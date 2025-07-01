@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Copy, Link, Sparkles, Shuffle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ShortenedUrl } from '@/types/url';
+import AdvancedUrlForm from './AdvancedUrlForm';
+import QRCodeGenerator from './QRCodeGenerator';
 
 interface UrlShortenerProps {
   onUrlShortened: (url: ShortenedUrl) => void;
@@ -14,6 +16,10 @@ interface UrlShortenerProps {
 const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
   const [originalUrl, setOriginalUrl] = useState('');
   const [customCode, setCustomCode] = useState('');
+  const [description, setDescription] = useState('');
+  const [tags, setTags] = useState('');
+  const [password, setPassword] = useState('');
+  const [expiresAt, setExpiresAt] = useState('');
   const [shortenedUrl, setShortenedUrl] = useState<ShortenedUrl | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -62,13 +68,19 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
     await new Promise(resolve => setTimeout(resolve, 200));
     
     const shortCode = customCode.trim() || generateShortCode();
+    const tagArray = tags.trim() ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : undefined;
+    
     const newUrl: ShortenedUrl = {
       id: Date.now().toString(),
       originalUrl,
       shortCode,
       customCode: customCode.trim() || undefined,
       createdAt: new Date(),
-      clicks: 0
+      clicks: 0,
+      description: description.trim() || undefined,
+      tags: tagArray,
+      password: password.trim() || undefined,
+      expiresAt: expiresAt ? new Date(expiresAt) : undefined
     };
 
     setShortenedUrl(newUrl);
@@ -152,6 +164,17 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
               </p>
             </div>
 
+            <AdvancedUrlForm
+              description={description}
+              setDescription={setDescription}
+              tags={tags}
+              setTags={setTags}
+              password={password}
+              setPassword={setPassword}
+              expiresAt={expiresAt}
+              setExpiresAt={setExpiresAt}
+            />
+
             <Button 
               type="submit" 
               disabled={isLoading}
@@ -174,36 +197,52 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
       </Card>
 
       {shortenedUrl && (
-        <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-lg animate-in slide-in-from-bottom-4 duration-500">
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-green-800">
-                URL raccourcie avec succès !
-              </h3>
-              
-              <div className="flex items-center gap-2 p-3 bg-white rounded-lg border border-green-200">
-                <Input
-                  value={shortUrl}
-                  readOnly
-                  className="border-0 bg-transparent text-lg font-mono"
-                />
-                <Button
-                  onClick={() => copyToClipboard(shortUrl)}
-                  variant="outline"
-                  size="sm"
-                  className="shrink-0 border-green-200 hover:bg-green-100"
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-lg animate-in slide-in-from-bottom-4 duration-500">
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-green-800">
+                  URL raccourcie avec succès !
+                </h3>
+                
+                <div className="flex items-center gap-2 p-3 bg-white rounded-lg border border-green-200">
+                  <Input
+                    value={shortUrl}
+                    readOnly
+                    className="border-0 bg-transparent text-lg font-mono"
+                  />
+                  <Button
+                    onClick={() => copyToClipboard(shortUrl)}
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0 border-green-200 hover:bg-green-100"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
 
-              <div className="text-sm text-green-700">
-                <p><strong>URL originale :</strong> {shortenedUrl.originalUrl}</p>
-                <p><strong>Créé le :</strong> {shortenedUrl.createdAt.toLocaleDateString('fr-FR')}</p>
+                <div className="text-sm text-green-700 space-y-1">
+                  <p><strong>URL originale :</strong> {shortenedUrl.originalUrl}</p>
+                  <p><strong>Créé le :</strong> {shortenedUrl.createdAt.toLocaleDateString('fr-FR')}</p>
+                  {shortenedUrl.description && (
+                    <p><strong>Description :</strong> {shortenedUrl.description}</p>
+                  )}
+                  {shortenedUrl.tags && shortenedUrl.tags.length > 0 && (
+                    <p><strong>Tags :</strong> {shortenedUrl.tags.join(', ')}</p>
+                  )}
+                  {shortenedUrl.password && (
+                    <p><strong>Protégé par mot de passe :</strong> ✓</p>
+                  )}
+                  {shortenedUrl.expiresAt && (
+                    <p><strong>Expire le :</strong> {shortenedUrl.expiresAt.toLocaleDateString('fr-FR')}</p>
+                  )}
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          <QRCodeGenerator url={shortUrl} shortCode={shortenedUrl.shortCode} />
+        </div>
       )}
     </div>
   );

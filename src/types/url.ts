@@ -7,6 +7,10 @@ export interface ShortenedUrl {
   createdAt: Date;
   clicks: number;
   lastClickedAt?: Date;
+  description?: string;
+  tags?: string[];
+  password?: string;
+  expiresAt?: Date;
 }
 
 export interface UrlStatistic {
@@ -15,4 +19,6 @@ export interface UrlStatistic {
   originalUrl: string;
   createdAt: Date;
   lastClickedAt?: Date;
+  description?: string;
+  tags?: string[];
 }
