@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Copy, Link, Sparkles } from 'lucide-react';
+import { Copy, Link, Sparkles, Shuffle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ShortenedUrl } from '@/types/url';
 
@@ -20,6 +20,10 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
 
   const generateShortCode = () => {
     return Math.random().toString(36).substring(2, 8);
+  };
+
+  const generateRandomCode = () => {
+    setCustomCode(generateShortCode());
   };
 
   const isValidUrl = (url: string) => {
@@ -54,8 +58,8 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
 
     setIsLoading(true);
     
-    // Simuler un délai de traitement
-    await new Promise(resolve => setTimeout(resolve, 800));
+    // Réduction du délai de 800ms à 200ms pour un chargement plus rapide
+    await new Promise(resolve => setTimeout(resolve, 200));
     
     const shortCode = customCode.trim() || generateShortCode();
     const newUrl: ShortenedUrl = {
@@ -116,17 +120,35 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
               />
             </div>
             
-            <div>
-              <Input
-                type="text"
-                placeholder="Code personnalisé (optionnel)"
-                value={customCode}
-                onChange={(e) => setCustomCode(e.target.value.replace(/[^a-zA-Z0-9-]/g, ''))}
-                className="h-10 border-purple-200 focus:border-purple-400"
-                maxLength={20}
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                Laissez vide pour un code automatique
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Personnaliser votre lien court
+              </label>
+              <div className="flex gap-2">
+                <div className="flex-1 flex">
+                  <div className="flex items-center px-3 bg-gray-100 border border-r-0 border-purple-200 rounded-l-md text-sm text-gray-600">
+                    {window.location.origin}/
+                  </div>
+                  <Input
+                    type="text"
+                    placeholder="mon-lien-perso"
+                    value={customCode}
+                    onChange={(e) => setCustomCode(e.target.value.replace(/[^a-zA-Z0-9-]/g, ''))}
+                    className="h-10 border-purple-200 focus:border-purple-400 rounded-l-none"
+                    maxLength={20}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={generateRandomCode}
+                  className="h-10 px-3 border-purple-200 hover:bg-purple-50"
+                >
+                  <Shuffle className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500">
+                Laissez vide pour un code automatique ou utilisez le bouton pour générer aléatoirement
               </p>
             </div>
 
