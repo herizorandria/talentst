@@ -90,24 +90,33 @@ const Redirect = () => {
     loadAndValidateUrl();
   }, [shortCode]);
 
+  const updateClickStats = async (urlId: string) => {
+    try {
+      // Mettre à jour les statistiques dans Supabase
+      const { error } = await supabase
+        .from('shortened_urls')
+        .update({
+          clicks: supabase.raw('clicks + 1'),
+          last_clicked_at: new Date().toISOString()
+        })
+        .eq('id', urlId);
+
+      if (error) {
+        console.error('Erreur lors de la mise à jour des stats:', error);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour des statistiques:', error);
+    }
+  };
+
   const handleHumanVerified = async () => {
     setHumanVerified(true);
     setShowBotDetection(false);
     
     if (!url) return;
     
-    // Update statistics
-    try {
-      const urls = await loadUrlsSecurely();
-      const updatedUrls = urls.map((u: ShortenedUrl) =>
-        u.shortCode === shortCode
-          ? { ...u, clicks: u.clicks + 1, lastClickedAt: new Date() }
-          : u
-      );
-      await saveUrlsSecurely(updatedUrls);
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour des statistiques:', error);
-    }
+    // Update statistics in database
+    await updateClickStats(url.id);
     
     // Direct redirect for direct links
     if (url.directLink) {
@@ -143,14 +152,8 @@ const Redirect = () => {
         setPasswordRequired(false);
         setPasswordError('');
         
-        // Update statistics
-        const urls = await loadUrlsSecurely();
-        const updatedUrls = urls.map((u: ShortenedUrl) =>
-          u.shortCode === shortCode
-            ? { ...u, clicks: u.clicks + 1, lastClickedAt: new Date() }
-            : u
-        );
-        await saveUrlsSecurely(updatedUrls);
+        // Update statistics in database
+        await updateClickStats(url.id);
         
         // Check if it's a direct link after password verification
         if (url.directLink) {
@@ -169,8 +172,10 @@ const Redirect = () => {
     }
   };
 
-  const handleDirectRedirect = () => {
+  const handleDirectRedirect = async () => {
     if (url) {
+      // Update statistics before redirect
+      await updateClickStats(url.id);
       window.location.href = url.originalUrl;
     }
   };
@@ -267,6 +272,8 @@ const Redirect = () => {
   if (showBotDetection && !humanVerified) {
     // Si lien direct, rediriger immédiatement
     if (url?.directLink) {
+      // Update stats before redirect
+      updateClickStats(url.id);
       window.location.href = url.originalUrl;
       return null;
     }
@@ -284,6 +291,8 @@ const Redirect = () => {
 
   // Si lien direct, rediriger immédiatement (sécurité supplémentaire)
   if (url?.directLink) {
+    // Update stats before redirect
+    updateClickStats(url.id);
     window.location.href = url.originalUrl;
     return null;
   }

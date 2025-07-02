@@ -77,7 +77,6 @@ export const useDatabase = () => {
 
     try {
       // Hasher le mot de passe si présent
-
       const passwordHash = url.password ? await hashPassword(url.password) : null;
 
       // Vérifier unicité du short_code et custom_code
@@ -145,7 +144,7 @@ export const useDatabase = () => {
     }
   };
 
-  // Mettre à jour les statistiques d'un lien
+  // Mettre à jour les statistiques d'un lien (optimisé pour les redirections)
   const updateUrlStats = async (shortCode: string): Promise<boolean> => {
     try {
       const { error } = await supabase
@@ -161,12 +160,14 @@ export const useDatabase = () => {
         return false;
       }
 
-      // Mettre à jour l'état local
-      setUrls(prev => prev.map(url => 
-        url.shortCode === shortCode 
-          ? { ...url, clicks: url.clicks + 1, lastClickedAt: new Date() }
-          : url
-      ));
+      // Mettre à jour l'état local seulement si l'utilisateur est connecté et que c'est son lien
+      if (user) {
+        setUrls(prev => prev.map(url => 
+          url.shortCode === shortCode 
+            ? { ...url, clicks: url.clicks + 1, lastClickedAt: new Date() }
+            : url
+        ));
+      }
 
       return true;
     } catch (error) {
@@ -175,13 +176,14 @@ export const useDatabase = () => {
     }
   };
 
-  // Récupérer une URL par son code court (pour les redirections)
+  // Récupérer une URL par son code court (pour les redirections) - optimisé
   const getUrlByShortCode = async (shortCode: string): Promise<ShortenedUrl | null> => {
     try {
       const { data, error } = await supabase
         .from('shortened_urls')
         .select('*')
-        .eq('short_code', shortCode)
+        .or(`short_code.eq.${shortCode},custom_code.eq.${shortCode}`)
+        .limit(1)
         .single();
 
       if (error || !data) {
