@@ -1,15 +1,27 @@
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import UrlShortener from '@/components/UrlShortener';
 import UrlHistory from '@/components/UrlHistory';
 import Statistics from '@/components/Statistics';
+import UserMenu from '@/components/UserMenu';
 import { ShortenedUrl } from '@/types/url';
-import { Link, BarChart3, History } from 'lucide-react';
+import { Link, BarChart3, History, LogIn } from 'lucide-react';
 import { saveUrlsSecurely, loadUrlsSecurely } from '@/utils/storageUtils';
+import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
   const [urls, setUrls] = useState<ShortenedUrl[]>([]);
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth');
+    }
+  }, [user, loading, navigate]);
 
   // Load URLs securely from storage on startup
   useEffect(() => {
@@ -46,22 +58,42 @@ const Index = () => {
     );
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-50 to-indigo-100">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-3 mb-4">
-            <div className="p-3 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl shadow-lg">
-              <Link className="h-8 w-8 text-white" />
+        <div className="flex justify-between items-start mb-8">
+          <div className="text-center flex-1">
+            <div className="inline-flex items-center gap-3 mb-4">
+              <div className="p-3 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl shadow-lg">
+                <Link className="h-8 w-8 text-white" />
+              </div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                ShortLink Pro
+              </h1>
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              ShortLink Pro
-            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Raccourcissez vos URLs, suivez vos statistiques et gérez votre historique en toute simplicité
+            </p>
           </div>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Raccourcissez vos URLs, suivez vos statistiques et gérez votre historique en toute simplicité
-          </p>
+          <div className="ml-4">
+            <UserMenu />
+          </div>
         </div>
 
         {/* Interface avec onglets */}
