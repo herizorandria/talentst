@@ -1,11 +1,11 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { History, Copy, ExternalLink, Eye } from 'lucide-react';
+import { History, Copy, ExternalLink, Eye, Trash2, Calendar, Tag } from 'lucide-react';
 import { ShortenedUrl } from '@/types/url';
 import { useToast } from '@/hooks/use-toast';
+import { useDatabase } from '@/hooks/useDatabase';
 
 interface UrlHistoryProps {
   urls: ShortenedUrl[];
@@ -14,6 +14,7 @@ interface UrlHistoryProps {
 
 const UrlHistory = ({ urls, onUrlClick }: UrlHistoryProps) => {
   const { toast } = useToast();
+  const { deleteUrl } = useDatabase();
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -34,6 +35,22 @@ const UrlHistory = ({ urls, onUrlClick }: UrlHistoryProps) => {
   const handleRedirect = (url: ShortenedUrl) => {
     onUrlClick(url);
     window.open(url.originalUrl, '_blank');
+  };
+
+  const handleDelete = async (url: ShortenedUrl) => {
+    if (window.confirm(`Êtes-vous sûr de vouloir supprimer le lien ${url.shortCode} ?`)) {
+      await deleteUrl(url.id);
+    }
+  };
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   if (urls.length === 0) {
@@ -64,7 +81,7 @@ const UrlHistory = ({ urls, onUrlClick }: UrlHistoryProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {urls.map((url) => {
             const shortUrl = `${window.location.origin}/${url.shortCode}`;
             return (
@@ -74,51 +91,110 @@ const UrlHistory = ({ urls, onUrlClick }: UrlHistoryProps) => {
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
+                    {/* En-tête avec code et badges */}
+                    <div className="flex items-center gap-2 mb-3 flex-wrap">
                       <code className="text-sm font-mono bg-blue-100 px-2 py-1 rounded text-blue-800">
                         {url.shortCode}
                       </code>
+                      
                       {url.customCode && (
                         <Badge variant="outline" className="text-xs">
                           Personnalisé
                         </Badge>
                       )}
+                      
+                      {url.directLink && (
+                        <Badge className="text-xs bg-green-100 text-green-700">
+                          Direct
+                        </Badge>
+                      )}
+                      
+                      {url.password && (
+                        <Badge className="text-xs bg-orange-100 text-orange-700">
+                          Protégé
+                        </Badge>
+                      )}
+                      
+                      {url.expiresAt && (
+                        <Badge variant="outline" className="text-xs">
+                          <Calendar className="h-3 w-3 mr-1" />
+                          Expire le {url.expiresAt.toLocaleDateString('fr-FR')}
+                        </Badge>
+                      )}
+                      
                       <Badge variant="secondary" className="text-xs">
                         <Eye className="h-3 w-3 mr-1" />
                         {url.clicks}
                       </Badge>
                     </div>
                     
-                    <p className="text-sm text-gray-600 truncate mb-1">
-                      {url.originalUrl}
+                    {/* Description si présente */}
+                    {url.description && (
+                      <p className="text-sm text-gray-700 mb-2 font-medium">
+                        {url.description}
+                      </p>
+                    )}
+                    
+                    {/* URL originale */}
+                    <p className="text-sm text-gray-600 truncate mb-2">
+                      <strong>Destination:</strong> {url.originalUrl}
                     </p>
                     
-                    <p className="text-xs text-gray-400">
-                      Créé le {url.createdAt.toLocaleDateString('fr-FR')} à {url.createdAt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                    {/* Tags si présents */}
+                    {url.tags && url.tags.length > 0 && (
+                      <div className="flex items-center gap-1 mb-2 flex-wrap">
+                        <Tag className="h-3 w-3 text-gray-500" />
+                        {url.tags.map((tag, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Informations de date */}
+                    <div className="text-xs text-gray-400 space-y-1">
+                      <p>
+                        <strong>Créé:</strong> {formatDate(url.createdAt)}
+                      </p>
                       {url.lastClickedAt && (
-                        <span className="ml-2">
-                          • Dernier clic : {url.lastClickedAt.toLocaleDateString('fr-FR')}
-                        </span>
+                        <p>
+                          <strong>Dernier clic:</strong> {formatDate(url.lastClickedAt)}
+                        </p>
                       )}
-                    </p>
+                    </div>
                   </div>
                   
+                  {/* Actions */}
                   <div className="flex items-center gap-2 shrink-0">
                     <Button
                       onClick={() => copyToClipboard(shortUrl)}
                       variant="outline"
                       size="sm"
                       className="border-blue-200 hover:bg-blue-50"
+                      title="Copier le lien"
                     >
                       <Copy className="h-4 w-4" />
                     </Button>
+                    
                     <Button
                       onClick={() => handleRedirect(url)}
                       variant="outline"
                       size="sm"
                       className="border-green-200 hover:bg-green-50"
+                      title="Ouvrir le lien"
                     >
                       <ExternalLink className="h-4 w-4" />
+                    </Button>
+                    
+                    <Button
+                      onClick={() => handleDelete(url)}
+                      variant="outline"
+                      size="sm"
+                      className="border-red-200 hover:bg-red-50 text-red-600"
+                      title="Supprimer le lien"
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
