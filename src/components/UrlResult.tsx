@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Copy } from 'lucide-react';
+import { Copy, Zap } from 'lucide-react';
 import { ShortenedUrl } from '@/types/url';
 import { useToast } from '@/hooks/use-toast';
 import QRCodeGenerator from './QRCodeGenerator';
@@ -37,9 +37,17 @@ const UrlResult = ({ shortenedUrl, shortUrl }: UrlResultProps) => {
       <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-lg animate-in slide-in-from-bottom-4 duration-500">
         <CardContent className="pt-6">
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-green-800">
-              URL raccourcie avec succès !
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-green-800">
+                URL raccourcie avec succès !
+              </h3>
+              {shortenedUrl.directLink && (
+                <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                  <Zap className="h-3 w-3" />
+                  Direct
+                </div>
+              )}
+            </div>
             
             <div className="flex items-center gap-2 p-3 bg-white rounded-lg border border-green-200">
               <Input
@@ -60,6 +68,9 @@ const UrlResult = ({ shortenedUrl, shortUrl }: UrlResultProps) => {
             <div className="text-sm text-green-700 space-y-1">
               <p><strong>URL originale :</strong> {shortenedUrl.originalUrl}</p>
               <p><strong>Créé le :</strong> {shortenedUrl.createdAt.toLocaleDateString('fr-FR')}</p>
+              {shortenedUrl.directLink && (
+                <p><strong>Redirection :</strong> Immédiate (lien direct)</p>
+              )}
               {shortenedUrl.description && (
                 <p><strong>Description :</strong> {shortenedUrl.description}</p>
               )}

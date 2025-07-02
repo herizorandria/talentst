@@ -8,6 +8,7 @@ import { ShortenedUrl } from '@/types/url';
 import AdvancedUrlForm from './AdvancedUrlForm';
 import UrlInputForm from './UrlInputForm';
 import UrlResult from './UrlResult';
+import DirectLinkOption from './DirectLinkOption';
 import { generateShortCode, isValidUrl, createShortUrl } from '@/utils/urlUtils';
 import { sanitizeInput, checkRateLimit } from '@/utils/securityUtils';
 
@@ -22,6 +23,7 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
   const [tags, setTags] = useState('');
   const [password, setPassword] = useState('');
   const [expiresAt, setExpiresAt] = useState('');
+  const [directLink, setDirectLink] = useState(false);
   const [shortenedUrl, setShortenedUrl] = useState<ShortenedUrl | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -94,7 +96,8 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
         description: sanitizedDescription,
         tags: sanitizedTags,
         password: password.trim() || undefined, // Will be hashed in storage
-        expiresAt: expiresAt ? new Date(expiresAt) : undefined
+        expiresAt: expiresAt ? new Date(expiresAt) : undefined,
+        directLink
       };
 
       setShortenedUrl(newUrl);
@@ -103,7 +106,7 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
 
       toast({
         title: "URL raccourcie !",
-        description: "Votre lien a été créé avec succès",
+        description: directLink ? "Votre lien direct a été créé avec succès" : "Votre lien a été créé avec succès",
       });
     } catch (error) {
       setIsLoading(false);
@@ -134,6 +137,11 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
               customCode={customCode}
               setCustomCode={setCustomCode}
               onGenerateRandomCode={handleGenerateRandomCode}
+            />
+
+            <DirectLinkOption
+              directLink={directLink}
+              setDirectLink={setDirectLink}
             />
 
             <AdvancedUrlForm

@@ -1,4 +1,3 @@
-
 export interface ShortenedUrl {
   id: string;
   originalUrl: string;
@@ -11,6 +10,7 @@ export interface ShortenedUrl {
   tags?: string[];
   password?: string;
   expiresAt?: Date;
+  directLink?: boolean;
 }
 
 export interface UrlStatistic {

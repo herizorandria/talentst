@@ -38,6 +38,21 @@ const Redirect = () => {
             return;
           }
           
+          // Update statistics securely
+          const updatedUrls = urls.map((url: ShortenedUrl) =>
+            url.shortCode === shortCode
+              ? { ...url, clicks: url.clicks + 1, lastClickedAt: new Date() }
+              : url
+          );
+          await saveUrlsSecurely(updatedUrls);
+          
+          // Check if it's a direct link
+          if (foundUrl.directLink && !foundUrl.password) {
+            // Redirect immediately for direct links without password
+            window.location.href = foundUrl.originalUrl;
+            return;
+          }
+          
           // Check if password is required
           if (foundUrl.password) {
             setPasswordRequired(true);
@@ -48,27 +63,21 @@ const Redirect = () => {
           
           setUrl(foundUrl);
           
-          // Update statistics securely
-          const updatedUrls = urls.map((url: ShortenedUrl) =>
-            url.shortCode === shortCode
-              ? { ...url, clicks: url.clicks + 1, lastClickedAt: new Date() }
-              : url
-          );
-          await saveUrlsSecurely(updatedUrls);
-          
-          // Start countdown for redirect
-          const timer = setInterval(() => {
-            setCountdown(prev => {
-              if (prev <= 1) {
-                clearInterval(timer);
-                window.location.href = foundUrl.originalUrl;
-                return 0;
-              }
-              return prev - 1;
-            });
-          }, 1000);
-          
-          return () => clearInterval(timer);
+          // Start countdown for redirect if not direct link
+          if (!foundUrl.directLink) {
+            const timer = setInterval(() => {
+              setCountdown(prev => {
+                if (prev <= 1) {
+                  clearInterval(timer);
+                  window.location.href = foundUrl.originalUrl;
+                  return 0;
+                }
+                return prev - 1;
+              });
+            }, 1000);
+            
+            return () => clearInterval(timer);
+          }
         }
       } catch (error) {
         console.error('Erreur lors de la récupération de l\'URL:', error);
@@ -101,17 +110,22 @@ const Redirect = () => {
         );
         await saveUrlsSecurely(updatedUrls);
         
-        // Start countdown
-        const timer = setInterval(() => {
-          setCountdown(prev => {
-            if (prev <= 1) {
-              clearInterval(timer);
-              window.location.href = url.originalUrl;
-              return 0;
-            }
-            return prev - 1;
-          });
-        }, 1000);
+        // Direct redirect for direct links or start countdown
+        if (url.directLink) {
+          window.location.href = url.originalUrl;
+        } else {
+          // Start countdown
+          const timer = setInterval(() => {
+            setCountdown(prev => {
+              if (prev <= 1) {
+                clearInterval(timer);
+                window.location.href = url.originalUrl;
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+        }
       } else {
         setPasswordError('Mot de passe incorrect');
       }
@@ -234,7 +248,7 @@ const Redirect = () => {
             
             <div className="p-3 bg-gray-100 rounded-lg">
               <p className="text-sm font-mono break-all text-gray-800">
-                {url.originalUrl}
+                {url?.originalUrl}
               </p>
             </div>
             
