@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,9 +6,10 @@ import UrlShortener from '@/components/UrlShortener';
 import UrlHistory from '@/components/UrlHistory';
 import Statistics from '@/components/Statistics';
 import LinksManager from './LinksManager';
+import Tutorials from './Tutorials';
 import UserMenu from '@/components/UserMenu';
 import { ShortenedUrl } from '@/types/url';
-import { Link, BarChart3, History, LogIn } from 'lucide-react';
+import { Link, BarChart3, History, LogIn, BookOpen, Settings } from 'lucide-react';
 import { saveUrlsSecurely, loadUrlsSecurely } from '@/utils/storageUtils';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -99,7 +99,7 @@ const Index = () => {
 
         {/* Interface avec onglets */}
         <Tabs defaultValue="shortener" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 bg-white/70 backdrop-blur-sm shadow-lg">
+        <TabsList className="grid w-full grid-cols-5 bg-white/70 backdrop-blur-sm shadow-lg">
           <TabsTrigger 
             value="shortener" 
             className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white"
@@ -111,8 +111,8 @@ const Index = () => {
             value="linksmanager"
             className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white"
           >
-            <Link className="h-4 w-4" />
-            Gérer mes liens
+            <Settings className="h-4 w-4" />
+            Gérer
           </TabsTrigger>
           <TabsTrigger 
             value="history"
@@ -127,6 +127,13 @@ const Index = () => {
           >
             <BarChart3 className="h-4 w-4" />
             Statistiques
+          </TabsTrigger>
+          <TabsTrigger 
+            value="tutorials"
+            className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white"
+          >
+            <BookOpen className="h-4 w-4" />
+            Tutoriels
           </TabsTrigger>
         </TabsList>
 
@@ -144,6 +151,10 @@ const Index = () => {
 
           <TabsContent value="statistics" className="space-y-6">
             <Statistics urls={urls} />
+          </TabsContent>
+
+          <TabsContent value="tutorials" className="space-y-6">
+            <Tutorials />
           </TabsContent>
         </Tabs>
 
