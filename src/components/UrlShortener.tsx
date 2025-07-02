@@ -1,5 +1,7 @@
 
 import React, { useState } from 'react';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link, Sparkles } from 'lucide-react';
@@ -9,8 +11,10 @@ import AdvancedUrlForm from './AdvancedUrlForm';
 import UrlInputForm from './UrlInputForm';
 import UrlResult from './UrlResult';
 import DirectLinkOption from './DirectLinkOption';
+
 import { generateShortCode, isValidUrl, createShortUrl } from '@/utils/urlUtils';
 import { sanitizeInput, checkRateLimit } from '@/utils/securityUtils';
+import { useDatabase } from '@/hooks/useDatabase';
 
 interface UrlShortenerProps {
   onUrlShortened: (url: ShortenedUrl) => void;
@@ -27,6 +31,8 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
   const [shortenedUrl, setShortenedUrl] = useState<ShortenedUrl | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { saveUrl } = useDatabase();
+  const navigate = useNavigate();
 
   const handleGenerateRandomCode = async () => {
     const code = await generateShortCode();
@@ -87,7 +93,7 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
         undefined;
       
       const newUrl: ShortenedUrl = {
-        id: Date.now().toString(),
+        id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
         originalUrl: sanitizeInput(originalUrl),
         shortCode,
         customCode: customCode.trim() ? sanitizeInput(customCode.trim()) : undefined,
@@ -100,14 +106,23 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
         directLink
       };
 
+      // Sauvegarder dans la base de données
+      const saved = await saveUrl(newUrl);
       setShortenedUrl(newUrl);
       onUrlShortened(newUrl);
       setIsLoading(false);
 
-      toast({
-        title: "URL raccourcie !",
-        description: directLink ? "Votre lien direct a été créé avec succès" : "Votre lien a été créé avec succès",
-      });
+      if (saved) {
+        if (directLink) {
+          // Rediriger immédiatement vers l'URL d'origine
+          window.location.href = newUrl.originalUrl;
+        } else {
+          toast({
+            title: "URL raccourcie !",
+            description: "Votre lien a été créé avec succès",
+          });
+        }
+      }
     } catch (error) {
       setIsLoading(false);
       toast({

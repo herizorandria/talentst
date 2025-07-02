@@ -5,7 +5,7 @@ import { ExternalLink, AlertCircle, Shield } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { loadUrlsSecurely, saveUrlsSecurely } from '@/utils/storageUtils';
+import { supabase } from '@/integrations/supabase/client';
 import { verifyPassword } from '@/utils/securityUtils';
 import { isUrlExpired } from '@/utils/urlUtils';
 import BotDetection from '@/components/BotDetection';
@@ -30,36 +30,60 @@ const Redirect = () => {
 
     const loadAndValidateUrl = async () => {
       try {
-        const urls = await loadUrlsSecurely();
-        const foundUrl = urls.find((url: ShortenedUrl) => url.shortCode === shortCode);
-        
-        if (foundUrl) {
-          // Check if URL has expired
-          if (isUrlExpired(foundUrl.expiresAt)) {
-            setUrl(null);
-            setLoading(false);
-            return;
-          }
-          
-          setUrl(foundUrl);
-          
-          // Check if password is required
-          if (foundUrl.password) {
-            setPasswordRequired(true);
-            setLoading(false);
-            return;
-          }
-          
-          // For direct links without password, skip bot detection
-          if (foundUrl.directLink) {
-            setShowBotDetection(false);
-            setHumanVerified(true);
-          }
+        // Chercher le lien dans la base Supabase
+        const { data, error } = await supabase
+          .from('shortened_urls')
+          .select('*')
+          .or(`short_code.eq.${shortCode},custom_code.eq.${shortCode}`)
+          .limit(1)
+          .single();
+
+        if (error || !data) {
+          setUrl(null);
+          setLoading(false);
+          return;
+        }
+
+        // Adapter le format pour ShortenedUrl
+        const foundUrl: ShortenedUrl = {
+          id: data.id,
+          originalUrl: data.original_url,
+          shortCode: data.short_code,
+          customCode: data.custom_code || undefined,
+          createdAt: new Date(data.created_at),
+          clicks: data.clicks,
+          lastClickedAt: data.last_clicked_at ? new Date(data.last_clicked_at) : undefined,
+          description: data.description || undefined,
+          tags: data.tags || undefined,
+          password: data.password_hash || undefined,
+          expiresAt: data.expires_at ? new Date(data.expires_at) : undefined,
+          directLink: data.direct_link || false
+        };
+
+        // Check if URL has expired
+        if (isUrlExpired(foundUrl.expiresAt)) {
+          setUrl(null);
+          setLoading(false);
+          return;
+        }
+
+        setUrl(foundUrl);
+
+        // Check if password is required
+        if (foundUrl.password) {
+          setPasswordRequired(true);
+          setLoading(false);
+          return;
+        }
+
+        // For direct links without password, skip bot detection
+        if (foundUrl.directLink) {
+          setShowBotDetection(false);
+          setHumanVerified(true);
         }
       } catch (error) {
         console.error('Erreur lors de la récupération de l\'URL:', error);
       }
-      
       setLoading(false);
     };
 
@@ -209,7 +233,6 @@ const Redirect = () => {
                 <p className="text-gray-600">
                   Ce lien est protégé par un mot de passe. Veuillez l'entrer pour continuer.
                 </p>
-                
                 <div>
                   <Input
                     type="password"
@@ -222,12 +245,10 @@ const Redirect = () => {
                     <p className="text-red-600 text-sm mt-1">{passwordError}</p>
                   )}
                 </div>
-                
                 <div className="space-y-2">
                   <Button type="submit" className="w-full">
                     Accéder au lien
                   </Button>
-                  
                   <Button 
                     onClick={() => window.location.href = '/'}
                     variant="outline"
@@ -243,8 +264,12 @@ const Redirect = () => {
       </>
     );
   }
-
   if (showBotDetection && !humanVerified) {
+    // Si lien direct, rediriger immédiatement
+    if (url?.directLink) {
+      window.location.href = url.originalUrl;
+      return null;
+    }
     return (
       <>
         <MetaTagsGenerator url={url} shortUrl={shortUrl} />
@@ -255,6 +280,12 @@ const Redirect = () => {
         />
       </>
     );
+  }
+
+  // Si lien direct, rediriger immédiatement (sécurité supplémentaire)
+  if (url?.directLink) {
+    window.location.href = url.originalUrl;
+    return null;
   }
 
   return (
@@ -273,7 +304,6 @@ const Redirect = () => {
               <div className="text-6xl font-bold text-green-600">
                 {countdown}
               </div>
-              
               <p className="text-gray-600">
                 Vous allez être redirigé vers :
               </p>
@@ -306,6 +336,6 @@ const Redirect = () => {
       </div>
     </>
   );
-};
+}
 
 export default Redirect;

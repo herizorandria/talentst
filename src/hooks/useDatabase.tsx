@@ -77,7 +77,34 @@ export const useDatabase = () => {
 
     try {
       // Hasher le mot de passe si présent
+
       const passwordHash = url.password ? await hashPassword(url.password) : null;
+
+      // Vérifier unicité du short_code et custom_code
+      const { data: existing, error: checkError } = await supabase
+        .from('shortened_urls')
+        .select('id')
+        .or(`short_code.eq.${url.shortCode},custom_code.eq.${url.shortCode}${url.customCode ? `,short_code.eq.${url.customCode},custom_code.eq.${url.customCode}` : ''}`)
+        .limit(1);
+
+      if (checkError) {
+        console.error('Erreur lors de la vérification d\'unicité:', checkError);
+        toast({
+          title: "Erreur",
+          description: "Erreur lors de la vérification d'unicité du code.",
+          variant: "destructive"
+        });
+        return false;
+      }
+
+      if (existing && existing.length > 0) {
+        toast({
+          title: "Code déjà utilisé",
+          description: "Le code personnalisé ou généré est déjà pris. Veuillez en choisir un autre.",
+          variant: "destructive"
+        });
+        return false;
+      }
 
       const { error } = await supabase
         .from('shortened_urls')

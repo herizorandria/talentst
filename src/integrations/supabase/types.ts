@@ -32,6 +32,54 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      },
+      shortened_urls: {
+        Row: {
+          id: string;
+          user_id: string;
+          original_url: string;
+          short_code: string;
+          custom_code?: string | null;
+          created_at: string;
+          clicks: number;
+          last_clicked_at?: string | null;
+          description?: string | null;
+          tags?: string[] | null;
+          password_hash?: string | null;
+          expires_at?: string | null;
+          direct_link?: boolean | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          original_url: string;
+          short_code: string;
+          custom_code?: string | null;
+          created_at?: string;
+          clicks?: number;
+          last_clicked_at?: string | null;
+          description?: string | null;
+          tags?: string[] | null;
+          password_hash?: string | null;
+          expires_at?: string | null;
+          direct_link?: boolean | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          original_url?: string;
+          short_code?: string;
+          custom_code?: string | null;
+          created_at?: string;
+          clicks?: number;
+          last_clicked_at?: string | null;
+          description?: string | null;
+          tags?: string[] | null;
+          password_hash?: string | null;
+          expires_at?: string | null;
+          direct_link?: boolean | null;
+        };
+        Relationships: [];
       }
     }
     Views: {
