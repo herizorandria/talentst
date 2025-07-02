@@ -6,30 +6,30 @@ import UrlHistory from '@/components/UrlHistory';
 import Statistics from '@/components/Statistics';
 import { ShortenedUrl } from '@/types/url';
 import { Link, BarChart3, History } from 'lucide-react';
+import { saveUrlsSecurely, loadUrlsSecurely } from '@/utils/storageUtils';
 
 const Index = () => {
   const [urls, setUrls] = useState<ShortenedUrl[]>([]);
 
-  // Charger les URLs depuis le localStorage au démarrage
+  // Load URLs securely from storage on startup
   useEffect(() => {
-    const savedUrls = localStorage.getItem('shortenedUrls');
-    if (savedUrls) {
+    const loadUrls = async () => {
       try {
-        const parsedUrls = JSON.parse(savedUrls).map((url: any) => ({
-          ...url,
-          createdAt: new Date(url.createdAt),
-          lastClickedAt: url.lastClickedAt ? new Date(url.lastClickedAt) : undefined
-        }));
-        setUrls(parsedUrls);
+        const loadedUrls = await loadUrlsSecurely();
+        setUrls(loadedUrls);
       } catch (error) {
         console.error('Erreur lors du chargement des URLs:', error);
       }
-    }
+    };
+    
+    loadUrls();
   }, []);
 
-  // Sauvegarder les URLs dans le localStorage à chaque modification
+  // Save URLs securely to storage on every modification
   useEffect(() => {
-    localStorage.setItem('shortenedUrls', JSON.stringify(urls));
+    if (urls.length > 0) {
+      saveUrlsSecurely(urls);
+    }
   }, [urls]);
 
   const handleUrlShortened = (newUrl: ShortenedUrl) => {

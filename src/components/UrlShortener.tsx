@@ -9,6 +9,7 @@ import AdvancedUrlForm from './AdvancedUrlForm';
 import UrlInputForm from './UrlInputForm';
 import UrlResult from './UrlResult';
 import { generateShortCode, isValidUrl, createShortUrl } from '@/utils/urlUtils';
+import { sanitizeInput, checkRateLimit } from '@/utils/securityUtils';
 
 interface UrlShortenerProps {
   onUrlShortened: (url: ShortenedUrl) => void;
@@ -25,13 +26,25 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleGenerateRandomCode = () => {
-    setCustomCode(generateShortCode());
+  const handleGenerateRandomCode = async () => {
+    const code = await generateShortCode();
+    setCustomCode(code);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Rate limiting check
+    const userIdentifier = 'user-session'; // In production, use actual user ID
+    if (!checkRateLimit(userIdentifier, 10, 60000)) {
+      toast({
+        title: "Limite atteinte",
+        description: "Trop de tentatives. Veuillez attendre avant de réessayer.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!originalUrl.trim()) {
       toast({
         title: "Erreur",
@@ -44,7 +57,17 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
     if (!isValidUrl(originalUrl)) {
       toast({
         title: "URL invalide",
-        description: "Veuillez entrer une URL valide (ex: https://example.com)",
+        description: "URL non autorisée ou dangereuse détectée",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate password strength if provided
+    if (password.trim() && password.length < 6) {
+      toast({
+        title: "Mot de passe faible",
+        description: "Le mot de passe doit contenir au moins 6 caractères",
         variant: "destructive"
       });
       return;
@@ -54,30 +77,42 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
     
     await new Promise(resolve => setTimeout(resolve, 200));
     
-    const shortCode = customCode.trim() || generateShortCode();
-    const tagArray = tags.trim() ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : undefined;
-    
-    const newUrl: ShortenedUrl = {
-      id: Date.now().toString(),
-      originalUrl,
-      shortCode,
-      customCode: customCode.trim() || undefined,
-      createdAt: new Date(),
-      clicks: 0,
-      description: description.trim() || undefined,
-      tags: tagArray,
-      password: password.trim() || undefined,
-      expiresAt: expiresAt ? new Date(expiresAt) : undefined
-    };
+    try {
+      const shortCode = customCode.trim() ? sanitizeInput(customCode.trim()) : await generateShortCode();
+      const sanitizedDescription = description.trim() ? sanitizeInput(description.trim()) : undefined;
+      const sanitizedTags = tags.trim() ? 
+        tags.split(',').map(tag => sanitizeInput(tag.trim())).filter(tag => tag) : 
+        undefined;
+      
+      const newUrl: ShortenedUrl = {
+        id: Date.now().toString(),
+        originalUrl: sanitizeInput(originalUrl),
+        shortCode,
+        customCode: customCode.trim() ? sanitizeInput(customCode.trim()) : undefined,
+        createdAt: new Date(),
+        clicks: 0,
+        description: sanitizedDescription,
+        tags: sanitizedTags,
+        password: password.trim() || undefined, // Will be hashed in storage
+        expiresAt: expiresAt ? new Date(expiresAt) : undefined
+      };
 
-    setShortenedUrl(newUrl);
-    onUrlShortened(newUrl);
-    setIsLoading(false);
+      setShortenedUrl(newUrl);
+      onUrlShortened(newUrl);
+      setIsLoading(false);
 
-    toast({
-      title: "URL raccourcie !",
-      description: "Votre lien a été créé avec succès",
-    });
+      toast({
+        title: "URL raccourcie !",
+        description: "Votre lien a été créé avec succès",
+      });
+    } catch (error) {
+      setIsLoading(false);
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer le lien court",
+        variant: "destructive"
+      });
+    }
   };
 
   const shortUrl = shortenedUrl ? createShortUrl(shortenedUrl.shortCode) : '';
