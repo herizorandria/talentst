@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import UrlShortener from '@/components/UrlShortener';
 import UrlHistory from '@/components/UrlHistory';
 import Statistics from '@/components/Statistics';
+import LinksManager from './LinksManager';
 import UserMenu from '@/components/UserMenu';
 import { ShortenedUrl } from '@/types/url';
 import { Link, BarChart3, History, LogIn } from 'lucide-react';
@@ -98,32 +99,43 @@ const Index = () => {
 
         {/* Interface avec onglets */}
         <Tabs defaultValue="shortener" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 bg-white/70 backdrop-blur-sm shadow-lg">
-            <TabsTrigger 
-              value="shortener" 
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white"
-            >
-              <Link className="h-4 w-4" />
-              Raccourcir
-            </TabsTrigger>
-            <TabsTrigger 
-              value="history"
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white"
-            >
-              <History className="h-4 w-4" />
-              Historique
-            </TabsTrigger>
-            <TabsTrigger 
-              value="statistics"
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white"
-            >
-              <BarChart3 className="h-4 w-4" />
-              Statistiques
-            </TabsTrigger>
-          </TabsList>
+        <TabsList className="grid w-full grid-cols-4 bg-white/70 backdrop-blur-sm shadow-lg">
+          <TabsTrigger 
+            value="shortener" 
+            className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white"
+          >
+            <Link className="h-4 w-4" />
+            Raccourcir
+          </TabsTrigger>
+          <TabsTrigger 
+            value="linksmanager"
+            className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white"
+          >
+            <Link className="h-4 w-4" />
+            Gérer mes liens
+          </TabsTrigger>
+          <TabsTrigger 
+            value="history"
+            className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white"
+          >
+            <History className="h-4 w-4" />
+            Historique
+          </TabsTrigger>
+          <TabsTrigger 
+            value="statistics"
+            className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white"
+          >
+            <BarChart3 className="h-4 w-4" />
+            Statistiques
+          </TabsTrigger>
+        </TabsList>
 
           <TabsContent value="shortener" className="space-y-6">
             <UrlShortener onUrlShortened={handleUrlShortened} />
+          </TabsContent>
+
+          <TabsContent value="linksmanager" className="space-y-6">
+            <LinksManager />
           </TabsContent>
 
           <TabsContent value="history" className="space-y-6">

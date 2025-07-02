@@ -308,10 +308,23 @@ const Redirect = () => {
                 Vous allez être redirigé vers :
               </p>
               
-              <div className="p-3 bg-gray-100 rounded-lg">
-                <p className="text-sm font-mono break-all text-gray-800">
+              <div className="p-3 bg-gray-100 rounded-lg flex items-center gap-2">
+                <p className="text-sm font-mono break-all text-gray-800 flex-1">
                   {url?.originalUrl}
                 </p>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="ml-2"
+                  onClick={() => {
+                    if (url?.originalUrl) {
+                      navigator.clipboard.writeText(url.originalUrl);
+                    }
+                  }}
+                >
+                  Copier
+                </Button>
               </div>
               
               <div className="space-y-2">
