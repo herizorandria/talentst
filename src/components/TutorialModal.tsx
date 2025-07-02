@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -52,6 +52,14 @@ const TutorialModal = ({ isOpen, onClose, tutorial }: TutorialModalProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
 
+  // Reset state when modal opens or tutorial changes
+  useEffect(() => {
+    if (isOpen && tutorial) {
+      setCurrentStep(0);
+      setCompletedSteps(new Set());
+    }
+  }, [isOpen, tutorial]);
+
   if (!tutorial) return null;
 
   const handleNextStep = () => {
@@ -78,6 +86,11 @@ const TutorialModal = ({ isOpen, onClose, tutorial }: TutorialModalProps) => {
 
   const currentStepData = tutorial.steps[currentStep];
   const isLastStep = currentStep === tutorial.steps.length - 1;
+
+  // Safety check to prevent accessing undefined step data
+  if (!currentStepData) {
+    return null;
+  }
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
