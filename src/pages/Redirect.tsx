@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ShortenedUrl } from '@/types/url';
@@ -9,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { loadUrlsSecurely, saveUrlsSecurely } from '@/utils/storageUtils';
 import { verifyPassword } from '@/utils/securityUtils';
 import { isUrlExpired } from '@/utils/urlUtils';
+import BotDetection from '@/components/BotDetection';
+import MetaTagsGenerator from '@/components/MetaTagsGenerator';
 
 const Redirect = () => {
   const { shortCode } = useParams<{ shortCode: string }>();
@@ -18,6 +19,8 @@ const Redirect = () => {
   const [passwordRequired, setPasswordRequired] = useState(false);
   const [enteredPassword, setEnteredPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [showBotDetection, setShowBotDetection] = useState(true);
+  const [humanVerified, setHumanVerified] = useState(false);
 
   useEffect(() => {
     if (!shortCode) {
@@ -38,45 +41,19 @@ const Redirect = () => {
             return;
           }
           
-          // Update statistics securely
-          const updatedUrls = urls.map((url: ShortenedUrl) =>
-            url.shortCode === shortCode
-              ? { ...url, clicks: url.clicks + 1, lastClickedAt: new Date() }
-              : url
-          );
-          await saveUrlsSecurely(updatedUrls);
-          
-          // Check if it's a direct link
-          if (foundUrl.directLink && !foundUrl.password) {
-            // Redirect immediately for direct links without password
-            window.location.href = foundUrl.originalUrl;
-            return;
-          }
+          setUrl(foundUrl);
           
           // Check if password is required
           if (foundUrl.password) {
             setPasswordRequired(true);
-            setUrl(foundUrl);
             setLoading(false);
             return;
           }
           
-          setUrl(foundUrl);
-          
-          // Start countdown for redirect if not direct link
-          if (!foundUrl.directLink) {
-            const timer = setInterval(() => {
-              setCountdown(prev => {
-                if (prev <= 1) {
-                  clearInterval(timer);
-                  window.location.href = foundUrl.originalUrl;
-                  return 0;
-                }
-                return prev - 1;
-              });
-            }, 1000);
-            
-            return () => clearInterval(timer);
+          // For direct links without password, skip bot detection
+          if (foundUrl.directLink) {
+            setShowBotDetection(false);
+            setHumanVerified(true);
           }
         }
       } catch (error) {
@@ -88,6 +65,47 @@ const Redirect = () => {
 
     loadAndValidateUrl();
   }, [shortCode]);
+
+  const handleHumanVerified = async () => {
+    setHumanVerified(true);
+    setShowBotDetection(false);
+    
+    if (!url) return;
+    
+    // Update statistics
+    try {
+      const urls = await loadUrlsSecurely();
+      const updatedUrls = urls.map((u: ShortenedUrl) =>
+        u.shortCode === shortCode
+          ? { ...u, clicks: u.clicks + 1, lastClickedAt: new Date() }
+          : u
+      );
+      await saveUrlsSecurely(updatedUrls);
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour des statistiques:', error);
+    }
+    
+    // Direct redirect for direct links
+    if (url.directLink) {
+      // Ajouter un délai minimal pour éviter la détection de redirection automatique
+      setTimeout(() => {
+        window.location.href = url.originalUrl;
+      }, 500);
+      return;
+    }
+    
+    // Start countdown for regular links
+    const timer = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          window.location.href = url.originalUrl;
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,7 +119,7 @@ const Redirect = () => {
         setPasswordRequired(false);
         setPasswordError('');
         
-        // Update statistics and redirect
+        // Update statistics
         const urls = await loadUrlsSecurely();
         const updatedUrls = urls.map((u: ShortenedUrl) =>
           u.shortCode === shortCode
@@ -110,21 +128,14 @@ const Redirect = () => {
         );
         await saveUrlsSecurely(updatedUrls);
         
-        // Direct redirect for direct links or start countdown
+        // Check if it's a direct link after password verification
         if (url.directLink) {
-          window.location.href = url.originalUrl;
+          setTimeout(() => {
+            window.location.href = url.originalUrl;
+          }, 500);
         } else {
-          // Start countdown
-          const timer = setInterval(() => {
-            setCountdown(prev => {
-              if (prev <= 1) {
-                clearInterval(timer);
-                window.location.href = url.originalUrl;
-                return 0;
-              }
-              return prev - 1;
-            });
-          }, 1000);
+          setShowBotDetection(false);
+          setHumanVerified(true);
         }
       } else {
         setPasswordError('Mot de passe incorrect');
@@ -178,38 +189,107 @@ const Redirect = () => {
     );
   }
 
+  // Générer les meta tags pour le preview
+  const shortUrl = `${window.location.origin}/${shortCode}`;
+
   if (passwordRequired) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-100 to-orange-100 p-4">
+      <>
+        <MetaTagsGenerator url={url} shortUrl={shortUrl} />
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-100 to-orange-100 p-4">
+          <Card className="max-w-md w-full shadow-xl">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-orange-600">
+                <Shield className="h-6 w-6" />
+                Lien protégé
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handlePasswordSubmit} className="space-y-4">
+                <p className="text-gray-600">
+                  Ce lien est protégé par un mot de passe. Veuillez l'entrer pour continuer.
+                </p>
+                
+                <div>
+                  <Input
+                    type="password"
+                    placeholder="Mot de passe"
+                    value={enteredPassword}
+                    onChange={(e) => setEnteredPassword(e.target.value)}
+                    className="w-full"
+                  />
+                  {passwordError && (
+                    <p className="text-red-600 text-sm mt-1">{passwordError}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Button type="submit" className="w-full">
+                    Accéder au lien
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => window.location.href = '/'}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    Annuler
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </>
+    );
+  }
+
+  if (showBotDetection && !humanVerified) {
+    return (
+      <>
+        <MetaTagsGenerator url={url} shortUrl={shortUrl} />
+        <BotDetection
+          originalUrl={url.originalUrl}
+          shortCode={shortCode!}
+          onHumanVerified={handleHumanVerified}
+        />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <MetaTagsGenerator url={url} shortUrl={shortUrl} />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 to-emerald-100 p-4">
         <Card className="max-w-md w-full shadow-xl">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-orange-600">
-              <Shield className="h-6 w-6" />
-              Lien protégé
+            <CardTitle className="flex items-center gap-2 text-green-600">
+              <ExternalLink className="h-6 w-6" />
+              Redirection sécurisée
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <div className="text-center space-y-4">
+              <div className="text-6xl font-bold text-green-600">
+                {countdown}
+              </div>
+              
               <p className="text-gray-600">
-                Ce lien est protégé par un mot de passe. Veuillez l'entrer pour continuer.
+                Vous allez être redirigé vers :
               </p>
               
-              <div>
-                <Input
-                  type="password"
-                  placeholder="Mot de passe"
-                  value={enteredPassword}
-                  onChange={(e) => setEnteredPassword(e.target.value)}
-                  className="w-full"
-                />
-                {passwordError && (
-                  <p className="text-red-600 text-sm mt-1">{passwordError}</p>
-                )}
+              <div className="p-3 bg-gray-100 rounded-lg">
+                <p className="text-sm font-mono break-all text-gray-800">
+                  {url?.originalUrl}
+                </p>
               </div>
               
               <div className="space-y-2">
-                <Button type="submit" className="w-full">
-                  Accéder au lien
+                <Button 
+                  onClick={handleDirectRedirect}
+                  className="w-full bg-green-600 hover:bg-green-700"
+                >
+                  Y aller maintenant
                 </Button>
                 
                 <Button 
@@ -220,58 +300,11 @@ const Redirect = () => {
                   Annuler
                 </Button>
               </div>
-            </form>
+            </div>
           </CardContent>
         </Card>
       </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 to-emerald-100 p-4">
-      <Card className="max-w-md w-full shadow-xl">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-green-600">
-            <ExternalLink className="h-6 w-6" />
-            Redirection sécurisée
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center space-y-4">
-            <div className="text-6xl font-bold text-green-600">
-              {countdown}
-            </div>
-            
-            <p className="text-gray-600">
-              Vous allez être redirigé vers :
-            </p>
-            
-            <div className="p-3 bg-gray-100 rounded-lg">
-              <p className="text-sm font-mono break-all text-gray-800">
-                {url?.originalUrl}
-              </p>
-            </div>
-            
-            <div className="space-y-2">
-              <Button 
-                onClick={handleDirectRedirect}
-                className="w-full bg-green-600 hover:bg-green-700"
-              >
-                Y aller maintenant
-              </Button>
-              
-              <Button 
-                onClick={() => window.location.href = '/'}
-                variant="outline"
-                className="w-full"
-              >
-                Annuler
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    </>
   );
 };
 
