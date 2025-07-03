@@ -230,7 +230,7 @@ Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 ### Contact
 - **Issues GitHub** : Pour les bugs et demandes de fonctionnalités
 - **Discussions** : Pour les questions et suggestions
-- **Email** : support@shortlink-pro.com
+- **Email** : herizobm@gmail.com
 
 ---
 
