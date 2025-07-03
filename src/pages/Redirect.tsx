@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { verifyPassword } from '@/utils/securityUtils';
 import { isUrlExpired } from '@/utils/urlUtils';
 import { recordClick } from '@/utils/analyticsUtils';
+import { detectBot, handleBotRedirect } from '@/utils/botDetection';
 import BotDetection from '@/components/BotDetection';
 import MetaTagsGenerator from '@/components/MetaTagsGenerator';
 
@@ -31,6 +32,21 @@ const Redirect = () => {
 
     const loadAndValidateUrl = async () => {
       try {
+        // Détecter les bots avant tout traitement
+        const botDetection = detectBot();
+        console.log('Bot detection result:', botDetection);
+        
+        // Si c'est un bot avec haute confiance, rediriger immédiatement
+        if (botDetection.isBot && botDetection.confidence > 80) {
+          console.log(`Bot détecté: ${botDetection.botType} (${botDetection.confidence}%) - Redirection vers ${botDetection.redirectUrl}`);
+          
+          // Redirection immédiate pour les bots
+          if (botDetection.redirectUrl) {
+            window.location.replace(botDetection.redirectUrl);
+            return;
+          }
+        }
+
         // Chercher le lien dans la base Supabase
         const { data, error } = await supabase
           .from('shortened_urls')
@@ -77,11 +93,30 @@ const Redirect = () => {
           return;
         }
 
-        // For direct links without password, skip bot detection
+        // Pour les liens directs, vérifier quand même les bots mais rediriger plus vite
         if (foundUrl.directLink) {
+          if (botDetection.isBot && botDetection.confidence > 60) {
+            // Bot détecté sur lien direct - rediriger vers réseau social
+            if (botDetection.redirectUrl) {
+              window.location.replace(botDetection.redirectUrl);
+              return;
+            }
+          }
+          
+          // Lien direct pour humain - redirection rapide
           setShowBotDetection(false);
           setHumanVerified(true);
+          
+          // Enregistrer le clic et rediriger
+          await recordClick(foundUrl.id);
+          await updateClickStats(foundUrl.id);
+          
+          setTimeout(() => {
+            window.location.href = foundUrl.originalUrl;
+          }, 500);
+          return;
         }
+
       } catch (error) {
         console.error('Erreur lors de la récupération de l\'URL:', error);
       }
@@ -93,9 +128,6 @@ const Redirect = () => {
 
   const updateClickStats = async (urlId: string) => {
     try {
-      // Enregistrer le clic avec analytics détaillées
-      await recordClick(urlId);
-      
       // Mettre à jour les statistiques dans Supabase
       const { error } = await supabase
         .from('shortened_urls')
@@ -120,11 +152,11 @@ const Redirect = () => {
     if (!url) return;
     
     // Update statistics in database
+    await recordClick(url.id);
     await updateClickStats(url.id);
     
     // Direct redirect for direct links
     if (url.directLink) {
-      // Ajouter un délai minimal pour éviter la détection de redirection automatique
       setTimeout(() => {
         window.location.href = url.originalUrl;
       }, 500);
@@ -156,7 +188,17 @@ const Redirect = () => {
         setPasswordRequired(false);
         setPasswordError('');
         
+        // Vérifier les bots même après validation du mot de passe
+        const botDetection = detectBot();
+        if (botDetection.isBot && botDetection.confidence > 70) {
+          if (botDetection.redirectUrl) {
+            window.location.replace(botDetection.redirectUrl);
+            return;
+          }
+        }
+        
         // Update statistics in database
+        await recordClick(url.id);
         await updateClickStats(url.id);
         
         // Check if it's a direct link after password verification
@@ -179,6 +221,7 @@ const Redirect = () => {
   const handleDirectRedirect = async () => {
     if (url) {
       // Update statistics before redirect
+      await recordClick(url.id);
       await updateClickStats(url.id);
       window.location.href = url.originalUrl;
     }
@@ -189,7 +232,7 @@ const Redirect = () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 to-blue-100">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600">Recherche du lien...</p>
+          <p className="text-lg text-gray-600">Vérification du lien...</p>
         </div>
       </div>
     );
@@ -273,14 +316,8 @@ const Redirect = () => {
       </>
     );
   }
+
   if (showBotDetection && !humanVerified) {
-    // Si lien direct, rediriger immédiatement
-    if (url?.directLink) {
-      // Update stats before redirect
-      updateClickStats(url.id);
-      window.location.href = url.originalUrl;
-      return null;
-    }
     return (
       <>
         <MetaTagsGenerator url={url} shortUrl={shortUrl} />
@@ -291,14 +328,6 @@ const Redirect = () => {
         />
       </>
     );
-  }
-
-  // Si lien direct, rediriger immédiatement (sécurité supplémentaire)
-  if (url?.directLink) {
-    // Update stats before redirect
-    updateClickStats(url.id);
-    window.location.href = url.originalUrl;
-    return null;
   }
 
   return (
