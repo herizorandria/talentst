@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { verifyPassword } from '@/utils/securityUtils';
 import { isUrlExpired } from '@/utils/urlUtils';
+import { recordClick } from '@/utils/analyticsUtils';
 import BotDetection from '@/components/BotDetection';
 import MetaTagsGenerator from '@/components/MetaTagsGenerator';
 
@@ -92,6 +93,9 @@ const Redirect = () => {
 
   const updateClickStats = async (urlId: string) => {
     try {
+      // Enregistrer le clic avec analytics détaillées
+      await recordClick(urlId);
+      
       // Mettre à jour les statistiques dans Supabase
       const { error } = await supabase
         .from('shortened_urls')

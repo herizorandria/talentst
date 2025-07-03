@@ -16,16 +16,19 @@ import {
   Globe,
   Shield,
   Zap,
-  Clock
+  Clock,
+  BarChart3
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 import { ShortenedUrl } from '@/types/url';
 
 const LinksManager = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [links, setLinks] = useState<ShortenedUrl[]>([]);
   const [filteredLinks, setFilteredLinks] = useState<ShortenedUrl[]>([]);
   const [loading, setLoading] = useState(true);
@@ -158,6 +161,10 @@ const LinksManager = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const handleViewAnalytics = (shortCode: string) => {
+    navigate(`/analytics/${shortCode}`);
   };
 
   const formatDate = (date: Date) => {
@@ -441,6 +448,16 @@ const LinksManager = () => {
                         title="Ouvrir le lien original"
                       >
                         <ExternalLink className="h-4 w-4" />
+                      </Button>
+
+                      <Button
+                        onClick={() => handleViewAnalytics(link.shortCode)}
+                        variant="outline"
+                        size="sm"
+                        className="border-purple-200 hover:bg-purple-50"
+                        title="Voir les analytics"
+                      >
+                        <BarChart3 className="h-4 w-4" />
                       </Button>
                       
                       <Button

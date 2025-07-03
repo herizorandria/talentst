@@ -2,10 +2,11 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { History, Copy, ExternalLink, Eye, Trash2, Calendar, Tag } from 'lucide-react';
+import { History, Copy, ExternalLink, Eye, Trash2, Calendar, Tag, BarChart3 } from 'lucide-react';
 import { ShortenedUrl } from '@/types/url';
 import { useToast } from '@/hooks/use-toast';
 import { useDatabase } from '@/hooks/useDatabase';
+import { useNavigate } from 'react-router-dom';
 
 interface UrlHistoryProps {
   urls: ShortenedUrl[];
@@ -15,6 +16,7 @@ interface UrlHistoryProps {
 const UrlHistory = ({ urls, onUrlClick }: UrlHistoryProps) => {
   const { toast } = useToast();
   const { deleteUrl } = useDatabase();
+  const navigate = useNavigate();
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -41,6 +43,10 @@ const UrlHistory = ({ urls, onUrlClick }: UrlHistoryProps) => {
     if (window.confirm(`Êtes-vous sûr de vouloir supprimer le lien ${url.shortCode} ?`)) {
       await deleteUrl(url.id);
     }
+  };
+
+  const handleViewAnalytics = (shortCode: string) => {
+    navigate(`/analytics/${shortCode}`);
   };
 
   const formatDate = (date: Date) => {
@@ -185,6 +191,16 @@ const UrlHistory = ({ urls, onUrlClick }: UrlHistoryProps) => {
                       title="Ouvrir le lien"
                     >
                       <ExternalLink className="h-4 w-4" />
+                    </Button>
+
+                    <Button
+                      onClick={() => handleViewAnalytics(url.shortCode)}
+                      variant="outline"
+                      size="sm"
+                      className="border-purple-200 hover:bg-purple-50"
+                      title="Voir les analytics"
+                    >
+                      <BarChart3 className="h-4 w-4" />
                     </Button>
                     
                     <Button
