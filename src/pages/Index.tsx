@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import UrlShortener from '@/components/UrlShortener';
@@ -17,6 +17,10 @@ const Index = () => {
   const [urls, setUrls] = useState<ShortenedUrl[]>([]);
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Récupérer l'onglet depuis l'URL
+  const defaultTab = searchParams.get('tab') || 'shortener';
 
   useEffect(() => {
     if (!loading && !user) {
@@ -98,7 +102,7 @@ const Index = () => {
         </div>
 
         {/* Interface avec onglets */}
-        <Tabs defaultValue="shortener" className="space-y-6">
+        <Tabs defaultValue={defaultTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-5 bg-white/70 backdrop-blur-sm shadow-lg">
           <TabsTrigger 
             value="shortener" 

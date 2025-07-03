@@ -81,7 +81,7 @@ const UrlAnalytics = () => {
           description: "URL non trouvée ou accès non autorisé",
           variant: "destructive"
         });
-        navigate('/');
+        navigate('/?tab=linksmanager');
         return;
       }
 
@@ -197,6 +197,10 @@ const UrlAnalytics = () => {
     window.URL.revokeObjectURL(url);
   };
 
+  const handleBackToManager = () => {
+    navigate('/?tab=linksmanager');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center">
@@ -214,8 +218,8 @@ const UrlAnalytics = () => {
         <Card className="max-w-md w-full">
           <CardContent className="pt-6 text-center">
             <p className="text-gray-600 mb-4">URL non trouvée</p>
-            <Button onClick={() => navigate('/')}>
-              Retour à l'accueil
+            <Button onClick={handleBackToManager}>
+              Retour à la gestion
             </Button>
           </CardContent>
         </Card>
@@ -229,12 +233,12 @@ const UrlAnalytics = () => {
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Button
-            onClick={() => navigate('/')}
+            onClick={handleBackToManager}
             variant="outline"
             size="sm"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Retour
+            Retour à la gestion
           </Button>
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-gray-800 mb-2">
