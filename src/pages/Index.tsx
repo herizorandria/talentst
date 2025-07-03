@@ -1,17 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import UrlShortener from '@/components/UrlShortener';
-import UrlHistory from '@/components/UrlHistory';
-import Statistics from '@/components/Statistics';
-import LinksManager from './LinksManager';
-import Tutorials from './Tutorials';
 import UserMenu from '@/components/UserMenu';
 import { ShortenedUrl } from '@/types/url';
 import { Link, BarChart3, History, LogIn, BookOpen, Settings } from 'lucide-react';
 import { saveUrlsSecurely, loadUrlsSecurely } from '@/utils/storageUtils';
 import { useAuth } from '@/hooks/useAuth';
+
+// Lazy load heavy components
+const UrlShortener = lazy(() => import('@/components/UrlShortener'));
+const UrlHistory = lazy(() => import('@/components/UrlHistory'));
+const Statistics = lazy(() => import('@/components/Statistics'));
+const LinksManager = lazy(() => import('./LinksManager'));
+const Tutorials = lazy(() => import('./Tutorials'));
 
 const Index = () => {
   const [urls, setUrls] = useState<ShortenedUrl[]>([]);
@@ -49,11 +51,11 @@ const Index = () => {
     }
   }, [urls]);
 
-  const handleUrlShortened = (newUrl: ShortenedUrl) => {
+  const handleUrlShortened = useCallback((newUrl: ShortenedUrl) => {
     setUrls(prev => [newUrl, ...prev]);
-  };
+  }, []);
 
-  const handleUrlClick = (clickedUrl: ShortenedUrl) => {
+  const handleUrlClick = useCallback((clickedUrl: ShortenedUrl) => {
     setUrls(prev => 
       prev.map(url => 
         url.id === clickedUrl.id 
@@ -61,7 +63,7 @@ const Index = () => {
           : url
       )
     );
-  };
+  }, []);
 
   if (loading) {
     return (
@@ -142,23 +144,33 @@ const Index = () => {
         </TabsList>
 
           <TabsContent value="shortener" className="space-y-6">
-            <UrlShortener onUrlShortened={handleUrlShortened} />
+            <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div></div>}>
+              <UrlShortener onUrlShortened={handleUrlShortened} />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="linksmanager" className="space-y-6">
-            <LinksManager />
+            <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div></div>}>
+              <LinksManager />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="history" className="space-y-6">
-            <UrlHistory urls={urls} onUrlClick={handleUrlClick} />
+            <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div></div>}>
+              <UrlHistory urls={urls} onUrlClick={handleUrlClick} />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="statistics" className="space-y-6">
-            <Statistics urls={urls} />
+            <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div></div>}>
+              <Statistics urls={urls} />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="tutorials" className="space-y-6">
-            <Tutorials />
+            <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div></div>}>
+              <Tutorials />
+            </Suspense>
           </TabsContent>
         </Tabs>
 

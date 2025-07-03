@@ -32,54 +32,101 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
-      },
+      }
       shortened_urls: {
         Row: {
-          id: string;
-          user_id: string;
-          original_url: string;
-          short_code: string;
-          custom_code?: string | null;
-          created_at: string;
-          clicks: number;
-          last_clicked_at?: string | null;
-          description?: string | null;
-          tags?: string[] | null;
-          password_hash?: string | null;
-          expires_at?: string | null;
-          direct_link?: boolean | null;
-        };
+          clicks: number | null
+          created_at: string
+          custom_code: string | null
+          description: string | null
+          direct_link: boolean | null
+          expires_at: string | null
+          id: string
+          last_clicked_at: string | null
+          original_url: string
+          password_hash: string | null
+          short_code: string
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
         Insert: {
-          id?: string;
-          user_id: string;
-          original_url: string;
-          short_code: string;
-          custom_code?: string | null;
-          created_at?: string;
-          clicks?: number;
-          last_clicked_at?: string | null;
-          description?: string | null;
-          tags?: string[] | null;
-          password_hash?: string | null;
-          expires_at?: string | null;
-          direct_link?: boolean | null;
-        };
+          clicks?: number | null
+          created_at?: string
+          custom_code?: string | null
+          description?: string | null
+          direct_link?: boolean | null
+          expires_at?: string | null
+          id?: string
+          last_clicked_at?: string | null
+          original_url: string
+          password_hash?: string | null
+          short_code: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
         Update: {
-          id?: string;
-          user_id?: string;
-          original_url?: string;
-          short_code?: string;
-          custom_code?: string | null;
-          created_at?: string;
-          clicks?: number;
-          last_clicked_at?: string | null;
-          description?: string | null;
-          tags?: string[] | null;
-          password_hash?: string | null;
-          expires_at?: string | null;
-          direct_link?: boolean | null;
-        };
-        Relationships: [];
+          clicks?: number | null
+          created_at?: string
+          custom_code?: string | null
+          description?: string | null
+          direct_link?: boolean | null
+          expires_at?: string | null
+          id?: string
+          last_clicked_at?: string | null
+          original_url?: string
+          password_hash?: string | null
+          short_code?: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      url_clicks: {
+        Row: {
+          browser: string | null
+          clicked_at: string | null
+          device: string | null
+          id: string
+          ip: string | null
+          location_city: string | null
+          location_country: string | null
+          os: string | null
+          short_url_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          clicked_at?: string | null
+          device?: string | null
+          id?: string
+          ip?: string | null
+          location_city?: string | null
+          location_country?: string | null
+          os?: string | null
+          short_url_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          clicked_at?: string | null
+          device?: string | null
+          id?: string
+          ip?: string | null
+          location_city?: string | null
+          location_country?: string | null
+          os?: string | null
+          short_url_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "url_clicks_short_url_id_fkey"
+            columns: ["short_url_id"]
+            isOneToOne: false
+            referencedRelation: "shortened_urls"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

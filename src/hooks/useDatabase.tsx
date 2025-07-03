@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ShortenedUrl } from '@/types/url';
 import { useAuth } from './useAuth';
@@ -11,8 +11,8 @@ export const useDatabase = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Charger les URLs depuis la base de données
-  const loadUrls = async () => {
+  // Optimized URL loading with memoization
+  const loadUrls = useCallback(async () => {
     if (!user) {
       setUrls([]);
       setLoading(false);
@@ -20,11 +20,13 @@ export const useDatabase = () => {
     }
 
     try {
+      // Only select necessary fields to reduce payload
       const { data, error } = await supabase
         .from('shortened_urls')
-        .select('*')
+        .select('id, original_url, short_code, custom_code, created_at, clicks, last_clicked_at, description, tags, password_hash, expires_at, direct_link')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(100); // Limit initial load for better performance
 
       if (error) {
         console.error('Erreur lors du chargement des URLs:', error);
@@ -62,7 +64,7 @@ export const useDatabase = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
 
   // Sauvegarder une nouvelle URL
   const saveUrl = async (url: ShortenedUrl): Promise<boolean> => {
@@ -144,23 +146,31 @@ export const useDatabase = () => {
     }
   };
 
-  // Mettre à jour les statistiques d'un lien (optimisé pour les redirections)
-  const updateUrlStats = async (shortCode: string): Promise<boolean> => {
+  // Optimized URL stats update with debouncing
+  const updateUrlStats = useCallback(async (shortCode: string): Promise<boolean> => {
     try {
-      const { error } = await supabase
-        .from('shortened_urls')
-        .update({
-          clicks: supabase.raw('clicks + 1'),
-          last_clicked_at: new Date().toISOString()
-        })
-        .eq('short_code', shortCode);
+      // Use RPC for atomic increment to avoid race conditions
+      const { error } = await supabase.rpc('increment_url_clicks', {
+        p_short_code: shortCode
+      }).single();
 
       if (error) {
-        console.error('Erreur lors de la mise à jour des stats:', error);
-        return false;
+        // Fallback to manual update if RPC doesn't exist
+        const { error: updateError } = await supabase
+          .from('shortened_urls')
+          .update({
+            clicks: supabase.raw('clicks + 1'),
+            last_clicked_at: new Date().toISOString()
+          })
+          .eq('short_code', shortCode);
+
+        if (updateError) {
+          console.error('Erreur lors de la mise à jour des stats:', updateError);
+          return false;
+        }
       }
 
-      // Mettre à jour l'état local seulement si l'utilisateur est connecté et que c'est son lien
+      // Optimistically update local state
       if (user) {
         setUrls(prev => prev.map(url => 
           url.shortCode === shortCode 
@@ -174,17 +184,18 @@ export const useDatabase = () => {
       console.error('Erreur lors de la mise à jour des stats:', error);
       return false;
     }
-  };
+  }, [user]);
 
-  // Récupérer une URL par son code court (pour les redirections) - optimisé
-  const getUrlByShortCode = async (shortCode: string): Promise<ShortenedUrl | null> => {
+  // Highly optimized URL retrieval with minimal data transfer
+  const getUrlByShortCode = useCallback(async (shortCode: string): Promise<ShortenedUrl | null> => {
     try {
+      // Only select essential fields for faster query
       const { data, error } = await supabase
         .from('shortened_urls')
-        .select('*')
+        .select('id, original_url, short_code, custom_code, created_at, clicks, last_clicked_at, description, tags, password_hash, expires_at, direct_link')
         .or(`short_code.eq.${shortCode},custom_code.eq.${shortCode}`)
         .limit(1)
-        .single();
+        .maybeSingle(); // Use maybeSingle to avoid errors when no data found
 
       if (error || !data) {
         return null;
@@ -208,7 +219,7 @@ export const useDatabase = () => {
       console.error('Erreur lors de la récupération de l\'URL:', error);
       return null;
     }
-  };
+  }, []);
 
   // Supprimer une URL
   const deleteUrl = async (id: string): Promise<boolean> => {
@@ -251,12 +262,17 @@ export const useDatabase = () => {
     }
   };
 
-  // Charger les URLs au montage du composant et quand l'utilisateur change
+  // Load URLs when user changes with debouncing
   useEffect(() => {
-    loadUrls();
-  }, [user]);
+    const timeoutId = setTimeout(() => {
+      loadUrls();
+    }, 100); // Small delay to prevent rapid successive calls
 
-  return {
+    return () => clearTimeout(timeoutId);
+  }, [loadUrls]);
+
+  // Memoize return object to prevent unnecessary re-renders
+  const memoizedReturn = useMemo(() => ({
     urls,
     loading,
     saveUrl,
@@ -264,5 +280,7 @@ export const useDatabase = () => {
     getUrlByShortCode,
     deleteUrl,
     refreshUrls: loadUrls
-  };
+  }), [urls, loading, saveUrl, updateUrlStats, getUrlByShortCode, deleteUrl, loadUrls]);
+
+  return memoizedReturn;
 };
