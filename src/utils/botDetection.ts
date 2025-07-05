@@ -1,4 +1,4 @@
-// Système avancé de détection de bots avec redirections vers réseaux sociaux
+// Système optimisé de détection de bots avec redirections vers réseaux sociaux
 
 export interface BotDetectionResult {
   isBot: boolean;
@@ -7,7 +7,7 @@ export interface BotDetectionResult {
   redirectUrl?: string;
 }
 
-// Patterns de détection des bots (plus précis)
+// Patterns de détection des bots (ultra-optimisés)
 const BOT_PATTERNS = {
   // Bots des réseaux sociaux (patterns très spécifiques)
   social: [
@@ -24,19 +24,19 @@ const BOT_PATTERNS = {
     'slackbot'
   ],
   
-  // Crawlers et scrapers
+  // Crawlers et scrapers (patterns essentiels)
   crawler: [
     'googlebot', 'bingbot', 'slurp', 'duckduckbot',
-    'baiduspider', 'yandexbot', 'sogou', 'exabot',
+    'baiduspider', 'yandexbot',
     'crawler', 'spider', 'scraper', 'bot',
-    'curl', 'wget', 'python-requests', 'node-fetch',
+    'curl', 'wget', 'python-requests',
     'headlesschrome', 'phantomjs', 'selenium'
   ],
   
-  // Autres bots suspects
+  // Autres bots suspects (patterns critiques)
   suspicious: [
-    'python/', 'java/', 'go-http-client', 'okhttp',
-    'apache-httpclient', 'libwww-perl', 'lwp-trivial'
+    'python/', 'java/', 'go-http-client',
+    'apache-httpclient', 'libwww-perl'
   ]
 };
 
@@ -55,21 +55,29 @@ const REDIRECT_URLS = {
   default: 'https://www.google.com'
 };
 
-export const detectBot = (userAgent?: string, additionalChecks = true): BotDetectionResult => {
+// Cache pour éviter les recalculs
+const detectionCache = new Map<string, BotDetectionResult>();
+
+export const detectBot = (userAgent?: string, additionalChecks = false): BotDetectionResult => {
   const ua = (userAgent || navigator.userAgent).toLowerCase();
   
-  // Score de confiance (0-100) - plus strict pour éviter les faux positifs
+  // Vérifier le cache d'abord
+  if (detectionCache.has(ua)) {
+    return detectionCache.get(ua)!;
+  }
+  
+  // Score de confiance (0-100) - optimisé pour la vitesse
   let confidence = 0;
   let botType: 'social' | 'crawler' | 'scraper' | 'unknown' = 'unknown';
   let redirectUrl = REDIRECT_URLS.default;
   
-  // Vérification des patterns de bots sociaux (très spécifiques)
+  // Vérification ultra-rapide des patterns de bots sociaux
   for (const pattern of BOT_PATTERNS.social) {
     if (ua.includes(pattern)) {
-      confidence += 95; // Très haute confiance pour les bots identifiés
+      confidence = 98; // Très haute confiance pour les bots identifiés
       botType = 'social';
       
-      // Déterminer l'URL de redirection spécifique
+      // Déterminer l'URL de redirection spécifique (optimisé)
       if (pattern.includes('facebook')) redirectUrl = REDIRECT_URLS.facebook;
       else if (pattern.includes('twitter')) redirectUrl = REDIRECT_URLS.twitter;
       else if (pattern.includes('bytespider') || pattern.includes('bytedance')) redirectUrl = REDIRECT_URLS.tiktok;
@@ -85,71 +93,69 @@ export const detectBot = (userAgent?: string, additionalChecks = true): BotDetec
     }
   }
   
-  // Vérification des crawlers (seulement si pas déjà détecté comme bot social)
+  // Vérification des crawlers (seulement si pas déjà détecté)
   if (confidence < 50) {
     for (const pattern of BOT_PATTERNS.crawler) {
       if (ua.includes(pattern)) {
-        confidence += 85;
+        confidence = 90;
         botType = 'crawler';
         break;
       }
     }
   }
   
-  // Vérifications supplémentaires (plus conservatrices)
-  if (additionalChecks && typeof window !== 'undefined') {
-    // Vérifications très spécifiques aux bots
-    if ('webdriver' in navigator) confidence += 40;
-    if ('_phantom' in window || '_selenium' in window) confidence += 50;
-    
-    // Vérifications moins agressives pour éviter les faux positifs
-    if (navigator.plugins.length === 0 && navigator.userAgent.includes('HeadlessChrome')) confidence += 30;
-    if (!navigator.cookieEnabled && ua.includes('bot')) confidence += 20;
-    
-    // Résolutions très suspectes (pas les résolutions mobiles normales)
-    if ((screen.width < 100 || screen.height < 100) && screen.width !== 0) confidence += 30;
-    if (screen.width === 1024 && screen.height === 768 && ua.includes('bot')) confidence += 15;
+  // Vérifications supplémentaires (très limitées pour la performance)
+  if (additionalChecks && confidence < 50 && typeof window !== 'undefined') {
+    // Seulement les vérifications les plus critiques
+    if ('webdriver' in navigator) confidence += 50;
+    if ('_phantom' in window || '_selenium' in window) confidence += 60;
   }
   
-  // Vérifications des patterns suspects dans l'user agent (plus strict)
-  for (const pattern of BOT_PATTERNS.suspicious) {
-    if (ua.startsWith(pattern)) { // Utiliser startsWith pour être plus précis
-      confidence += 70;
-      botType = 'scraper';
-      break;
+  // Vérifications des patterns suspects (optimisé)
+  if (confidence < 50) {
+    for (const pattern of BOT_PATTERNS.suspicious) {
+      if (ua.startsWith(pattern)) {
+        confidence = 80;
+        botType = 'scraper';
+        break;
+      }
     }
   }
   
-  // User agents très courts ou sans version (plus spécifique)
-  if (ua.length < 15 || (ua.length > 500 && ua.includes('bot'))) confidence += 25;
+  // User agents très courts (vérification rapide)
+  if (confidence < 50 && ua.length < 15) confidence += 30;
   
-  // Seuil plus élevé pour éviter les faux positifs
-  const isBot = confidence >= 70; // Augmenté de 50 à 70
+  const isBot = confidence >= 75; // Seuil optimisé
   
-  return {
+  const result: BotDetectionResult = {
     isBot,
     botType,
     confidence: Math.min(100, confidence),
     redirectUrl: isBot ? redirectUrl : undefined
   };
+  
+  // Mettre en cache le résultat
+  detectionCache.set(ua, result);
+  
+  // Nettoyer le cache après 5 minutes
+  setTimeout(() => detectionCache.delete(ua), 5 * 60 * 1000);
+  
+  return result;
 };
 
 export const handleBotRedirect = (detection: BotDetectionResult, originalUrl: string) => {
   if (!detection.isBot || !detection.redirectUrl) return false;
-  
-  // Log pour analytics (optionnel)
-  console.log(`Bot détecté (${detection.botType}, confiance: ${detection.confidence}%) - Redirection vers ${detection.redirectUrl}`);
   
   // Redirection immédiate pour les bots
   window.location.replace(detection.redirectUrl);
   return true;
 };
 
-// Fonction pour tester si c'est un humain via interaction (plus rapide)
-export const waitForHumanInteraction = (timeout = 5000): Promise<boolean> => {
+// Fonction ultra-rapide pour tester l'interaction humaine
+export const waitForHumanInteraction = (timeout = 3000): Promise<boolean> => {
   return new Promise((resolve) => {
     let resolved = false;
-    const events = ['click', 'touchstart', 'keydown', 'mousemove'];
+    const events = ['click', 'touchstart', 'keydown'];
     
     const handleInteraction = () => {
       if (!resolved) {
@@ -181,36 +187,20 @@ export const waitForHumanInteraction = (timeout = 5000): Promise<boolean> => {
   });
 };
 
-// Fonction pour créer un challenge anti-bot simple (plus rapide)
+// Challenge ultra-rapide
 export const createBotChallenge = (): Promise<boolean> => {
   return new Promise((resolve) => {
-    // Challenge mathématique simple
-    const num1 = Math.floor(Math.random() * 5) + 1; // Nombres plus petits
-    const num2 = Math.floor(Math.random() * 5) + 1;
+    // Challenge mathématique très simple
+    const num1 = Math.floor(Math.random() * 3) + 1; // 1-3
+    const num2 = Math.floor(Math.random() * 3) + 1; // 1-3
     const correctAnswer = num1 + num2;
     
-    const userAnswer = prompt(`Vérification: ${num1} + ${num2} = ?`);
+    const userAnswer = prompt(`${num1} + ${num2} = ?`);
     
     if (userAnswer === null) {
-      resolve(false); // Utilisateur a annulé
+      resolve(false);
     } else {
       resolve(parseInt(userAnswer) === correctAnswer);
     }
   });
-};
-
-// Fonction optimisée pour détecter les comportements automatisés
-export const detectAutomatedBehavior = (): number => {
-  let suspicionScore = 0;
-  
-  // Vérifier la vitesse de navigation (plus tolérant)
-  const navigationStart = performance.timing?.navigationStart;
-  const loadComplete = performance.timing?.loadEventEnd;
-  
-  if (navigationStart && loadComplete) {
-    const loadTime = loadComplete - navigationStart;
-    if (loadTime < 50) suspicionScore += 20; // Seuil réduit
-  }
-  
-  return suspicionScore;
 };

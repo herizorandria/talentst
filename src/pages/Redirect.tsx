@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { verifyPassword } from '@/utils/securityUtils';
 import { isUrlExpired } from '@/utils/urlUtils';
-import { recordClick } from '@/utils/analyticsUtils';
-import { detectBot, handleBotRedirect } from '@/utils/botDetection';
+import { recordClick, preloadGeolocationData } from '@/utils/analyticsUtils';
+import { detectBot } from '@/utils/botDetection';
 import BotDetection from '@/components/BotDetection';
 import MetaTagsGenerator from '@/components/MetaTagsGenerator';
 
@@ -17,7 +17,7 @@ const Redirect = () => {
   const { shortCode } = useParams<{ shortCode: string }>();
   const [url, setUrl] = useState<ShortenedUrl | null>(null);
   const [loading, setLoading] = useState(true);
-  const [countdown, setCountdown] = useState(3); // Réduit à 3 secondes
+  const [countdown, setCountdown] = useState(2); // Réduit à 2 secondes
   const [passwordRequired, setPasswordRequired] = useState(false);
   const [enteredPassword, setEnteredPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -30,30 +30,31 @@ const Redirect = () => {
       return;
     }
 
+    // Précharger les données de géolocalisation en arrière-plan
+    preloadGeolocationData();
+
     const loadAndValidateUrl = async () => {
       try {
-        // Détecter les bots avant tout traitement (seuils plus élevés)
+        // Détecter les bots avant tout traitement (seuils optimisés)
         const botDetection = detectBot();
-        console.log('Bot detection result:', botDetection);
         
         // Si c'est un bot avec très haute confiance, rediriger immédiatement
-        if (botDetection.isBot && botDetection.confidence > 90) {
+        if (botDetection.isBot && botDetection.confidence > 95) {
           console.log(`Bot détecté: ${botDetection.botType} (${botDetection.confidence}%) - Redirection vers ${botDetection.redirectUrl}`);
           
-          // Redirection immédiate pour les bots
           if (botDetection.redirectUrl) {
             window.location.replace(botDetection.redirectUrl);
             return;
           }
         }
 
-        // Chercher le lien dans la base Supabase
+        // Chercher le lien dans la base Supabase (requête optimisée)
         const { data, error } = await supabase
           .from('shortened_urls')
-          .select('*')
+          .select('id, original_url, short_code, custom_code, created_at, clicks, password_hash, expires_at, direct_link, description')
           .or(`short_code.eq.${shortCode},custom_code.eq.${shortCode}`)
           .limit(1)
-          .single();
+          .maybeSingle();
 
         if (error || !data) {
           setUrl(null);
@@ -69,9 +70,7 @@ const Redirect = () => {
           customCode: data.custom_code || undefined,
           createdAt: new Date(data.created_at),
           clicks: data.clicks,
-          lastClickedAt: data.last_clicked_at ? new Date(data.last_clicked_at) : undefined,
           description: data.description || undefined,
-          tags: data.tags || undefined,
           password: data.password_hash || undefined,
           expiresAt: data.expires_at ? new Date(data.expires_at) : undefined,
           directLink: data.direct_link || false
@@ -93,9 +92,9 @@ const Redirect = () => {
           return;
         }
 
-        // Pour les liens directs, vérifier quand même les bots mais rediriger plus vite
+        // Pour les liens directs, traitement ultra-rapide
         if (foundUrl.directLink) {
-          if (botDetection.isBot && botDetection.confidence > 80) {
+          if (botDetection.isBot && botDetection.confidence > 85) {
             // Bot détecté sur lien direct - rediriger vers réseau social
             if (botDetection.redirectUrl) {
               window.location.replace(botDetection.redirectUrl);
@@ -103,22 +102,23 @@ const Redirect = () => {
             }
           }
           
-          // Lien direct pour humain - redirection rapide
+          // Lien direct pour humain - redirection immédiate
           setShowBotDetection(false);
           setHumanVerified(true);
           
-          // Enregistrer le clic et rediriger
-          await recordClick(foundUrl.id);
-          await updateClickStats(foundUrl.id);
+          // Enregistrer le clic en arrière-plan (non-bloquant)
+          recordClick(foundUrl.id);
+          updateClickStatsAsync(foundUrl.id);
           
+          // Redirection immédiate
           setTimeout(() => {
             window.location.href = foundUrl.originalUrl;
-          }, 300); // Réduit à 300ms
+          }, 100); // Quasi-immédiat
           return;
         }
 
         // Pour les liens normaux, vérifier si on doit montrer la détection de bot
-        if (botDetection.isBot && botDetection.confidence > 70) {
+        if (botDetection.isBot && botDetection.confidence > 80) {
           setShowBotDetection(true);
         } else {
           // Utilisateur humain probable - passer directement au countdown
@@ -135,22 +135,18 @@ const Redirect = () => {
     loadAndValidateUrl();
   }, [shortCode]);
 
-  const updateClickStats = async (urlId: string) => {
+  // Fonction asynchrone pour mettre à jour les stats sans bloquer
+  const updateClickStatsAsync = async (urlId: string) => {
     try {
-      // Mettre à jour les statistiques dans Supabase
-      const { error } = await supabase
+      await supabase
         .from('shortened_urls')
         .update({
           clicks: supabase.raw('clicks + 1'),
           last_clicked_at: new Date().toISOString()
         })
         .eq('id', urlId);
-
-      if (error) {
-        console.error('Erreur lors de la mise à jour des stats:', error);
-      }
     } catch (error) {
-      console.error('Erreur lors de la mise à jour des statistiques:', error);
+      console.error('Erreur mise à jour stats:', error);
     }
   };
 
@@ -160,19 +156,19 @@ const Redirect = () => {
     
     if (!url) return;
     
-    // Update statistics in database
-    await recordClick(url.id);
-    await updateClickStats(url.id);
+    // Enregistrer en arrière-plan (non-bloquant)
+    recordClick(url.id);
+    updateClickStatsAsync(url.id);
     
     // Direct redirect for direct links
     if (url.directLink) {
       setTimeout(() => {
         window.location.href = url.originalUrl;
-      }, 200);
+      }, 100);
       return;
     }
     
-    // Start countdown for regular links (réduit)
+    // Start countdown for regular links (très rapide)
     const timer = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
@@ -199,22 +195,22 @@ const Redirect = () => {
         
         // Vérifier les bots même après validation du mot de passe
         const botDetection = detectBot();
-        if (botDetection.isBot && botDetection.confidence > 85) {
+        if (botDetection.isBot && botDetection.confidence > 90) {
           if (botDetection.redirectUrl) {
             window.location.replace(botDetection.redirectUrl);
             return;
           }
         }
         
-        // Update statistics in database
-        await recordClick(url.id);
-        await updateClickStats(url.id);
+        // Enregistrer en arrière-plan
+        recordClick(url.id);
+        updateClickStatsAsync(url.id);
         
         // Check if it's a direct link after password verification
         if (url.directLink) {
           setTimeout(() => {
             window.location.href = url.originalUrl;
-          }, 200);
+          }, 100);
         } else {
           setShowBotDetection(false);
           setHumanVerified(true);
@@ -229,9 +225,9 @@ const Redirect = () => {
 
   const handleDirectRedirect = async () => {
     if (url) {
-      // Update statistics before redirect
-      await recordClick(url.id);
-      await updateClickStats(url.id);
+      // Enregistrer en arrière-plan
+      recordClick(url.id);
+      updateClickStatsAsync(url.id);
       window.location.href = url.originalUrl;
     }
   };
@@ -240,8 +236,8 @@ const Redirect = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 to-blue-100">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600">Vérification du lien...</p>
+          <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Vérification...</p>
         </div>
       </div>
     );
@@ -254,12 +250,12 @@ const Redirect = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-red-600">
               <AlertCircle className="h-6 w-6" />
-              Lien introuvable ou expiré
+              Lien introuvable
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-gray-600 mb-4">
-              Le lien court <code className="bg-gray-100 px-2 py-1 rounded">{shortCode}</code> n'existe pas, a expiré ou n'est plus accessible.
+              Le lien court <code className="bg-gray-100 px-2 py-1 rounded">{shortCode}</code> n'existe pas ou a expiré.
             </p>
             <Button 
               onClick={() => window.location.href = '/'}
@@ -292,7 +288,7 @@ const Redirect = () => {
             <CardContent>
               <form onSubmit={handlePasswordSubmit} className="space-y-4">
                 <p className="text-gray-600">
-                  Ce lien est protégé par un mot de passe. Veuillez l'entrer pour continuer.
+                  Ce lien est protégé par un mot de passe.
                 </p>
                 <div>
                   <Input
@@ -301,6 +297,7 @@ const Redirect = () => {
                     value={enteredPassword}
                     onChange={(e) => setEnteredPassword(e.target.value)}
                     className="w-full"
+                    autoFocus
                   />
                   {passwordError && (
                     <p className="text-red-600 text-sm mt-1">{passwordError}</p>
@@ -308,7 +305,7 @@ const Redirect = () => {
                 </div>
                 <div className="space-y-2">
                   <Button type="submit" className="w-full">
-                    Accéder au lien
+                    Accéder
                   </Button>
                   <Button 
                     onClick={() => window.location.href = '/'}
@@ -347,35 +344,23 @@ const Redirect = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-green-600">
               <ExternalLink className="h-6 w-6" />
-              Redirection sécurisée
+              Redirection
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-center space-y-4">
-              <div className="text-6xl font-bold text-green-600">
+              <div className="text-4xl font-bold text-green-600">
                 {countdown}
               </div>
+              
               <p className="text-gray-600">
-                Vous allez être redirigé vers :
+                Redirection vers :
               </p>
               
-              <div className="p-3 bg-gray-100 rounded-lg flex items-center gap-2">
-                <p className="text-sm font-mono break-all text-gray-800 flex-1">
+              <div className="p-3 bg-gray-100 rounded-lg">
+                <p className="text-sm break-all text-gray-800">
                   {url?.originalUrl}
                 </p>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  className="ml-2"
-                  onClick={() => {
-                    if (url?.originalUrl) {
-                      navigator.clipboard.writeText(url.originalUrl);
-                    }
-                  }}
-                >
-                  Copier
-                </Button>
               </div>
               
               <div className="space-y-2">

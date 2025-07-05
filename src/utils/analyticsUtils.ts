@@ -1,4 +1,4 @@
-// Utilitaires pour détecter les informations du navigateur et de l'appareil
+// Utilitaires optimisés pour détecter les informations du navigateur et de l'appareil
 
 export interface DeviceInfo {
   browser: string;
@@ -9,170 +9,255 @@ export interface DeviceInfo {
 export const detectDeviceInfo = (userAgent: string): DeviceInfo => {
   const ua = userAgent.toLowerCase();
   
-  // Détection du navigateur
+  // Détection du navigateur (optimisée)
   let browser = 'Inconnu';
-  if (ua.includes('chrome') && !ua.includes('edg')) browser = 'Chrome';
+  if (ua.includes('edg')) browser = 'Edge';
+  else if (ua.includes('chrome')) browser = 'Chrome';
   else if (ua.includes('firefox')) browser = 'Firefox';
-  else if (ua.includes('safari') && !ua.includes('chrome')) browser = 'Safari';
-  else if (ua.includes('edg')) browser = 'Edge';
+  else if (ua.includes('safari')) browser = 'Safari';
   else if (ua.includes('opera') || ua.includes('opr')) browser = 'Opera';
-  else if (ua.includes('msie') || ua.includes('trident')) browser = 'Internet Explorer';
   
-  // Détection de l'appareil
+  // Détection de l'appareil (optimisée)
   let device = 'Desktop';
   if (ua.includes('mobile')) device = 'Mobile';
   else if (ua.includes('tablet') || ua.includes('ipad')) device = 'Tablet';
   
-  // Détection de l'OS
+  // Détection de l'OS (optimisée)
   let os = 'Inconnu';
-  if (ua.includes('windows')) os = 'Windows';
+  if (ua.includes('android')) os = 'Android';
+  else if (ua.includes('ios') || ua.includes('iphone') || ua.includes('ipad')) os = 'iOS';
+  else if (ua.includes('windows')) os = 'Windows';
   else if (ua.includes('mac')) os = 'macOS';
   else if (ua.includes('linux')) os = 'Linux';
-  else if (ua.includes('android')) os = 'Android';
-  else if (ua.includes('ios') || ua.includes('iphone') || ua.includes('ipad')) os = 'iOS';
   
   return { browser, device, os };
 };
 
-// Utiliser l'API ipify pour obtenir l'IP (HTTPS)
+// Cache pour éviter les appels API répétés
+const ipCache = new Map<string, string>();
+const locationCache = new Map<string, { country: string; city: string }>();
+
+// Fonction ultra-rapide pour obtenir l'IP avec cache et timeout court
 export const getClientIP = async (): Promise<string> => {
+  const cacheKey = 'current_ip';
+  
+  // Vérifier le cache d'abord
+  if (ipCache.has(cacheKey)) {
+    return ipCache.get(cacheKey)!;
+  }
+  
   try {
+    // Timeout très court pour éviter les blocages
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 secondes max
+    
     const response = await fetch('https://api.ipify.org?format=json', {
       method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-      },
+      signal: controller.signal,
+      headers: { 'Accept': 'application/json' }
     });
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
     
     const data = await response.json();
-    return data.ip || 'Inconnu';
+    const ip = data.ip || 'Inconnu';
+    
+    // Mettre en cache pour 5 minutes
+    ipCache.set(cacheKey, ip);
+    setTimeout(() => ipCache.delete(cacheKey), 5 * 60 * 1000);
+    
+    return ip;
   } catch (error) {
-    console.error('Erreur lors de la récupération de l\'IP:', error);
+    console.warn('IP rapide échouée, utilisation fallback:', error);
     return 'Inconnu';
   }
 };
 
-// Utiliser ipapi.co (HTTPS et gratuit) pour la géolocalisation
+// Fonction ultra-rapide pour la géolocalisation avec cache et fallback
 export const getLocationFromIP = async (ip: string): Promise<{ country: string; city: string }> => {
   if (ip === 'Inconnu') {
     return { country: 'Inconnu', city: 'Inconnu' };
   }
   
+  // Vérifier le cache d'abord
+  if (locationCache.has(ip)) {
+    return locationCache.get(ip)!;
+  }
+  
   try {
-    // Utiliser ipapi.co qui supporte HTTPS
+    // Timeout très court
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 1500); // 1.5 secondes max
+    
     const response = await fetch(`https://ipapi.co/${ip}/json/`, {
       method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-      },
+      signal: controller.signal,
+      headers: { 'Accept': 'application/json' }
     });
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
     
     const data = await response.json();
     
-    // Vérifier si la réponse contient une erreur
     if (data.error) {
-      console.warn('Erreur API géolocalisation:', data.reason);
-      return { country: 'Inconnu', city: 'Inconnu' };
+      throw new Error(data.reason || 'API Error');
     }
     
-    return {
+    const location = {
       country: data.country_name || 'Inconnu',
       city: data.city || 'Inconnu'
     };
-  } catch (error) {
-    console.error('Erreur lors de la géolocalisation:', error);
     
-    // Fallback vers une autre API HTTPS
+    // Mettre en cache pour 1 heure
+    locationCache.set(ip, location);
+    setTimeout(() => locationCache.delete(ip), 60 * 60 * 1000);
+    
+    return location;
+  } catch (error) {
+    console.warn('Géolocalisation rapide échouée:', error);
+    
+    // Fallback ultra-rapide (pays seulement)
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1000); // 1 seconde max
+      
       const fallbackResponse = await fetch(`https://api.country.is/${ip}`, {
         method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-        },
+        signal: controller.signal,
+        headers: { 'Accept': 'application/json' }
       });
+      
+      clearTimeout(timeoutId);
       
       if (fallbackResponse.ok) {
         const fallbackData = await fallbackResponse.json();
-        return {
+        const location = {
           country: fallbackData.country || 'Inconnu',
-          city: 'Inconnu' // Cette API ne fournit que le pays
+          city: 'Inconnu'
         };
+        
+        // Cache même le fallback
+        locationCache.set(ip, location);
+        setTimeout(() => locationCache.delete(ip), 30 * 60 * 1000);
+        
+        return location;
       }
     } catch (fallbackError) {
-      console.error('Erreur API fallback:', fallbackError);
+      console.warn('Fallback géolocalisation échoué:', fallbackError);
     }
     
     return { country: 'Inconnu', city: 'Inconnu' };
   }
 };
 
-// Fonction optimisée pour enregistrer les clics avec gestion d'erreurs améliorée
+// Fonction optimisée pour enregistrer les clics en arrière-plan
 export const recordClick = async (shortUrlId: string) => {
+  // Enregistrer immédiatement les données de base sans attendre les APIs
+  const userAgent = navigator.userAgent;
+  const deviceInfo = detectDeviceInfo(userAgent);
+  const referrer = document.referrer || 'Direct';
+  
+  // Données de base à enregistrer immédiatement
+  const baseClickData = {
+    short_url_id: shortUrlId,
+    user_agent: userAgent,
+    browser: deviceInfo.browser,
+    device: deviceInfo.device,
+    os: deviceInfo.os,
+    referrer: referrer,
+    ip: 'En cours...',
+    location_country: 'En cours...',
+    location_city: 'En cours...'
+  };
+  
   try {
-    const userAgent = navigator.userAgent;
-    const deviceInfo = detectDeviceInfo(userAgent);
-    const referrer = document.referrer || 'Direct';
-    
-    // Obtenir l'IP d'abord
-    const ip = await getClientIP();
-    console.log('IP récupérée:', ip);
-    
-    // Puis la géolocalisation
-    const location = await getLocationFromIP(ip);
-    console.log('Localisation récupérée:', location);
-    
-    const clickData = {
-      short_url_id: shortUrlId,
-      user_agent: userAgent,
-      browser: deviceInfo.browser,
-      device: deviceInfo.device,
-      os: deviceInfo.os,
-      referrer: referrer,
-      ip: ip,
-      location_country: location.country,
-      location_city: location.city
-    };
-    
-    console.log('Données à enregistrer:', clickData);
-    
-    // Envoyer les données à Supabase
+    // Enregistrer immédiatement avec des données partielles
     const { supabase } = await import('@/integrations/supabase/client');
-    const { error } = await supabase
+    const { data: insertedData, error: insertError } = await supabase
       .from('url_clicks')
-      .insert(clickData);
+      .insert(baseClickData)
+      .select('id')
+      .single();
     
-    if (error) {
-      console.error('Erreur lors de l\'enregistrement du clic:', error);
-    } else {
-      console.log('Clic enregistré avec succès');
+    if (insertError) {
+      console.error('Erreur lors de l\'enregistrement initial:', insertError);
+      return;
     }
+    
+    const clickId = insertedData.id;
+    
+    // Mettre à jour en arrière-plan avec les données géographiques
+    updateLocationDataInBackground(clickId);
+    
   } catch (error) {
     console.error('Erreur lors de l\'enregistrement du clic:', error);
   }
 };
 
-// Fonction pour tester les APIs de géolocalisation
-export const testGeolocationAPIs = async () => {
-  console.log('Test des APIs de géolocalisation...');
-  
+// Fonction pour mettre à jour les données de localisation en arrière-plan
+const updateLocationDataInBackground = async (clickId: string) => {
   try {
-    const ip = await getClientIP();
-    console.log('IP obtenue:', ip);
+    // Obtenir l'IP et la localisation en parallèle avec Promise.allSettled
+    const [ipResult, ] = await Promise.allSettled([
+      getClientIP()
+    ]);
     
-    const location = await getLocationFromIP(ip);
-    console.log('Localisation obtenue:', location);
+    const ip = ipResult.status === 'fulfilled' ? ipResult.value : 'Inconnu';
     
-    return { ip, location };
+    // Obtenir la localisation seulement si on a une IP valide
+    let location = { country: 'Inconnu', city: 'Inconnu' };
+    if (ip !== 'Inconnu') {
+      try {
+        location = await getLocationFromIP(ip);
+      } catch (error) {
+        console.warn('Erreur géolocalisation en arrière-plan:', error);
+      }
+    }
+    
+    // Mettre à jour l'enregistrement avec les vraies données
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { error: updateError } = await supabase
+      .from('url_clicks')
+      .update({
+        ip: ip,
+        location_country: location.country,
+        location_city: location.city
+      })
+      .eq('id', clickId);
+    
+    if (updateError) {
+      console.error('Erreur mise à jour localisation:', updateError);
+    } else {
+      console.log('Localisation mise à jour:', { ip, location });
+    }
+    
   } catch (error) {
-    console.error('Erreur lors du test:', error);
-    return null;
+    console.error('Erreur mise à jour arrière-plan:', error);
   }
+};
+
+// Fonction pour précharger les données géographiques (optionnel)
+export const preloadGeolocationData = async () => {
+  try {
+    // Lancer en arrière-plan sans bloquer
+    getClientIP().then(ip => {
+      if (ip !== 'Inconnu') {
+        getLocationFromIP(ip);
+      }
+    }).catch(() => {
+      // Ignorer les erreurs de préchargement
+    });
+  } catch (error) {
+    // Ignorer les erreurs de préchargement
+  }
+};
+
+// Fonction pour nettoyer les caches (à appeler périodiquement)
+export const clearLocationCaches = () => {
+  ipCache.clear();
+  locationCache.clear();
 };
