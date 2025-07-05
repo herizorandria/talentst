@@ -138,13 +138,10 @@ const Redirect = () => {
   // Fonction asynchrone pour mettre à jour les stats sans bloquer
   const updateClickStatsAsync = async (urlId: string) => {
     try {
-      await supabase
-        .from('shortened_urls')
-        .update({
-          clicks: supabase.raw('clicks + 1'),
-          last_clicked_at: new Date().toISOString()
-        })
-        .eq('id', urlId);
+      // Use RPC function for atomic increment
+      await supabase.rpc('increment_url_clicks', {
+        p_short_code: shortCode || ''
+      });
     } catch (error) {
       console.error('Erreur mise à jour stats:', error);
     }

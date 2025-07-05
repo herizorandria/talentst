@@ -155,17 +155,13 @@ export const useDatabase = () => {
       }).single();
 
       if (error) {
-        // Fallback to manual update if RPC doesn't exist
-        const { error: updateError } = await supabase
-          .from('shortened_urls')
-          .update({
-            clicks: supabase.raw('clicks + 1'),
-            last_clicked_at: new Date().toISOString()
-          })
-          .eq('short_code', shortCode);
+        // Fallback to manual update if RPC doesn't exist - use the database function we created
+        const { error: rpcError } = await supabase.rpc('increment_url_clicks', {
+          p_short_code: shortCode
+        });
 
-        if (updateError) {
-          console.error('Erreur lors de la mise à jour des stats:', updateError);
+        if (rpcError) {
+          console.error('Erreur lors de la mise à jour des stats:', rpcError);
           return false;
         }
       }

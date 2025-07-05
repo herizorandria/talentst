@@ -1,4 +1,5 @@
 // Utilitaires optimisés pour détecter les informations du navigateur et de l'appareil
+import { UAParser } from 'ua-parser-js';
 
 export interface DeviceInfo {
   browser: string;
@@ -7,6 +8,25 @@ export interface DeviceInfo {
 }
 
 export const detectDeviceInfo = (userAgent: string): DeviceInfo => {
+  try {
+    const parser = new UAParser(userAgent);
+    const result = parser.getResult();
+    
+    const browser = result.browser.name || 'Inconnu';
+    const device = result.device.type === 'mobile' ? 'Mobile' : 
+                   result.device.type === 'tablet' ? 'Tablet' : 'Desktop';
+    const os = result.os.name || 'Inconnu';
+    
+    return { browser, device, os };
+  } catch (error) {
+    console.warn('Erreur parsing user agent:', error);
+    // Fallback vers l'ancienne méthode en cas d'erreur
+    return detectDeviceInfoFallback(userAgent);
+  }
+};
+
+// Méthode fallback en cas d'erreur avec UAParser
+const detectDeviceInfoFallback = (userAgent: string): DeviceInfo => {
   const ua = userAgent.toLowerCase();
   
   // Détection du navigateur (optimisée)
@@ -14,7 +34,7 @@ export const detectDeviceInfo = (userAgent: string): DeviceInfo => {
   if (ua.includes('edg')) browser = 'Edge';
   else if (ua.includes('chrome')) browser = 'Chrome';
   else if (ua.includes('firefox')) browser = 'Firefox';
-  else if (ua.includes('safari')) browser = 'Safari';
+  else if (ua.includes('safari') && !ua.includes('chrome')) browser = 'Safari';
   else if (ua.includes('opera') || ua.includes('opr')) browser = 'Opera';
   
   // Détection de l'appareil (optimisée)

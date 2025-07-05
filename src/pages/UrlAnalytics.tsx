@@ -176,7 +176,7 @@ const UrlAnalytics = () => {
 
     const exportData = () => {
         const csvContent = [
-            ['Date/Heure', 'Pays', 'Ville', 'Appareil', 'Navigateur', 'OS', 'Référent'].join(','),
+            ['Date/Heure', 'Pays', 'Ville', 'Appareil', 'Navigateur', 'OS', 'Référent', 'IP'].join(','),
             ...filteredClicks.map(click => [
                 new Date(click.clicked_at).toLocaleString('fr-FR'),
                 click.location_country || '',
@@ -184,7 +184,8 @@ const UrlAnalytics = () => {
                 click.device || '',
                 click.browser || '',
                 click.os || '',
-                click.referrer || ''
+                click.referrer || '',
+                click.ip || ''
             ].join(','))
         ].join('\n');
 
@@ -507,6 +508,7 @@ const UrlAnalytics = () => {
                                         <th className="text-left p-2">Navigateur</th>
                                         <th className="text-left p-2">OS</th>
                                         <th className="text-left p-2">Référent</th>
+                                        <th className="text-left p-2">IP</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -521,11 +523,32 @@ const UrlAnalytics = () => {
                                                     : click.location_country || 'Inconnu'
                                                 }
                                             </td>
-                                            <td className="p-2">{click.device || 'Inconnu'}</td>
+                                            <td className="p-2">
+                                                <div className="flex items-center gap-1">
+                                                    {getDeviceIcon(click.device)}
+                                                    {click.device || 'Inconnu'}
+                                                </div>
+                                            </td>
                                             <td className="p-2">{click.browser || 'Inconnu'}</td>
                                             <td className="p-2">{click.os || 'Inconnu'}</td>
-                                            <td className="p-2 max-w-xs truncate">
-                                                {click.referrer || 'Direct'}
+                                            <td className="p-2 max-w-xs truncate" title={click.referrer}>
+                                                {click.referrer === 'Direct' || !click.referrer ? 'Direct' : 
+                                                 click.referrer.includes('facebook.com') ? 'Facebook' :
+                                                 click.referrer.includes('instagram.com') ? 'Instagram' :
+                                                 click.referrer.includes('twitter.com') ? 'Twitter' :
+                                                 click.referrer.includes('linkedin.com') ? 'LinkedIn' :
+                                                 click.referrer.includes('google.com') ? 'Google' :
+                                                 (() => {
+                                                     try {
+                                                         return new URL(click.referrer).hostname;
+                                                     } catch {
+                                                         return click.referrer;
+                                                     }
+                                                 })()
+                                                }
+                                            </td>
+                                            <td className="p-2 font-mono text-xs">
+                                                {click.ip && click.ip !== 'En cours...' ? click.ip : 'Inconnu'}
                                             </td>
                                         </tr>
                                     ))}
