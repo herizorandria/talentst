@@ -13,7 +13,7 @@ interface BotDetectionProps {
 const BotDetection = ({ originalUrl, shortCode, onHumanVerified }: BotDetectionProps) => {
   const [detection, setDetection] = useState<any>(null);
   const [showChallenge, setShowChallenge] = useState(false);
-  const [countdown, setCountdown] = useState(3);
+  const [countdown, setCountdown] = useState(2); // Réduit à 2 secondes
   const [challengeStep, setChallengeStep] = useState(0);
 
   useEffect(() => {
@@ -24,8 +24,9 @@ const BotDetection = ({ originalUrl, shortCode, onHumanVerified }: BotDetectionP
       
       console.log('Détection bot:', result);
       
-      if (result.isBot && result.confidence > 70) {
-        // Bot détecté avec haute confiance - redirection immédiate
+      // Seuil plus élevé pour éviter les faux positifs
+      if (result.isBot && result.confidence > 85) {
+        // Bot détecté avec très haute confiance - redirection immédiate
         console.log(`Bot ${result.botType} détecté - Redirection vers ${result.redirectUrl}`);
         
         // Petit délai pour éviter la détection de redirection automatique
@@ -33,17 +34,17 @@ const BotDetection = ({ originalUrl, shortCode, onHumanVerified }: BotDetectionP
           if (result.redirectUrl) {
             window.location.replace(result.redirectUrl);
           }
-        }, 1000);
+        }, 500); // Réduit à 500ms
         return;
       }
       
-      if (result.isBot && result.confidence > 40) {
-        // Bot possible - montrer un challenge
+      if (result.isBot && result.confidence > 70) {
+        // Bot possible - montrer un challenge rapide
         setShowChallenge(true);
         return;
       }
       
-      // Probablement humain - démarrer le countdown normal
+      // Probablement humain - démarrer le countdown réduit
       startCountdown();
     };
     
@@ -66,8 +67,8 @@ const BotDetection = ({ originalUrl, shortCode, onHumanVerified }: BotDetectionP
   const handleHumanChallenge = async () => {
     setChallengeStep(1);
     
-    // Attendre une interaction humaine
-    const hasInteraction = await waitForHumanInteraction(5000);
+    // Attendre une interaction humaine (timeout réduit)
+    const hasInteraction = await waitForHumanInteraction(3000);
     
     if (!hasInteraction) {
       // Pas d'interaction - probablement un bot
@@ -81,7 +82,7 @@ const BotDetection = ({ originalUrl, shortCode, onHumanVerified }: BotDetectionP
     
     setChallengeStep(2);
     
-    // Challenge mathématique
+    // Challenge mathématique rapide
     const challengeResult = await createBotChallenge();
     
     if (!challengeResult) {
@@ -98,8 +99,8 @@ const BotDetection = ({ originalUrl, shortCode, onHumanVerified }: BotDetectionP
     onHumanVerified();
   };
 
-  // Si bot détecté avec haute confiance, afficher un message de redirection
-  if (detection?.isBot && detection?.confidence > 70) {
+  // Si bot détecté avec très haute confiance, afficher un message de redirection
+  if (detection?.isBot && detection?.confidence > 85) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-100 to-orange-100 p-4">
         <Card className="max-w-md w-full shadow-xl">
@@ -133,7 +134,7 @@ const BotDetection = ({ originalUrl, shortCode, onHumanVerified }: BotDetectionP
     );
   }
 
-  // Si bot possible, afficher le challenge
+  // Si bot possible, afficher le challenge rapide
   if (showChallenge) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-100 to-orange-100 p-4">
@@ -141,7 +142,7 @@ const BotDetection = ({ originalUrl, shortCode, onHumanVerified }: BotDetectionP
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-orange-600">
               <Shield className="h-6 w-6" />
-              Vérification de sécurité
+              Vérification rapide
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -149,14 +150,14 @@ const BotDetection = ({ originalUrl, shortCode, onHumanVerified }: BotDetectionP
               <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <AlertTriangle className="h-5 w-5 text-yellow-600" />
                 <p className="text-sm text-yellow-800">
-                  Activité suspecte détectée (score: {detection?.confidence}%)
+                  Vérification de sécurité (score: {detection?.confidence}%)
                 </p>
               </div>
               
               {challengeStep === 0 && (
                 <>
                   <p className="text-gray-600">
-                    Pour des raisons de sécurité, veuillez confirmer que vous êtes un humain.
+                    Vérification rapide requise pour accéder au contenu.
                   </p>
                   
                   <div className="p-3 bg-gray-100 rounded-lg">
@@ -170,7 +171,7 @@ const BotDetection = ({ originalUrl, shortCode, onHumanVerified }: BotDetectionP
                     className="w-full bg-orange-600 hover:bg-orange-700"
                   >
                     <User className="h-4 w-4 mr-2" />
-                    Je suis humain - Vérifier
+                    Vérifier et continuer
                   </Button>
                 </>
               )}
@@ -178,7 +179,7 @@ const BotDetection = ({ originalUrl, shortCode, onHumanVerified }: BotDetectionP
               {challengeStep === 1 && (
                 <div className="text-center">
                   <p className="text-gray-600 mb-4">
-                    Veuillez interagir avec cette page (cliquez, bougez la souris...)
+                    Cliquez n'importe où ou bougez la souris...
                   </p>
                   <div className="w-8 h-8 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto" />
                 </div>
@@ -187,7 +188,7 @@ const BotDetection = ({ originalUrl, shortCode, onHumanVerified }: BotDetectionP
               {challengeStep === 2 && (
                 <div className="text-center">
                   <p className="text-gray-600 mb-4">
-                    Challenge mathématique en cours...
+                    Dernière vérification...
                   </p>
                   <div className="w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto" />
                 </div>
@@ -199,7 +200,7 @@ const BotDetection = ({ originalUrl, shortCode, onHumanVerified }: BotDetectionP
     );
   }
 
-  // Affichage normal pour les humains
+  // Affichage normal pour les humains (countdown réduit)
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 to-emerald-100 p-4">
       <Card className="max-w-md w-full shadow-xl">
@@ -213,7 +214,7 @@ const BotDetection = ({ originalUrl, shortCode, onHumanVerified }: BotDetectionP
           <div className="text-center space-y-4">
             <div className="flex items-center justify-center gap-2 mb-4">
               <User className="h-5 w-5 text-green-600" />
-              <span className="text-sm text-green-700">Utilisateur humain vérifié</span>
+              <span className="text-sm text-green-700">Utilisateur vérifié</span>
             </div>
             
             <div className="text-6xl font-bold text-green-600">

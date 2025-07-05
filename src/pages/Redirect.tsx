@@ -17,11 +17,11 @@ const Redirect = () => {
   const { shortCode } = useParams<{ shortCode: string }>();
   const [url, setUrl] = useState<ShortenedUrl | null>(null);
   const [loading, setLoading] = useState(true);
-  const [countdown, setCountdown] = useState(5);
+  const [countdown, setCountdown] = useState(3); // Réduit à 3 secondes
   const [passwordRequired, setPasswordRequired] = useState(false);
   const [enteredPassword, setEnteredPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
-  const [showBotDetection, setShowBotDetection] = useState(true);
+  const [showBotDetection, setShowBotDetection] = useState(false);
   const [humanVerified, setHumanVerified] = useState(false);
 
   useEffect(() => {
@@ -32,12 +32,12 @@ const Redirect = () => {
 
     const loadAndValidateUrl = async () => {
       try {
-        // Détecter les bots avant tout traitement
+        // Détecter les bots avant tout traitement (seuils plus élevés)
         const botDetection = detectBot();
         console.log('Bot detection result:', botDetection);
         
-        // Si c'est un bot avec haute confiance, rediriger immédiatement
-        if (botDetection.isBot && botDetection.confidence > 80) {
+        // Si c'est un bot avec très haute confiance, rediriger immédiatement
+        if (botDetection.isBot && botDetection.confidence > 90) {
           console.log(`Bot détecté: ${botDetection.botType} (${botDetection.confidence}%) - Redirection vers ${botDetection.redirectUrl}`);
           
           // Redirection immédiate pour les bots
@@ -95,7 +95,7 @@ const Redirect = () => {
 
         // Pour les liens directs, vérifier quand même les bots mais rediriger plus vite
         if (foundUrl.directLink) {
-          if (botDetection.isBot && botDetection.confidence > 60) {
+          if (botDetection.isBot && botDetection.confidence > 80) {
             // Bot détecté sur lien direct - rediriger vers réseau social
             if (botDetection.redirectUrl) {
               window.location.replace(botDetection.redirectUrl);
@@ -113,8 +113,17 @@ const Redirect = () => {
           
           setTimeout(() => {
             window.location.href = foundUrl.originalUrl;
-          }, 500);
+          }, 300); // Réduit à 300ms
           return;
+        }
+
+        // Pour les liens normaux, vérifier si on doit montrer la détection de bot
+        if (botDetection.isBot && botDetection.confidence > 70) {
+          setShowBotDetection(true);
+        } else {
+          // Utilisateur humain probable - passer directement au countdown
+          setShowBotDetection(false);
+          setHumanVerified(true);
         }
 
       } catch (error) {
@@ -159,11 +168,11 @@ const Redirect = () => {
     if (url.directLink) {
       setTimeout(() => {
         window.location.href = url.originalUrl;
-      }, 500);
+      }, 200);
       return;
     }
     
-    // Start countdown for regular links
+    // Start countdown for regular links (réduit)
     const timer = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
@@ -190,7 +199,7 @@ const Redirect = () => {
         
         // Vérifier les bots même après validation du mot de passe
         const botDetection = detectBot();
-        if (botDetection.isBot && botDetection.confidence > 70) {
+        if (botDetection.isBot && botDetection.confidence > 85) {
           if (botDetection.redirectUrl) {
             window.location.replace(botDetection.redirectUrl);
             return;
@@ -205,7 +214,7 @@ const Redirect = () => {
         if (url.directLink) {
           setTimeout(() => {
             window.location.href = url.originalUrl;
-          }, 500);
+          }, 200);
         } else {
           setShowBotDetection(false);
           setHumanVerified(true);
@@ -250,7 +259,7 @@ const Redirect = () => {
           </CardHeader>
           <CardContent>
             <p className="text-gray-600 mb-4">
-              Le lien court <code className="bg-gray-100 px-2 py-1 rounded">{shortCode}</code> n'existe pas, a expiré ou n'est plus accessible pour des raisons de sécurité.
+              Le lien court <code className="bg-gray-100 px-2 py-1 rounded">{shortCode}</code> n'existe pas, a expiré ou n'est plus accessible.
             </p>
             <Button 
               onClick={() => window.location.href = '/'}

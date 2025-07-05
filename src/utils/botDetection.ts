@@ -7,22 +7,21 @@ export interface BotDetectionResult {
   redirectUrl?: string;
 }
 
-// Patterns de détection des bots
+// Patterns de détection des bots (plus précis)
 const BOT_PATTERNS = {
-  // Bots des réseaux sociaux
+  // Bots des réseaux sociaux (patterns très spécifiques)
   social: [
     'facebookexternalhit', 'facebookcatalog', 'facebookbot',
     'twitterbot', 'twitter',
-    'tiktok', 'bytespider', 'bytedance',
-    'instagram', 'instagrambot',
-    'linkedin', 'linkedinbot',
-    'whatsapp', 'whatsappbot',
-    'telegram', 'telegrambot',
-    'discord', 'discordbot',
-    'snapchat', 'snapbot',
-    'pinterest', 'pinterestbot',
-    'slackbot', 'slack',
-    'skype', 'skypebot'
+    'bytespider', 'bytedance', // TikTok bots uniquement
+    'instagrambot', // Instagram bot spécifique
+    'linkedinbot',
+    'whatsappbot',
+    'telegrambot',
+    'discordbot',
+    'snapbot',
+    'pinterestbot',
+    'slackbot'
   ],
   
   // Crawlers et scrapers
@@ -36,7 +35,7 @@ const BOT_PATTERNS = {
   
   // Autres bots suspects
   suspicious: [
-    'python', 'java', 'go-http-client', 'okhttp',
+    'python/', 'java/', 'go-http-client', 'okhttp',
     'apache-httpclient', 'libwww-perl', 'lwp-trivial'
   ]
 };
@@ -59,80 +58,73 @@ const REDIRECT_URLS = {
 export const detectBot = (userAgent?: string, additionalChecks = true): BotDetectionResult => {
   const ua = (userAgent || navigator.userAgent).toLowerCase();
   
-  // Score de confiance (0-100)
+  // Score de confiance (0-100) - plus strict pour éviter les faux positifs
   let confidence = 0;
   let botType: 'social' | 'crawler' | 'scraper' | 'unknown' = 'unknown';
   let redirectUrl = REDIRECT_URLS.default;
   
-  // Vérification des patterns de bots sociaux
+  // Vérification des patterns de bots sociaux (très spécifiques)
   for (const pattern of BOT_PATTERNS.social) {
     if (ua.includes(pattern)) {
-      confidence += 90;
+      confidence += 95; // Très haute confiance pour les bots identifiés
       botType = 'social';
       
       // Déterminer l'URL de redirection spécifique
       if (pattern.includes('facebook')) redirectUrl = REDIRECT_URLS.facebook;
       else if (pattern.includes('twitter')) redirectUrl = REDIRECT_URLS.twitter;
-      else if (pattern.includes('tiktok') || pattern.includes('bytespider')) redirectUrl = REDIRECT_URLS.tiktok;
+      else if (pattern.includes('bytespider') || pattern.includes('bytedance')) redirectUrl = REDIRECT_URLS.tiktok;
       else if (pattern.includes('instagram')) redirectUrl = REDIRECT_URLS.instagram;
       else if (pattern.includes('linkedin')) redirectUrl = REDIRECT_URLS.linkedin;
       else if (pattern.includes('whatsapp')) redirectUrl = REDIRECT_URLS.whatsapp;
       else if (pattern.includes('telegram')) redirectUrl = REDIRECT_URLS.telegram;
       else if (pattern.includes('discord')) redirectUrl = REDIRECT_URLS.discord;
-      else if (pattern.includes('snapchat')) redirectUrl = REDIRECT_URLS.snapchat;
+      else if (pattern.includes('snap')) redirectUrl = REDIRECT_URLS.snapchat;
       else if (pattern.includes('pinterest')) redirectUrl = REDIRECT_URLS.pinterest;
       
       break;
     }
   }
   
-  // Vérification des crawlers
+  // Vérification des crawlers (seulement si pas déjà détecté comme bot social)
   if (confidence < 50) {
     for (const pattern of BOT_PATTERNS.crawler) {
       if (ua.includes(pattern)) {
-        confidence += 80;
+        confidence += 85;
         botType = 'crawler';
         break;
       }
     }
   }
   
-  // Vérifications supplémentaires si activées
+  // Vérifications supplémentaires (plus conservatrices)
   if (additionalChecks && typeof window !== 'undefined') {
-    // Vérification des propriétés suspectes
-    if ('webdriver' in navigator) confidence += 30;
-    if ('_phantom' in window || '_selenium' in window) confidence += 40;
-    if (navigator.plugins.length === 0) confidence += 20;
-    if (navigator.languages.length === 0) confidence += 20;
-    if (!navigator.cookieEnabled) confidence += 15;
+    // Vérifications très spécifiques aux bots
+    if ('webdriver' in navigator) confidence += 40;
+    if ('_phantom' in window || '_selenium' in window) confidence += 50;
     
-    // Vérification de la taille de l'écran (bots ont souvent des résolutions étranges)
-    if (screen.width < 100 || screen.height < 100) confidence += 25;
-    if (screen.width === 1024 && screen.height === 768) confidence += 10; // Résolution commune des bots
+    // Vérifications moins agressives pour éviter les faux positifs
+    if (navigator.plugins.length === 0 && navigator.userAgent.includes('HeadlessChrome')) confidence += 30;
+    if (!navigator.cookieEnabled && ua.includes('bot')) confidence += 20;
     
-    // Vérification du timezone (bots ont souvent des timezones incohérentes)
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    if (!timezone || timezone === 'UTC') confidence += 15;
+    // Résolutions très suspectes (pas les résolutions mobiles normales)
+    if ((screen.width < 100 || screen.height < 100) && screen.width !== 0) confidence += 30;
+    if (screen.width === 1024 && screen.height === 768 && ua.includes('bot')) confidence += 15;
   }
   
-  // Vérifications des patterns suspects dans l'user agent
+  // Vérifications des patterns suspects dans l'user agent (plus strict)
   for (const pattern of BOT_PATTERNS.suspicious) {
-    if (ua.includes(pattern)) {
-      confidence += 60;
+    if (ua.startsWith(pattern)) { // Utiliser startsWith pour être plus précis
+      confidence += 70;
       botType = 'scraper';
       break;
     }
   }
   
-  // User agents trop courts ou trop longs sont suspects
-  if (ua.length < 20 || ua.length > 500) confidence += 30;
+  // User agents très courts ou sans version (plus spécifique)
+  if (ua.length < 15 || (ua.length > 500 && ua.includes('bot'))) confidence += 25;
   
-  // Absence de certains headers standards
-  if (typeof window !== 'undefined') {
-    if (!document.referrer && window.location.href.includes('http')) confidence += 10;
-  }
-  
-  const isBot = confidence >= 50;
+  // Seuil plus élevé pour éviter les faux positifs
+  const isBot = confidence >= 70; // Augmenté de 50 à 70
   
   return {
     isBot,
@@ -153,11 +145,11 @@ export const handleBotRedirect = (detection: BotDetectionResult, originalUrl: st
   return true;
 };
 
-// Fonction pour tester si c'est un humain via interaction
-export const waitForHumanInteraction = (timeout = 10000): Promise<boolean> => {
+// Fonction pour tester si c'est un humain via interaction (plus rapide)
+export const waitForHumanInteraction = (timeout = 5000): Promise<boolean> => {
   return new Promise((resolve) => {
     let resolved = false;
-    const events = ['click', 'touchstart', 'keydown', 'mousemove', 'scroll'];
+    const events = ['click', 'touchstart', 'keydown', 'mousemove'];
     
     const handleInteraction = () => {
       if (!resolved) {
@@ -178,7 +170,7 @@ export const waitForHumanInteraction = (timeout = 10000): Promise<boolean> => {
       document.addEventListener(event, handleInteraction, { once: true, passive: true });
     });
     
-    // Timeout
+    // Timeout réduit
     setTimeout(() => {
       if (!resolved) {
         resolved = true;
@@ -189,15 +181,15 @@ export const waitForHumanInteraction = (timeout = 10000): Promise<boolean> => {
   });
 };
 
-// Fonction pour créer un challenge anti-bot simple
+// Fonction pour créer un challenge anti-bot simple (plus rapide)
 export const createBotChallenge = (): Promise<boolean> => {
   return new Promise((resolve) => {
     // Challenge mathématique simple
-    const num1 = Math.floor(Math.random() * 10) + 1;
-    const num2 = Math.floor(Math.random() * 10) + 1;
+    const num1 = Math.floor(Math.random() * 5) + 1; // Nombres plus petits
+    const num2 = Math.floor(Math.random() * 5) + 1;
     const correctAnswer = num1 + num2;
     
-    const userAnswer = prompt(`Vérification humaine: Combien font ${num1} + ${num2} ?`);
+    const userAnswer = prompt(`Vérification: ${num1} + ${num2} = ?`);
     
     if (userAnswer === null) {
       resolve(false); // Utilisateur a annulé
@@ -207,29 +199,18 @@ export const createBotChallenge = (): Promise<boolean> => {
   });
 };
 
-// Fonction pour détecter les comportements automatisés
+// Fonction optimisée pour détecter les comportements automatisés
 export const detectAutomatedBehavior = (): number => {
   let suspicionScore = 0;
   
-  // Vérifier la vitesse de navigation (trop rapide = bot)
+  // Vérifier la vitesse de navigation (plus tolérant)
   const navigationStart = performance.timing?.navigationStart;
   const loadComplete = performance.timing?.loadEventEnd;
   
   if (navigationStart && loadComplete) {
     const loadTime = loadComplete - navigationStart;
-    if (loadTime < 100) suspicionScore += 30; // Chargement trop rapide
+    if (loadTime < 50) suspicionScore += 20; // Seuil réduit
   }
-  
-  // Vérifier les mouvements de souris (absence = bot)
-  let mouseMovements = 0;
-  const trackMouse = () => mouseMovements++;
-  
-  document.addEventListener('mousemove', trackMouse);
-  
-  setTimeout(() => {
-    document.removeEventListener('mousemove', trackMouse);
-    if (mouseMovements === 0) suspicionScore += 40;
-  }, 2000);
   
   return suspicionScore;
 };

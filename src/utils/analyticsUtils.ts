@@ -34,22 +34,22 @@ export const detectDeviceInfo = (userAgent: string): DeviceInfo => {
   return { browser, device, os };
 };
 
+// Utiliser l'API ipify pour obtenir l'IP
 export const getClientIP = async (): Promise<string> => {
   try {
-    // En production, vous devriez utiliser un service plus fiable
     const response = await fetch('https://api.ipify.org?format=json');
     const data = await response.json();
     return data.ip;
-  } catch {
+  } catch (error) {
+    console.error('Erreur lors de la récupération de l\'IP:', error);
     return 'Inconnu';
   }
 };
 
+// Utiliser l'API ip-api.com pour la géolocalisation (gratuite et rapide)
 export const getLocationFromIP = async (ip: string): Promise<{ country: string; city: string }> => {
   try {
-    // Service gratuit pour la géolocalisation IP
-    // En production, utilisez un service plus fiable comme MaxMind ou IPGeolocation
-    const response = await fetch(`http://ip-api.com/json/${ip}`);
+    const response = await fetch(`http://ip-api.com/json/${ip}?fields=status,country,city`);
     const data = await response.json();
     
     if (data.status === 'success') {
@@ -65,14 +65,18 @@ export const getLocationFromIP = async (ip: string): Promise<{ country: string; 
   return { country: 'Inconnu', city: 'Inconnu' };
 };
 
+// Fonction optimisée pour enregistrer les clics
 export const recordClick = async (shortUrlId: string) => {
   try {
     const userAgent = navigator.userAgent;
     const deviceInfo = detectDeviceInfo(userAgent);
     const referrer = document.referrer || '';
     
-    // Note: En production, l'IP et la géolocalisation devraient être gérées côté serveur
-    // pour des raisons de sécurité et de précision
+    // Obtenir l'IP et la localisation en parallèle pour optimiser les performances
+    const [ip, location] = await Promise.all([
+      getClientIP(),
+      getClientIP().then(ip => getLocationFromIP(ip))
+    ]);
     
     const clickData = {
       short_url_id: shortUrlId,
@@ -81,9 +85,9 @@ export const recordClick = async (shortUrlId: string) => {
       device: deviceInfo.device,
       os: deviceInfo.os,
       referrer: referrer,
-      ip: 'Client-side', // Sera remplacé côté serveur
-      location_country: 'À déterminer',
-      location_city: 'À déterminer'
+      ip: ip,
+      location_country: location.country,
+      location_city: location.city
     };
     
     // Envoyer les données à Supabase
