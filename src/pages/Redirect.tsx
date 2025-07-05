@@ -17,7 +17,7 @@ const Redirect = () => {
   const { shortCode } = useParams<{ shortCode: string }>();
   const [url, setUrl] = useState<ShortenedUrl | null>(null);
   const [loading, setLoading] = useState(true);
-  const [countdown, setCountdown] = useState(2); // Réduit à 2 secondes
+  const [countdown, setCountdown] = useState(0); // Redirection immédiate
   const [passwordRequired, setPasswordRequired] = useState(false);
   const [enteredPassword, setEnteredPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -110,10 +110,8 @@ const Redirect = () => {
           recordClick(foundUrl.id);
           updateClickStatsAsync(foundUrl.id);
           
-          // Redirection immédiate
-          setTimeout(() => {
-            window.location.href = foundUrl.originalUrl;
-          }, 100); // Quasi-immédiat
+          // Redirection immédiate (0ms)
+          window.location.href = foundUrl.originalUrl;
           return;
         }
 
@@ -157,25 +155,8 @@ const Redirect = () => {
     recordClick(url.id);
     updateClickStatsAsync(url.id);
     
-    // Direct redirect for direct links
-    if (url.directLink) {
-      setTimeout(() => {
-        window.location.href = url.originalUrl;
-      }, 100);
-      return;
-    }
-    
-    // Start countdown for regular links (très rapide)
-    const timer = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          window.location.href = url.originalUrl;
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    // Redirection immédiate pour tous types de liens
+    window.location.href = url.originalUrl;
   };
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
@@ -205,12 +186,14 @@ const Redirect = () => {
         
         // Check if it's a direct link after password verification
         if (url.directLink) {
-          setTimeout(() => {
-            window.location.href = url.originalUrl;
-          }, 100);
+          window.location.href = url.originalUrl;
         } else {
           setShowBotDetection(false);
           setHumanVerified(true);
+          // Redirection immédiate même après mot de passe
+          recordClick(url.id);
+          updateClickStatsAsync(url.id);
+          window.location.href = url.originalUrl;
         }
       } else {
         setPasswordError('Mot de passe incorrect');
@@ -333,6 +316,8 @@ const Redirect = () => {
     );
   }
 
+  // La page de countdown ne devrait plus jamais s'afficher car redirection immédiate
+  // Afficher "Redirection..." au lieu du countdown si on arrive ici
   return (
     <>
       <MetaTagsGenerator url={url} shortUrl={shortUrl} />
@@ -341,14 +326,12 @@ const Redirect = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-green-600">
               <ExternalLink className="h-6 w-6" />
-              Redirection
+              Redirection en cours...
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-center space-y-4">
-              <div className="text-4xl font-bold text-green-600">
-                {countdown}
-              </div>
+              <div className="w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
               
               <p className="text-gray-600">
                 Redirection vers :
