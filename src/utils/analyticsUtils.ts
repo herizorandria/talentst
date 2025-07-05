@@ -34,49 +34,100 @@ export const detectDeviceInfo = (userAgent: string): DeviceInfo => {
   return { browser, device, os };
 };
 
-// Utiliser l'API ipify pour obtenir l'IP
+// Utiliser l'API ipify pour obtenir l'IP (HTTPS)
 export const getClientIP = async (): Promise<string> => {
   try {
-    const response = await fetch('https://api.ipify.org?format=json');
+    const response = await fetch('https://api.ipify.org?format=json', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
     const data = await response.json();
-    return data.ip;
+    return data.ip || 'Inconnu';
   } catch (error) {
     console.error('Erreur lors de la récupération de l\'IP:', error);
     return 'Inconnu';
   }
 };
 
-// Utiliser l'API ip-api.com pour la géolocalisation (gratuite et rapide)
+// Utiliser ipapi.co (HTTPS et gratuit) pour la géolocalisation
 export const getLocationFromIP = async (ip: string): Promise<{ country: string; city: string }> => {
-  try {
-    const response = await fetch(`http://ip-api.com/json/${ip}?fields=status,country,city`);
-    const data = await response.json();
-    
-    if (data.status === 'success') {
-      return {
-        country: data.country || 'Inconnu',
-        city: data.city || 'Inconnu'
-      };
-    }
-  } catch (error) {
-    console.error('Erreur lors de la géolocalisation:', error);
+  if (ip === 'Inconnu') {
+    return { country: 'Inconnu', city: 'Inconnu' };
   }
   
-  return { country: 'Inconnu', city: 'Inconnu' };
+  try {
+    // Utiliser ipapi.co qui supporte HTTPS
+    const response = await fetch(`https://ipapi.co/${ip}/json/`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // Vérifier si la réponse contient une erreur
+    if (data.error) {
+      console.warn('Erreur API géolocalisation:', data.reason);
+      return { country: 'Inconnu', city: 'Inconnu' };
+    }
+    
+    return {
+      country: data.country_name || 'Inconnu',
+      city: data.city || 'Inconnu'
+    };
+  } catch (error) {
+    console.error('Erreur lors de la géolocalisation:', error);
+    
+    // Fallback vers une autre API HTTPS
+    try {
+      const fallbackResponse = await fetch(`https://api.country.is/${ip}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+      
+      if (fallbackResponse.ok) {
+        const fallbackData = await fallbackResponse.json();
+        return {
+          country: fallbackData.country || 'Inconnu',
+          city: 'Inconnu' // Cette API ne fournit que le pays
+        };
+      }
+    } catch (fallbackError) {
+      console.error('Erreur API fallback:', fallbackError);
+    }
+    
+    return { country: 'Inconnu', city: 'Inconnu' };
+  }
 };
 
-// Fonction optimisée pour enregistrer les clics
+// Fonction optimisée pour enregistrer les clics avec gestion d'erreurs améliorée
 export const recordClick = async (shortUrlId: string) => {
   try {
     const userAgent = navigator.userAgent;
     const deviceInfo = detectDeviceInfo(userAgent);
-    const referrer = document.referrer || '';
+    const referrer = document.referrer || 'Direct';
     
-    // Obtenir l'IP et la localisation en parallèle pour optimiser les performances
-    const [ip, location] = await Promise.all([
-      getClientIP(),
-      getClientIP().then(ip => getLocationFromIP(ip))
-    ]);
+    // Obtenir l'IP d'abord
+    const ip = await getClientIP();
+    console.log('IP récupérée:', ip);
+    
+    // Puis la géolocalisation
+    const location = await getLocationFromIP(ip);
+    console.log('Localisation récupérée:', location);
     
     const clickData = {
       short_url_id: shortUrlId,
@@ -90,6 +141,8 @@ export const recordClick = async (shortUrlId: string) => {
       location_city: location.city
     };
     
+    console.log('Données à enregistrer:', clickData);
+    
     // Envoyer les données à Supabase
     const { supabase } = await import('@/integrations/supabase/client');
     const { error } = await supabase
@@ -98,8 +151,28 @@ export const recordClick = async (shortUrlId: string) => {
     
     if (error) {
       console.error('Erreur lors de l\'enregistrement du clic:', error);
+    } else {
+      console.log('Clic enregistré avec succès');
     }
   } catch (error) {
     console.error('Erreur lors de l\'enregistrement du clic:', error);
+  }
+};
+
+// Fonction pour tester les APIs de géolocalisation
+export const testGeolocationAPIs = async () => {
+  console.log('Test des APIs de géolocalisation...');
+  
+  try {
+    const ip = await getClientIP();
+    console.log('IP obtenue:', ip);
+    
+    const location = await getLocationFromIP(ip);
+    console.log('Localisation obtenue:', location);
+    
+    return { ip, location };
+  } catch (error) {
+    console.error('Erreur lors du test:', error);
+    return null;
   }
 };
