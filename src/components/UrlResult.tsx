@@ -35,7 +35,7 @@ const UrlResult = ({ shortenedUrl, shortUrl }: UrlResultProps) => {
   return (
     <div className="space-y-6">
       {/* Résultat principal */}
-      <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-lg animate-in slide-in-from-bottom-4 duration-500">
+  <Card className="bg-green-50 border-green-200 shadow-lg animate-in slide-in-from-bottom-4 duration-500">
         <CardContent className="pt-6">
           <div className="space-y-4">
             <div className="flex items-center gap-2">

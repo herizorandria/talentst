@@ -27,7 +27,7 @@ const UrlInputForm = ({
           placeholder="https://example.com/tres-long-lien-a-raccourcir"
           value={originalUrl}
           onChange={(e) => setOriginalUrl(e.target.value)}
-          className="h-12 text-lg border-purple-200 focus:border-purple-400"
+          className="h-12 text-lg border-amber-200 focus:border-amber-400"
         />
       </div>
       
@@ -37,7 +37,7 @@ const UrlInputForm = ({
         </label>
         <div className="flex gap-2">
           <div className="flex-1 flex">
-            <div className="flex items-center px-3 bg-gray-100 border border-r-0 border-purple-200 rounded-l-md text-sm text-gray-600">
+            <div className="flex items-center px-3 bg-gray-100 border border-r-0 border-amber-200 rounded-l-md text-sm text-gray-600">
               {window.location.origin}/
             </div>
             <Input
@@ -45,7 +45,7 @@ const UrlInputForm = ({
               placeholder="mon-lien-perso"
               value={customCode}
               onChange={(e) => setCustomCode(e.target.value.replace(/[^a-zA-Z0-9-]/g, ''))}
-              className="h-10 border-purple-200 focus:border-purple-400 rounded-l-none"
+              className="h-10 border-amber-200 focus:border-amber-400 rounded-l-none"
               maxLength={20}
             />
           </div>
@@ -53,7 +53,7 @@ const UrlInputForm = ({
             type="button"
             variant="outline"
             onClick={onGenerateRandomCode}
-            className="h-10 px-3 border-purple-200 hover:bg-purple-50"
+            className="h-10 px-3 border-amber-200 hover:bg-amber-50"
           >
             <Shuffle className="h-4 w-4" />
           </Button>

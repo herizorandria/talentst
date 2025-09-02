@@ -107,7 +107,7 @@ const TutorialModal = ({ isOpen, onClose, tutorial }: TutorialModalProps) => {
         <DialogHeader className="border-b pb-4">
           <div className="flex items-center justify-between">
             <div>
-              <DialogTitle className="text-2xl font-bold text-purple-600">
+              <DialogTitle className="text-2xl font-bold text-amber-600">
                 {tutorial.title}
               </DialogTitle>
               <DialogDescription className="mt-2">
@@ -136,7 +136,7 @@ const TutorialModal = ({ isOpen, onClose, tutorial }: TutorialModalProps) => {
                   onClick={() => handleStepClick(index)}
                   className={`w-full text-left p-3 rounded-lg border transition-all duration-200 ${
                     currentStep === index
-                      ? 'border-purple-300 bg-purple-50'
+                      ? 'border-amber-300 bg-amber-50'
                       : completedSteps.has(index)
                       ? 'border-green-300 bg-green-50'
                       : 'border-gray-200 hover:border-gray-300'
@@ -145,7 +145,7 @@ const TutorialModal = ({ isOpen, onClose, tutorial }: TutorialModalProps) => {
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-full ${
                       currentStep === index
-                        ? 'bg-purple-100 text-purple-600'
+                        ? 'bg-amber-100 text-amber-600'
                         : completedSteps.has(index)
                         ? 'bg-green-100 text-green-600'
                         : 'bg-gray-100 text-gray-600'
@@ -172,7 +172,7 @@ const TutorialModal = ({ isOpen, onClose, tutorial }: TutorialModalProps) => {
           <div className="flex-1 pl-6 overflow-y-auto">
             <div className="mb-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 bg-purple-100 rounded-full">
+                <div className="p-3 bg-amber-100 rounded-full">
                   {currentStepData.icon}
                 </div>
                 <div>
@@ -229,7 +229,7 @@ const TutorialModal = ({ isOpen, onClose, tutorial }: TutorialModalProps) => {
                 key={index}
                 className={`w-2 h-2 rounded-full ${
                   index === currentStep
-                    ? 'bg-purple-600'
+                    ? 'bg-amber-600'
                     : completedSteps.has(index)
                     ? 'bg-green-500'
                     : 'bg-gray-300'

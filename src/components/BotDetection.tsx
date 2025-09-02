@@ -100,7 +100,7 @@ const BotDetection = ({ originalUrl, shortCode, onHumanVerified }: BotDetectionP
   // Si bot détecté avec très haute confiance, afficher un message de redirection
   if (detection?.isBot && detection?.confidence > 90) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-100 to-orange-100 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-red-100 p-4">
         <Card className="max-w-md w-full shadow-xl">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-red-600">
@@ -127,7 +127,7 @@ const BotDetection = ({ originalUrl, shortCode, onHumanVerified }: BotDetectionP
   // Si bot possible, afficher le challenge ultra-rapide
   if (showChallenge) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-100 to-orange-100 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-yellow-100 p-4">
         <Card className="max-w-md w-full shadow-xl">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-orange-600">
@@ -180,7 +180,7 @@ const BotDetection = ({ originalUrl, shortCode, onHumanVerified }: BotDetectionP
 
   // Affichage normal pour les humains (ultra-rapide)
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 to-emerald-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-green-100 p-4">
       <Card className="max-w-md w-full shadow-xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-green-600">

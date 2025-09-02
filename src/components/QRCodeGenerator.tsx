@@ -40,26 +40,26 @@ const QRCodeGenerator = ({ url, shortCode }: QRCodeGeneratorProps) => {
       link.click();
       
       toast({
-        title: "QR Code téléchargé !",
+    <Card className="bg-white border-amber-200">
         description: "Le QR Code a été sauvegardé avec succès",
-      });
+      <CardTitle className="flex items-center gap-2 text-amber-600">
     }
   };
 
   return (
-    <Card className="bg-white border-purple-200">
+    <Card className="bg-white border-amber-200">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-purple-600">
+        <CardTitle className="flex items-center gap-2 text-amber-600">
           <QrCode className="h-5 w-5" />
           QR Code
-        </CardTitle>
+      className="w-full border-amber-200 hover:bg-amber-50"
       </CardHeader>
       <CardContent className="text-center space-y-4">
         <canvas ref={canvasRef} className="mx-auto border rounded-lg" />
         <Button
           onClick={downloadQRCode}
           variant="outline"
-          className="w-full border-purple-200 hover:bg-purple-50"
+          className="w-full border-amber-200 hover:bg-amber-50"
         >
           <Download className="h-4 w-4 mr-2" />
           Télécharger le QR Code

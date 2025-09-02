@@ -268,10 +268,10 @@ const Redirect = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 to-blue-100">
+  return (
+   <div className="min-h-screen flex items-center justify-center bg-amber-100">
         <div className="text-center">
-          <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+       <div className="w-8 h-8 border-4 border-amber-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Vérification...</p>
         </div>
       </div>
@@ -280,7 +280,7 @@ const Redirect = () => {
 
   if (!url) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-100 to-pink-100 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-red-100 p-4">
         <Card className="max-w-md w-full shadow-xl">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-red-600">
@@ -313,7 +313,7 @@ const Redirect = () => {
     return (
       <>
         <MetaTagsGenerator url={url} shortUrl={shortUrl} />
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-100 to-orange-100 p-4">
+  <div className="min-h-screen flex items-center justify-center bg-yellow-100 p-4">
           <Card className="max-w-md w-full shadow-xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-orange-600">
@@ -377,7 +377,7 @@ const Redirect = () => {
   return (
     <>
       <MetaTagsGenerator url={url} shortUrl={shortUrl} />
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 to-emerald-100 p-4">
+  <div className="min-h-screen flex items-center justify-center bg-green-100 p-4">
         <Card className="max-w-md w-full shadow-xl">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-green-600">

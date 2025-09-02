@@ -44,8 +44,8 @@ const Statistics = ({ urls }: StatisticsProps) => {
       title: "Moyenne par lien",
       value: averageClicks,
       icon: TrendingUp,
-      color: "text-purple-600",
-      bgColor: "bg-purple-100"
+      color: "text-amber-600",
+    bgColor: "bg-amber-100"
     },
     {
       title: "Créés aujourd'hui",
@@ -61,7 +61,7 @@ const Statistics = ({ urls }: StatisticsProps) => {
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
-            <BarChart className="h-5 w-5 text-purple-600" />
+            <BarChart className="h-5 w-5 text-amber-600" />
             Statistiques
           </CardTitle>
         </CardHeader>
@@ -70,7 +70,7 @@ const Statistics = ({ urls }: StatisticsProps) => {
             {stats.map((stat, index) => (
               <div
                 key={index}
-                className="p-4 rounded-lg bg-gradient-to-br from-white to-gray-50 border border-gray-200 hover:shadow-md transition-shadow duration-200"
+                className="p-4 rounded-lg bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -98,7 +98,7 @@ const Statistics = ({ urls }: StatisticsProps) => {
                 {topUrls.map((url, index) => (
                   <div
                     key={url.id}
-                    className="flex items-center justify-between p-3 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg"
+                    className="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-lg"
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex items-center justify-center w-6 h-6 bg-yellow-400 text-yellow-900 rounded-full text-sm font-bold">

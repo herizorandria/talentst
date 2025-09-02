@@ -239,7 +239,7 @@ const LinksManager = () => {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-12 h-12 border-4 border-amber-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Chargement de vos liens...</p>
         </div>
       </div>
@@ -260,7 +260,7 @@ const LinksManager = () => {
   return (
     <div className="space-y-6">
       {/* En-tête avec statistiques */}
-      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 shadow-lg">
+  <Card className="bg-blue-50 border-blue-200 shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-2xl text-blue-600">
             <Link2 className="h-6 w-6" />
@@ -279,8 +279,8 @@ const LinksManager = () => {
               </div>
               <div className="text-sm text-gray-600">Total des clics</div>
             </div>
-            <div className="text-center p-3 bg-white rounded-lg border border-purple-200">
-              <div className="text-2xl font-bold text-purple-600">
+            <div className="text-center p-3 bg-white rounded-lg border border-amber-200">
+              <div className="text-2xl font-bold text-amber-600">
                 {links.filter(link => link.password).length}
               </div>
               <div className="text-sm text-gray-600">Liens protégés</div>
@@ -523,17 +523,17 @@ const LinksManager = () => {
 
                       <Button
                         onClick={() => handleViewAnalytics(link.shortCode)}
-                        variant="outline"
-                        size="sm"
-                        className="border-purple-200 hover:bg-purple-50"
+                          variant="outline"
+                          size="sm"
+                          className="border-amber-200 hover:bg-amber-50"
                         title="Voir les analytics"
                       >
                         <BarChart3 className="h-4 w-4" />
                       </Button>
 
-                      <Dialog open={!!editingLink && editingLink.id === link.id} onOpenChange={(open) => open ? openEdit(link) : setEditingLink(null)}>
-                        <DialogTrigger asChild>
-                          <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-amber-200 hover:bg-amber-50"
                             onClick={() => openEdit(link)}
                             variant="outline"
                             size="sm"

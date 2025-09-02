@@ -62,6 +62,7 @@ const UrlAnalytics = () => {
             return;
         }
         fetchAnalytics();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, shortCode, dateFilter]);
 
     const fetchAnalytics = async () => {
@@ -77,9 +78,9 @@ const UrlAnalytics = () => {
 
             if (urlError || !urlData) {
                 toast({
-                    title: "Erreur",
-                    description: "URL non trouvée ou accès non autorisé",
-                    variant: "destructive"
+                    title: 'Erreur',
+                    description: 'URL non trouvée ou accès non autorisé',
+                    variant: 'destructive'
                 });
                 navigate('/?tab=linksmanager');
                 return;
@@ -93,14 +94,12 @@ const UrlAnalytics = () => {
             const startDate = new Date(now.getTime() - (daysAgo * 24 * 60 * 60 * 1000));
 
             // Récupérer les clics
-            let query = supabase
+            const { data: clicksData, error: clicksError } = await supabase
                 .from('url_clicks')
                 .select('*')
                 .eq('short_url_id', urlData.id)
                 .gte('clicked_at', startDate.toISOString())
                 .order('clicked_at', { ascending: false });
-
-            const { data: clicksData, error: clicksError } = await query;
 
             if (clicksError) {
                 console.error('Erreur lors de la récupération des clics:', clicksError);
@@ -110,9 +109,9 @@ const UrlAnalytics = () => {
         } catch (error) {
             console.error('Erreur:', error);
             toast({
-                title: "Erreur",
-                description: "Impossible de charger les analytics",
-                variant: "destructive"
+                title: 'Erreur',
+                description: 'Impossible de charger les analytics',
+                variant: 'destructive'
             });
         } finally {
             setLoading(false);
@@ -181,7 +180,6 @@ const UrlAnalytics = () => {
                 new Date(click.clicked_at).toLocaleString('fr-FR'),
                 click.location_country || '',
                 click.location_city || '',
-                click.device || '',
                 click.browser || '',
                 click.os || '',
                 click.referrer || '',
@@ -204,9 +202,9 @@ const UrlAnalytics = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center">
+            <div className="min-h-screen bg-amber-100 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <div className="w-12 h-12 border-4 border-amber-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                     <p className="text-lg text-gray-600">Chargement des analytics...</p>
                 </div>
             </div>
@@ -215,7 +213,7 @@ const UrlAnalytics = () => {
 
     if (!urlInfo) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center">
+            <div className="min-h-screen bg-amber-100 flex items-center justify-center">
                 <Card className="max-w-md w-full">
                     <CardContent className="pt-6 text-center">
                         <p className="text-gray-600 mb-4">URL non trouvée</p>
@@ -229,7 +227,7 @@ const UrlAnalytics = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100">
+    <div className="min-h-screen bg-amber-100">
             <div className="container mx-auto px-4 py-8 max-w-6xl">
                 {/* Header */}
                 <div className="flex items-center gap-4 mb-8">
@@ -333,10 +331,10 @@ const UrlAnalytics = () => {
                         <CardContent className="pt-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-2xl font-bold text-purple-600">{topCountries.length}</p>
+                                    <p className="text-2xl font-bold text-amber-600">{topCountries.length}</p>
                                     <p className="text-sm text-gray-600">Pays uniques</p>
                                 </div>
-                                <Globe className="h-8 w-8 text-purple-600" />
+                                <Globe className="h-8 w-8 text-amber-600" />
                             </div>
                         </CardContent>
                     </Card>
@@ -433,7 +431,7 @@ const UrlAnalytics = () => {
                                         <div className="flex items-center gap-2">
                                             <div className="w-20 bg-gray-200 rounded-full h-2">
                                                 <div
-                                                    className="bg-purple-600 h-2 rounded-full"
+                                                    className="bg-amber-600 h-2 rounded-full"
                                                     style={{ width: `${(count / filteredClicks.length) * 100}%` }}
                                                 />
                                             </div>

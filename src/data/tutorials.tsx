@@ -22,7 +22,7 @@ export const tutorials = [
     description: 'Apprenez les bases pour créer votre premier lien raccourci et découvrir les fonctionnalités principales.',
     duration: '5 min',
     difficulty: 'Débutant' as const,
-    icon: <Link className="h-5 w-5 text-purple-600" />,
+  icon: <Link className="h-5 w-5 text-amber-600" />,
     stepsCount: 4,
     steps: [
       {
@@ -38,8 +38,8 @@ export const tutorials = [
                 L'application est organisée en 4 onglets principaux :
               </p>
               <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-center gap-2 p-2 bg-purple-50 rounded">
-                  <Link className="h-4 w-4 text-purple-600" />
+                <div className="flex items-center gap-2 p-2 bg-amber-50 rounded">
+                  <Link className="h-4 w-4 text-amber-600" />
                   <span className="text-sm">Raccourcir</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 bg-blue-50 rounded">
@@ -74,21 +74,21 @@ export const tutorials = [
               <h4 className="font-semibold mb-3">Étapes pour créer un lien :</h4>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center text-xs font-bold text-purple-600">1</div>
+                  <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-xs font-bold text-amber-600">1</div>
                   <div>
                     <p className="font-medium">Collez votre URL</p>
                     <p className="text-sm text-gray-600">Dans le champ "https://example.com/..."</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center text-xs font-bold text-purple-600">2</div>
+                  <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-xs font-bold text-amber-600">2</div>
                   <div>
                     <p className="font-medium">Personnalisez (optionnel)</p>
                     <p className="text-sm text-gray-600">Ajoutez un code personnalisé ou laissez vide</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center text-xs font-bold text-purple-600">3</div>
+                  <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-xs font-bold text-amber-600">3</div>
                   <div>
                     <p className="font-medium">Cliquez sur "Raccourcir"</p>
                     <p className="text-sm text-gray-600">Votre lien sera créé instantanément</p>
@@ -122,7 +122,7 @@ export const tutorials = [
                   <span className="text-sm">Télécharger le QR Code</span>
                 </div>
                 <div className="flex items-center gap-3 p-2 border rounded">
-                  <ExternalLink className="h-4 w-4 text-purple-600" />
+                  <ExternalLink className="h-4 w-4 text-amber-600" />
                   <span className="text-sm">Tester le lien dans un nouvel onglet</span>
                 </div>
               </div>
@@ -152,9 +152,9 @@ export const tutorials = [
                   <div className="text-lg font-bold text-green-600">0</div>
                   <div className="text-xs text-green-700">Liens créés</div>
                 </div>
-                <div className="p-3 bg-purple-50 rounded">
-                  <div className="text-lg font-bold text-purple-600">0</div>
-                  <div className="text-xs text-purple-700">Moyenne/lien</div>
+                <div className="p-3 bg-amber-50 rounded">
+                  <div className="text-lg font-bold text-amber-600">0</div>
+                  <div className="text-xs text-amber-700">Moyenne/lien</div>
                 </div>
                 <div className="p-3 bg-orange-50 rounded">
                   <div className="text-lg font-bold text-orange-600">0</div>
@@ -341,7 +341,7 @@ export const tutorials = [
                 <div className="flex flex-wrap gap-2">
                   <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">marketing</span>
                   <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">social</span>
-                  <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs">campagne-2024</span>
+                  <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs">campagne-2024</span>
                   <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs">urgent</span>
                 </div>
                 <div className="text-sm text-gray-600">
@@ -430,10 +430,10 @@ export const tutorials = [
                   <div className="text-sm text-green-700">Total des clics</div>
                   <div className="text-xs text-green-600 mt-1">Engagement global</div>
                 </div>
-                <div className="p-3 bg-purple-50 rounded">
-                  <div className="text-2xl font-bold text-purple-600">18</div>
-                  <div className="text-sm text-purple-700">Moyenne par lien</div>
-                  <div className="text-xs text-purple-600 mt-1">Performance moyenne</div>
+                <div className="p-3 bg-amber-50 rounded">
+                  <div className="text-2xl font-bold text-amber-600">18</div>
+                  <div className="text-sm text-amber-700">Moyenne par lien</div>
+                  <div className="text-xs text-amber-600 mt-1">Performance moyenne</div>
                 </div>
                 <div className="p-3 bg-orange-50 rounded">
                   <div className="text-2xl font-bold text-orange-600">12</div>

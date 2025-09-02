@@ -59,7 +59,7 @@ const TestLinkSpace = ({ shortUrl, originalUrl, shortCode, directLink }: TestLin
   };
 
   return (
-    <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 shadow-lg">
+    <Card className="bg-blue-50 border-blue-200 shadow-lg">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-blue-600">
           <TestTube className="h-5 w-5" />

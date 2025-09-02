@@ -47,7 +47,7 @@ const PhilosophicalQuotes = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-indigo-100 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full space-y-6">
 
         {/* Header Card */}
@@ -76,9 +76,9 @@ const PhilosophicalQuotes = () => {
               )}
 
               <div className="flex items-center justify-center">
-                <div className="h-px bg-gradient-to-r from-transparent via-indigo-300 to-transparent w-24 mr-4"></div>
+                <div className="h-px bg-indigo-300 w-24 mr-4"></div>
                 <cite className="text-lg font-semibold text-indigo-700">&nbsp;</cite>
-                <div className="h-px bg-gradient-to-r from-transparent via-indigo-300 to-transparent w-24 ml-4"></div>
+                <div className="h-px bg-indigo-300 w-24 ml-4"></div>
               </div>
             </div>
           </CardContent>

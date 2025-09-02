@@ -30,15 +30,15 @@ const TutorialCard = ({ tutorial, onStart }: TutorialCardProps) => {
   };
 
   return (
-    <Card className="h-full hover:shadow-lg transition-all duration-200 hover:border-purple-300 group">
+  <Card className="h-full hover:shadow-lg transition-all duration-200 hover:border-amber-300 group">
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
+            <div className="p-3 bg-amber-100 rounded-lg group-hover:bg-amber-200 transition-colors">
               {tutorial.icon}
             </div>
             <div>
-              <CardTitle className="text-lg font-bold text-gray-800 group-hover:text-purple-600 transition-colors">
+              <CardTitle className="text-lg font-bold text-gray-800 group-hover:text-amber-600 transition-colors">
                 {tutorial.title}
               </CardTitle>
               <div className="flex items-center gap-2 mt-2">
@@ -68,7 +68,7 @@ const TutorialCard = ({ tutorial, onStart }: TutorialCardProps) => {
           
           <Button
             onClick={() => onStart(tutorial.id)}
-            className="bg-purple-600 hover:bg-purple-700 text-white"
+            className="bg-amber-600 hover:bg-amber-700 text-white"
             size="sm"
           >
             <Play className="h-4 w-4 mr-2" />
