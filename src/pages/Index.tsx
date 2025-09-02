@@ -177,7 +177,7 @@ const Index = () => {
         {/* Footer */}
         <div className="text-center mt-12 py-6 border-t border-purple-200">
           <p className="text-sm text-gray-500">
-            © 2024 ShortLink Pro - Raccourcisseur d'URL professionnel
+            © 2025 ShortLink Pro - Raccourcisseur d'URL professionnel - By <a href="https://mbl-service.com" className="text-purple-600 hover:underline">MBL Service</a>
           </p>
         </div>
       </div>
