@@ -370,6 +370,16 @@ export type Database = {
       }
     }
     Functions: {
+      get_redirect_url: {
+        Args: { p_code: string; p_password?: string }
+        Returns: {
+          direct_link: boolean
+          expires_at: string
+          id: string
+          original_url: string
+          requires_password: boolean
+        }[]
+      }
       increment_photo_clicks: {
         Args: { photo_id: string }
         Returns: undefined
