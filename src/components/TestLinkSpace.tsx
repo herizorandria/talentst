@@ -59,9 +59,9 @@ const TestLinkSpace = ({ shortUrl, originalUrl, shortCode, directLink }: TestLin
   };
 
   return (
-    <Card className="bg-blue-50 border-blue-200 shadow-lg">
+    <Card className="bg-orange-50 border-orange-200 shadow-lg">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-blue-600">
+        <CardTitle className="flex items-center gap-2 text-orange-600">
           <TestTube className="h-5 w-5" />
           Espace de test du lien
         </CardTitle>
@@ -74,7 +74,7 @@ const TestLinkSpace = ({ shortUrl, originalUrl, shortCode, directLink }: TestLin
               Code: {shortCode}
             </Badge>
             {directLink && (
-              <Badge className="text-xs bg-blue-100 text-blue-700">
+              <Badge className="text-xs bg-orange-100 text-orange-700">
                 Lien direct
               </Badge>
             )}
@@ -211,9 +211,9 @@ const TestLinkSpace = ({ shortUrl, originalUrl, shortCode, directLink }: TestLin
         </div>
 
         {/* Conseils de test */}
-        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <h5 className="text-sm font-medium text-blue-800 mb-2">💡 Conseils de test :</h5>
-          <ul className="text-xs text-blue-700 space-y-1">
+        <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+          <h5 className="text-sm font-medium text-orange-800 mb-2">💡 Conseils de test :</h5>
+          <ul className="text-xs text-orange-700 space-y-1">
             <li>• Testez dans différents navigateurs</li>
             <li>• Vérifiez le comportement sur mobile</li>
             <li>• Testez le partage sur les réseaux sociaux</li>

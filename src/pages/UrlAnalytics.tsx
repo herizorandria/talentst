@@ -307,10 +307,10 @@ const UrlAnalytics = () => {
                         <CardContent className="pt-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-2xl font-bold text-blue-600">{filteredClicks.length}</p>
+                                    <p className="text-2xl font-bold text-orange-600">{filteredClicks.length}</p>
                                     <p className="text-sm text-gray-600">Clics (période)</p>
                                 </div>
-                                <Eye className="h-8 w-8 text-blue-600" />
+                                <Eye className="h-8 w-8 text-orange-600" />
                             </div>
                         </CardContent>
                     </Card>
@@ -375,7 +375,7 @@ const UrlAnalytics = () => {
                                         <div className="flex items-center gap-2">
                                             <div className="w-20 bg-gray-200 rounded-full h-2">
                                                 <div
-                                                    className="bg-blue-600 h-2 rounded-full"
+                                                    className="bg-orange-600 h-2 rounded-full"
                                                     style={{ width: `${(count / filteredClicks.length) * 100}%` }}
                                                 />
                                             </div>
@@ -479,7 +479,7 @@ const UrlAnalytics = () => {
                             {hourlyData.map((count, hour) => (
                                 <div key={hour} className="flex flex-col items-center justify-end flex-1">
                                     <div
-                                        className="bg-blue-500 rounded-t w-full min-h-[2px]"
+                                        className="bg-orange-500 rounded-t w-full min-h-[2px]"
                                         style={{ height: `${Math.max(2, (count / Math.max(...hourlyData)) * 120)}px` }}
                                         title={`${hour}h: ${count} clics`}
                                     />

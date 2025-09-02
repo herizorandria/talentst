@@ -53,9 +53,9 @@ const Tutorials = () => {
   return (
     <div className="space-y-6">
       {/* En-tête */}
-  <Card className="bg-indigo-50 border-indigo-200 shadow-lg">
+  <Card className="bg-yellow-50 border-yellow-200 shadow-lg">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-2xl text-indigo-600">
+          <CardTitle className="flex items-center gap-2 text-2xl text-yellow-600">
             <BookOpen className="h-6 w-6" />
             Centre d'apprentissage
           </CardTitle>
@@ -63,7 +63,7 @@ const Tutorials = () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-indigo-600 mb-2">
+              <div className="text-3xl font-bold text-yellow-600 mb-2">
                 {tutorials.length}
               </div>
               <div className="text-sm text-gray-600">Tutoriels disponibles</div>
@@ -139,15 +139,15 @@ const Tutorials = () => {
 
       {/* Tutoriels recommandés */}
       {completedTutorials.size === 0 && (
-  <Card className="bg-blue-50 border-blue-200 shadow-lg">
+  <Card className="bg-orange-50 border-orange-200 shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-blue-600">
+            <CardTitle className="flex items-center gap-2 text-orange-600">
               <Star className="h-5 w-5" />
               Recommandé pour commencer
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-blue-700 mb-4">
+            <p className="text-orange-700 mb-4">
               Nouveau sur ShortLink Pro ? Commencez par ce tutoriel pour maîtriser les bases !
             </p>
             <TutorialCard

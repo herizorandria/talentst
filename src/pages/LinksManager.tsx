@@ -260,17 +260,17 @@ const LinksManager = () => {
   return (
     <div className="space-y-6">
       {/* En-tête avec statistiques */}
-  <Card className="bg-blue-50 border-blue-200 shadow-lg">
+  <Card className="bg-yellow-50 border-yellow-200 shadow-lg">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-2xl text-blue-600">
+          <CardTitle className="flex items-center gap-2 text-2xl text-yellow-600">
             <Link2 className="h-6 w-6" />
             Gestion de mes liens
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-3 bg-white rounded-lg border border-blue-200">
-              <div className="text-2xl font-bold text-blue-600">{links.length}</div>
+            <div className="text-center p-3 bg-white rounded-lg border border-yellow-200">
+              <div className="text-2xl font-bold text-yellow-600">{links.length}</div>
               <div className="text-sm text-gray-600">Total des liens</div>
             </div>
             <div className="text-center p-3 bg-white rounded-lg border border-green-200">
@@ -391,7 +391,7 @@ const LinksManager = () => {
             return (
               <Card
                 key={link.id}
-                className={`shadow-lg transition-all duration-200 hover:shadow-xl ${expired ? 'border-red-200 bg-red-50' : 'hover:border-blue-300'
+                className={`shadow-lg transition-all duration-200 hover:shadow-xl ${expired ? 'border-red-200 bg-red-50' : 'hover:border-yellow-300'
                   }`}
               >
                 <CardContent className="pt-6">
@@ -399,7 +399,7 @@ const LinksManager = () => {
                     <div className="flex-1 min-w-0">
                       {/* En-tête avec code et badges */}
                       <div className="flex items-center gap-2 mb-3 flex-wrap">
-                        <code className="text-sm font-mono bg-blue-100 px-2 py-1 rounded text-blue-800">
+                        <code className="text-sm font-mono bg-yellow-100 px-2 py-1 rounded text-yellow-800">
                           /{link.customCode || link.shortCode}
                         </code>
 
@@ -468,7 +468,7 @@ const LinksManager = () => {
                           href={link.originalUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:text-blue-800 underline truncate"
+                          className="text-sm text-yellow-600 hover:text-yellow-800 underline truncate"
                         >
                           {link.originalUrl}
                         </a>
@@ -505,7 +505,7 @@ const LinksManager = () => {
                         onClick={() => copyToClipboard(shortUrl)}
                         variant="outline"
                         size="sm"
-                        className="border-blue-200 hover:bg-blue-50"
+                        className="border-yellow-200 hover:bg-yellow-50"
                         title="Copier le lien court"
                       >
                         <Copy className="h-4 w-4" />
@@ -523,17 +523,17 @@ const LinksManager = () => {
 
                       <Button
                         onClick={() => handleViewAnalytics(link.shortCode)}
-                          variant="outline"
-                          size="sm"
-                          className="border-amber-200 hover:bg-amber-50"
+                        variant="outline"
+                        size="sm"
+                        className="border-amber-200 hover:bg-amber-50"
                         title="Voir les analytics"
                       >
                         <BarChart3 className="h-4 w-4" />
                       </Button>
 
-                          variant="outline"
-                          size="sm"
-                          className="border-amber-200 hover:bg-amber-50"
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
                             onClick={() => openEdit(link)}
                             variant="outline"
                             size="sm"

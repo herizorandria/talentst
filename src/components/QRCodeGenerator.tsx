@@ -17,18 +17,23 @@ const QRCodeGenerator = ({ url, shortCode }: QRCodeGeneratorProps) => {
 
   useEffect(() => {
     if (canvasRef.current && url) {
-      QRCode.toCanvas(canvasRef.current, url, {
-        width: 200,
-        margin: 2,
-        color: {
-          dark: '#7c3aed',
-          light: '#ffffff'
+      QRCode.toCanvas(
+        canvasRef.current,
+        url,
+        {
+          width: 200,
+          margin: 2,
+          color: {
+            dark: '#b45309', // amber-700
+            light: '#ffffff'
+          }
+        },
+        (error) => {
+          if (error) {
+            console.error('Erreur lors de la génération du QR Code:', error);
+          }
         }
-      }, (error) => {
-        if (error) {
-          console.error('Erreur lors de la génération du QR Code:', error);
-        }
-      });
+      );
     }
   }, [url]);
 
@@ -38,11 +43,11 @@ const QRCodeGenerator = ({ url, shortCode }: QRCodeGeneratorProps) => {
       link.download = `qr-code-${shortCode}.png`;
       link.href = canvasRef.current.toDataURL();
       link.click();
-      
+
       toast({
-    <Card className="bg-white border-amber-200">
-        description: "Le QR Code a été sauvegardé avec succès",
-      <CardTitle className="flex items-center gap-2 text-amber-600">
+        title: 'Succès',
+        description: 'Le QR Code a été sauvegardé avec succès',
+      });
     }
   };
 
@@ -52,7 +57,7 @@ const QRCodeGenerator = ({ url, shortCode }: QRCodeGeneratorProps) => {
         <CardTitle className="flex items-center gap-2 text-amber-600">
           <QrCode className="h-5 w-5" />
           QR Code
-      className="w-full border-amber-200 hover:bg-amber-50"
+        </CardTitle>
       </CardHeader>
       <CardContent className="text-center space-y-4">
         <canvas ref={canvasRef} className="mx-auto border rounded-lg" />

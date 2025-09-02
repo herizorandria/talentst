@@ -79,7 +79,7 @@ const UrlHistory = ({ urls, onUrlClick }: UrlHistoryProps) => {
     <Card className="shadow-lg">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xl">
-          <History className="h-5 w-5 text-blue-600" />
+          <History className="h-5 w-5 text-orange-600" />
           Historique des liens
           <Badge variant="secondary" className="ml-auto">
             {urls.length}
@@ -93,18 +93,18 @@ const UrlHistory = ({ urls, onUrlClick }: UrlHistoryProps) => {
             return (
               <div
                 key={url.id}
-                className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all duration-200 bg-white"
+                className="p-4 border border-gray-200 rounded-lg hover:border-orange-300 hover:shadow-md transition-all duration-200 bg-white"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     {/* En-tête avec code et badges */}
                     <div className="flex items-center gap-2 mb-3 flex-wrap">
-                      <code className="text-sm font-mono bg-blue-100 px-2 py-1 rounded text-blue-800">
+                      <code className="text-sm font-mono bg-orange-100 px-2 py-1 rounded text-orange-800">
                         {url.shortCode}
                       </code>
                       
                       {url.customCode && (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs bg-orange-200 text-orange-700">
                           Personnalisé
                         </Badge>
                       )}
@@ -177,7 +177,7 @@ const UrlHistory = ({ urls, onUrlClick }: UrlHistoryProps) => {
                       onClick={() => copyToClipboard(shortUrl)}
                       variant="outline"
                       size="sm"
-                      className="border-blue-200 hover:bg-blue-50"
+                      className="border-orange-200 hover:bg-orange-50"
                       title="Copier le lien"
                     >
                       <Copy className="h-4 w-4" />

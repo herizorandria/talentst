@@ -42,8 +42,8 @@ export const tutorials = [
                   <Link className="h-4 w-4 text-amber-600" />
                   <span className="text-sm">Raccourcir</span>
                 </div>
-                <div className="flex items-center gap-2 p-2 bg-blue-50 rounded">
-                  <Settings className="h-4 w-4 text-blue-600" />
+                <div className="flex items-center gap-2 p-2 bg-orange-50 rounded">
+                  <Settings className="h-4 w-4 text-orange-600" />
                   <span className="text-sm">Gérer</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 bg-green-50 rounded">
@@ -114,7 +114,7 @@ export const tutorials = [
               <h4 className="font-semibold mb-3">Actions disponibles :</h4>
               <div className="space-y-3">
                 <div className="flex items-center gap-3 p-2 border rounded">
-                  <Copy className="h-4 w-4 text-blue-600" />
+                  <Copy className="h-4 w-4 text-orange-600" />
                   <span className="text-sm">Copier le lien dans le presse-papiers</span>
                 </div>
                 <div className="flex items-center gap-3 p-2 border rounded">
@@ -144,9 +144,9 @@ export const tutorials = [
             <div className="bg-white border rounded-lg p-4">
               <h4 className="font-semibold mb-3">Métriques disponibles :</h4>
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 bg-blue-50 rounded">
-                  <div className="text-lg font-bold text-blue-600">0</div>
-                  <div className="text-xs text-blue-700">Clics totaux</div>
+                <div className="p-3 bg-orange-50 rounded">
+                  <div className="text-lg font-bold text-orange-600">0</div>
+                  <div className="text-xs text-orange-700">Clics totaux</div>
                 </div>
                 <div className="p-3 bg-green-50 rounded">
                   <div className="text-lg font-bold text-green-600">0</div>
@@ -177,7 +177,7 @@ export const tutorials = [
     description: 'Maîtrisez les options avancées : mots de passe, expiration, liens directs et tags.',
     duration: '8 min',
     difficulty: 'Intermédiaire' as const,
-    icon: <Settings className="h-5 w-5 text-blue-600" />,
+    icon: <Settings className="h-5 w-5 text-orange-600" />,
     stepsCount: 5,
     steps: [
       {
@@ -263,9 +263,9 @@ export const tutorials = [
             <div className="bg-white border rounded-lg p-4">
               <h4 className="font-semibold mb-3">Lien direct vs Normal :</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded">
-                  <h5 className="font-medium text-blue-800 mb-2">Lien Normal</h5>
-                  <ul className="text-sm text-blue-700 space-y-1">
+                <div className="p-3 bg-orange-50 border border-orange-200 rounded">
+                  <h5 className="font-medium text-orange-800 mb-2">Lien Normal</h5>
+                  <ul className="text-sm text-orange-700 space-y-1">
                     <li>• Page de confirmation</li>
                     <li>• Détection de bots</li>
                     <li>• Compteur visible</li>
@@ -312,9 +312,9 @@ export const tutorials = [
                     Accès limité à des fichiers sensibles
                   </p>
                 </div>
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded">
-                  <h5 className="font-medium text-blue-800">Événements</h5>
-                  <p className="text-sm text-blue-700">
+                <div className="p-3 bg-orange-50 border border-orange-200 rounded">
+                  <h5 className="font-medium text-orange-800">Événements</h5>
+                  <p className="text-sm text-orange-700">
                     Liens d'inscription qui ferment automatiquement
                   </p>
                 </div>
@@ -339,7 +339,7 @@ export const tutorials = [
               <h4 className="font-semibold mb-3">Exemples de tags :</h4>
               <div className="space-y-3">
                 <div className="flex flex-wrap gap-2">
-                  <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">marketing</span>
+                  <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs">marketing</span>
                   <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">social</span>
                   <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs">campagne-2024</span>
                   <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs">urgent</span>
@@ -420,10 +420,10 @@ export const tutorials = [
             <div className="bg-white border rounded-lg p-4">
               <h4 className="font-semibold mb-3">Métriques principales :</h4>
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-3 bg-blue-50 rounded">
-                  <div className="text-2xl font-bold text-blue-600">156</div>
-                  <div className="text-sm text-blue-700">Total des liens</div>
-                  <div className="text-xs text-blue-600 mt-1">Tous vos liens créés</div>
+                <div className="p-3 bg-orange-50 rounded">
+                  <div className="text-2xl font-bold text-orange-600">156</div>
+                  <div className="text-sm text-orange-700">Total des liens</div>
+                  <div className="text-xs text-orange-600 mt-1">Tous vos liens créés</div>
                 </div>
                 <div className="p-3 bg-green-50 rounded">
                   <div className="text-2xl font-bold text-green-600">2,847</div>

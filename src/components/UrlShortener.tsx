@@ -145,7 +145,7 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
 
   return (
     <div className="space-y-6">
-  <Card className="bg-amber-50 border-amber-200 shadow-lg">
+  <Card className="card bg-[color:var(--card-color)] border-[color:var(--border-color)] shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-2xl text-amber-600">
             <Link className="h-6 w-6 text-amber-600" />

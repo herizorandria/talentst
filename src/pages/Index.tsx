@@ -67,9 +67,9 @@ const Index = () => {
 
   if (loading) {
     return (
-  <div className="min-h-screen bg-amber-100 flex items-center justify-center">
+  <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
           <p className="text-gray-600">Chargement...</p>
         </div>
       </div>
@@ -81,7 +81,7 @@ const Index = () => {
   }
 
   return (
-  <div className="min-h-screen bg-amber-100">
+  <div className="min-h-screen bg-black">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
         <div className="flex justify-between items-start mb-8">
@@ -94,7 +94,7 @@ const Index = () => {
                 ShortLink Pro
               </h1>
             </div>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-white max-w-2xl mx-auto">
               Raccourcissez vos URLs, suivez vos statistiques et gérez votre historique en toute simplicité
             </p>
           </div>
@@ -105,7 +105,7 @@ const Index = () => {
 
         {/* Interface avec onglets */}
         <Tabs defaultValue={defaultTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 bg-white/70 backdrop-blur-sm shadow-lg">
+        <TabsList className="grid w-full grid-cols-5 bg-white backdrop-blur-sm shadow-lg">
           <TabsTrigger 
             value="shortener" 
             className="flex items-center gap-2 data-[state=active]:bg-amber-600 data-[state=active]:text-white"
@@ -176,7 +176,7 @@ const Index = () => {
 
         {/* Footer */}
   <div className="text-center mt-12 py-6 border-t border-amber-200">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-white">
             © 2025 ShortLink Pro - Raccourcisseur d'URL professionnel - By <a href="https://mbl-service.com" className="text-amber-600 hover:underline">MBL Service</a>
           </p>
         </div>

@@ -96,20 +96,20 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4 text-amber-100">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Link2 className="h-8 w-8 text-blue-600" />
-            <h1 className="text-2xl font-bold text-gray-900">ShortLink</h1>
+            <Link2 className="h-8 w-8 text-amber-400" />
+            <h1 className="text-2xl font-bold text-amber-100">ShortLink</h1>
           </div>
-          <p className="text-gray-600">Raccourcisseur d'URLs sécurisé</p>
+          <p className="text-amber-200">Raccourcisseur d'URLs sécurisé</p>
         </div>
 
-        <Card>
+        <Card className="bg-neutral-800/80">
           <CardHeader>
-            <CardTitle>Authentification</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-amber-100">Authentification</CardTitle>
+            <CardDescription className="text-amber-200">
               Connectez-vous ou créez un compte pour gérer vos liens
             </CardDescription>
           </CardHeader>
@@ -123,7 +123,7 @@ const Auth = () => {
               <TabsContent value="signin">
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email" className="text-amber-200">Email</Label>
                     <Input
                       id="email"
                       type="email"
@@ -134,7 +134,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password">Mot de passe</Label>
+                    <Label htmlFor="password" className="text-amber-200">Mot de passe</Label>
                     <Input
                       id="password"
                       type="password"
@@ -149,7 +149,7 @@ const Auth = () => {
                       <AlertDescription>{error}</AlertDescription>
                     </Alert>
                   )}
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button type="submit" className="w-full bg-amber-400 text-black hover:bg-amber-500" disabled={loading}>
                     {loading ? 'Connexion...' : 'Se connecter'}
                   </Button>
                 </form>
@@ -158,7 +158,7 @@ const Auth = () => {
               <TabsContent value="signup">
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
+                    <Label htmlFor="signup-email" className="text-amber-200">Email</Label>
                     <Input
                       id="signup-email"
                       type="email"
@@ -169,7 +169,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Mot de passe</Label>
+                    <Label htmlFor="signup-password" className="text-amber-200">Mot de passe</Label>
                     <Input
                       id="signup-password"
                       type="password"
@@ -181,7 +181,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
+                    <Label htmlFor="confirm-password" className="text-amber-200">Confirmer le mot de passe</Label>
                     <Input
                       id="confirm-password"
                       type="password"
@@ -197,7 +197,7 @@ const Auth = () => {
                       <AlertDescription>{error}</AlertDescription>
                     </Alert>
                   )}
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button type="submit" className="w-full bg-amber-400 text-black hover:bg-amber-500" disabled={loading}>
                     {loading ? 'Inscription...' : "S'inscrire"}
                   </Button>
                 </form>

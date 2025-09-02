@@ -46,7 +46,7 @@ const AdvancedUrlForm = ({
         <Button
           type="button"
           variant="outline"
-          className="w-full border-amber-200 hover:bg-amber-50"
+          className="w-full border-[color:var(--border-color)] hover:bg-[color:var(--accent-color)] hover:text-[color:var(--accent-foreground-color)]"
         >
           <Settings className="h-4 w-4 mr-2" />
           Options avancées
@@ -55,7 +55,7 @@ const AdvancedUrlForm = ({
       </CollapsibleTrigger>
 
       <CollapsibleContent className="space-y-4 mt-4">
-  <Card className="bg-gray-50 border-amber-200">
+  <Card className="card bg-[color:var(--card-color)] border-[color:var(--border-color)]">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg text-amber-600">
               Paramètres avancés
@@ -71,7 +71,7 @@ const AdvancedUrlForm = ({
                 placeholder="Décrivez votre lien (optionnel)"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="min-h-[80px] border-amber-200 focus:border-amber-400"
+                className="min-h-[80px] border-[color:var(--border-color)] focus:border-[color:var(--primary-color)]"
                 maxLength={200}
               />
               <p className="text-xs text-gray-500">
@@ -89,7 +89,7 @@ const AdvancedUrlForm = ({
                 placeholder="marketing, social, campagne..."
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
-                className="border-amber-200 focus:border-amber-400"
+                className="border-[color:var(--border-color)] focus:border-[color:var(--primary-color)]"
               />
               <p className="text-xs text-gray-500">
                 Séparez les tags par des virgules
@@ -106,7 +106,7 @@ const AdvancedUrlForm = ({
                 placeholder="Protégez votre lien"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="border-amber-200 focus:border-amber-400"
+                className="border-[color:var(--border-color)] focus:border-[color:var(--primary-color)]"
               />
               <p className="text-xs text-gray-500">
                 Le lien nécessitera un mot de passe pour être accessible
@@ -123,7 +123,7 @@ const AdvancedUrlForm = ({
                 value={expiresAt}
                 onChange={(e) => setExpiresAt(e.target.value)}
                 min={today}
-                className="border-amber-200 focus:border-amber-400"
+                className="border-[color:var(--border-color)] focus:border-[color:var(--primary-color)]"
               />
               <p className="text-xs text-gray-500">
                 Le lien expirera automatiquement à cette date
@@ -140,7 +140,7 @@ const AdvancedUrlForm = ({
                 placeholder="FR, US, Madagascar, Iran..."
                 value={blockedCountries}
                 onChange={(e) => setBlockedCountries && setBlockedCountries(e.target.value)}
-                className="border-amber-200 focus:border-amber-400"
+                className="border-[color:var(--border-color)] focus:border-[color:var(--primary-color)]"
               />
               <p className="text-xs text-gray-500">
                 Correspondances souples (ex: "fr" ou "France"). Laisser vide pour aucun blocage.
@@ -157,7 +157,7 @@ const AdvancedUrlForm = ({
                 placeholder="1.2.3.4, 5.6.7.8"
                 value={blockedIPs}
                 onChange={(e) => setBlockedIPs && setBlockedIPs(e.target.value)}
-                className="border-amber-200 focus:border-amber-400"
+                className="border-[color:var(--border-color)] focus:border-[color:var(--primary-color)]"
               />
               <p className="text-xs text-gray-500">
                 Entrez des adresses IPv4/IPv6 exactes. Laisser vide pour aucun blocage.

@@ -30,8 +30,8 @@ const Statistics = ({ urls }: StatisticsProps) => {
       title: "Total des liens",
       value: totalUrls,
       icon: Link2,
-      color: "text-blue-600",
-      bgColor: "bg-blue-100"
+      color: "text-orange-600",
+      bgColor: "bg-orange-100"
     },
     {
       title: "Total des clics",
@@ -105,7 +105,7 @@ const Statistics = ({ urls }: StatisticsProps) => {
                         {index + 1}
                       </div>
                       <div>
-                        <code className="text-sm font-mono bg-white px-2 py-1 rounded border">
+                        <code className="text-sm font-mono bg-orange-200 text-orange-800 px-2 py-1 rounded border">
                           {url.shortCode}
                         </code>
                         <p className="text-xs text-gray-600 mt-1 truncate max-w-xs">

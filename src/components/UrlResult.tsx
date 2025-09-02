@@ -43,7 +43,7 @@ const UrlResult = ({ shortenedUrl, shortUrl }: UrlResultProps) => {
                 URL raccourcie avec succès !
               </h3>
               {shortenedUrl.directLink && (
-                <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                <div className="flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
                   <Zap className="h-3 w-3" />
                   Direct
                 </div>
