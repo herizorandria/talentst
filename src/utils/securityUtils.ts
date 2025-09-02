@@ -50,12 +50,37 @@ export const isSecureValidUrl = (url: string): boolean => {
   }
 };
 
-// Input sanitization
+// Enhanced input sanitization
 export const sanitizeInput = (input: string): string => {
   return input
     .replace(/[<>]/g, '') // Remove potential HTML tags
     .replace(/['"]/g, '') // Remove quotes
+    .replace(/javascript:/gi, '') // Remove javascript protocol
+    .replace(/data:/gi, '') // Remove data protocol
+    .replace(/vbscript:/gi, '') // Remove vbscript protocol
+    .replace(/on\w+\s*=/gi, '') // Remove event handlers
     .trim();
+};
+
+// Sanitize URL input specifically
+export const sanitizeUrlInput = (url: string): string => {
+  // First apply general sanitization
+  let sanitized = sanitizeInput(url);
+  
+  // Remove any remaining dangerous protocols
+  const dangerousProtocols = [
+    'javascript:', 'data:', 'vbscript:', 'file:', 'ftp:',
+    'mailto:', 'tel:', 'sms:', 'about:', 'chrome:', 'edge:'
+  ];
+  
+  const lowerUrl = sanitized.toLowerCase();
+  for (const protocol of dangerousProtocols) {
+    if (lowerUrl.includes(protocol)) {
+      throw new Error(`Dangerous protocol detected: ${protocol}`);
+    }
+  }
+  
+  return sanitized;
 };
 
 // Password hashing using Web Crypto API
@@ -73,21 +98,39 @@ export const verifyPassword = async (password: string, hash: string): Promise<bo
   return passwordHash === hash;
 };
 
-// Encrypted storage utilities
-const ENCRYPTION_KEY = 'shortlink-secure-key-v1';
+// DEPRECATED: Basic XOR encryption for localStorage 
+// WARNING: This is not cryptographically secure and should only be used for obfuscation
+// For production applications, use proper encryption or store sensitive data server-side
+const generateEncryptionKey = (): Uint8Array => {
+  // Generate a random key each session for basic obfuscation
+  const key = new Uint8Array(32);
+  crypto.getRandomValues(key);
+  return key;
+};
+
+let sessionKey: Uint8Array | null = null;
 
 export const encryptData = async (data: string): Promise<string> => {
   try {
-    // Simple encryption for localStorage (note: not cryptographically secure for production)
+    console.warn('WARNING: Using deprecated client-side encryption. Consider server-side storage.');
+    
+    if (!sessionKey) {
+      sessionKey = generateEncryptionKey();
+    }
+    
     const encoder = new TextEncoder();
     const dataArray = encoder.encode(data);
-    const keyArray = encoder.encode(ENCRYPTION_KEY);
     
     const encrypted = dataArray.map((byte, index) => 
-      byte ^ keyArray[index % keyArray.length]
+      byte ^ sessionKey![index % sessionKey!.length]
     );
     
-    return btoa(String.fromCharCode(...encrypted));
+    // Prepend the key for this session
+    const keyAndData = new Uint8Array(sessionKey.length + encrypted.length);
+    keyAndData.set(sessionKey);
+    keyAndData.set(encrypted, sessionKey.length);
+    
+    return btoa(String.fromCharCode(...keyAndData));
   } catch {
     return data; // Fallback to unencrypted if encryption fails
   }
@@ -95,12 +138,17 @@ export const encryptData = async (data: string): Promise<string> => {
 
 export const decryptData = async (encryptedData: string): Promise<string> => {
   try {
-    const encrypted = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0));
-    const encoder = new TextEncoder();
-    const keyArray = encoder.encode(ENCRYPTION_KEY);
+    const keyAndData = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0));
+    
+    if (keyAndData.length < 32) {
+      throw new Error('Invalid encrypted data format');
+    }
+    
+    const key = keyAndData.slice(0, 32);
+    const encrypted = keyAndData.slice(32);
     
     const decrypted = encrypted.map((byte, index) => 
-      byte ^ keyArray[index % keyArray.length]
+      byte ^ key[index % key.length]
     );
     
     return new TextDecoder().decode(decrypted);
@@ -109,21 +157,62 @@ export const decryptData = async (encryptedData: string): Promise<string> => {
   }
 };
 
-// Rate limiting
+// Enhanced rate limiting with different tiers
 const rateLimitMap = new Map<string, number[]>();
 
-export const checkRateLimit = (identifier: string, maxRequests: number = 10, windowMs: number = 60000): boolean => {
+export const checkRateLimit = (
+  identifier: string, 
+  maxRequests: number = 10, 
+  windowMs: number = 60000,
+  action: 'url_creation' | 'password_attempt' | 'general' = 'general'
+): boolean => {
   const now = Date.now();
-  const requests = rateLimitMap.get(identifier) || [];
+  const key = `${identifier}-${action}`;
+  const requests = rateLimitMap.get(key) || [];
   
   // Clean old requests outside the window
   const validRequests = requests.filter(timestamp => now - timestamp < windowMs);
   
-  if (validRequests.length >= maxRequests) {
+  // Different limits for different actions
+  let actualMaxRequests = maxRequests;
+  let actualWindowMs = windowMs;
+  
+  switch (action) {
+    case 'url_creation':
+      actualMaxRequests = 5; // 5 URLs per minute per user
+      actualWindowMs = 60000; // 1 minute
+      break;
+    case 'password_attempt':
+      actualMaxRequests = 3; // 3 password attempts per 5 minutes
+      actualWindowMs = 5 * 60000; // 5 minutes
+      break;
+    case 'general':
+      actualMaxRequests = maxRequests;
+      actualWindowMs = windowMs;
+      break;
+  }
+  
+  if (validRequests.length >= actualMaxRequests) {
+    console.warn(`Rate limit exceeded for ${identifier} on ${action}: ${validRequests.length}/${actualMaxRequests}`);
     return false; // Rate limit exceeded
   }
   
   validRequests.push(now);
-  rateLimitMap.set(identifier, validRequests);
+  rateLimitMap.set(key, validRequests);
   return true;
 };
+
+// Clear old rate limit entries periodically
+setInterval(() => {
+  const now = Date.now();
+  const oneHour = 60 * 60 * 1000;
+  
+  for (const [key, requests] of rateLimitMap.entries()) {
+    const validRequests = requests.filter(timestamp => now - timestamp < oneHour);
+    if (validRequests.length === 0) {
+      rateLimitMap.delete(key);
+    } else {
+      rateLimitMap.set(key, validRequests);
+    }
+  }
+}, 5 * 60 * 1000); // Clean every 5 minutes

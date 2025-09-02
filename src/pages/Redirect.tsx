@@ -49,13 +49,12 @@ const Redirect = () => {
           }
         }
 
-        // Chercher le lien dans la base Supabase (requête optimisée)
+        // Utiliser la fonction RPC sécurisée pour la redirection
         const { data, error } = await supabase
-          .from('shortened_urls')
-          .select('id, original_url, short_code, custom_code, created_at, clicks, password_hash, expires_at, direct_link, description')
-          .or(`short_code.eq.${shortCode},custom_code.eq.${shortCode}`)
-          .limit(1)
-          .maybeSingle();
+          .rpc('get_redirect_url', { 
+            p_code: shortCode 
+          })
+          .single();
 
         if (error || !data) {
           setUrl(null);
@@ -63,16 +62,16 @@ const Redirect = () => {
           return;
         }
 
-        // Adapter le format pour ShortenedUrl
+        // Adapter le format pour ShortenedUrl depuis la RPC sécurisée
         const foundUrl: ShortenedUrl = {
           id: data.id,
-          originalUrl: data.original_url,
-          shortCode: data.short_code,
-          customCode: data.custom_code || undefined,
-          createdAt: new Date(data.created_at),
-          clicks: data.clicks,
-          description: data.description || undefined,
-          password: data.password_hash || undefined,
+          originalUrl: data.original_url || '',
+          shortCode: shortCode || '',
+          customCode: undefined,
+          createdAt: new Date(),
+          clicks: 0,
+          description: undefined,
+          password: data.requires_password ? 'protected' : undefined,
           expiresAt: data.expires_at ? new Date(data.expires_at) : undefined,
           directLink: data.direct_link || false
         };
@@ -183,9 +182,24 @@ const Redirect = () => {
     if (!url || !url.password) return;
     
     try {
-      const isValid = await verifyPassword(enteredPassword, url.password);
+      // Utiliser la RPC sécurisée pour valider le mot de passe côté serveur
+      const { data, error } = await supabase
+        .rpc('get_redirect_url', { 
+          p_code: shortCode || '', 
+          p_password: enteredPassword 
+        })
+        .single();
       
-      if (isValid) {
+      if (error || !data || !data.original_url) {
+        setPasswordError('Mot de passe incorrect');
+        return;
+      }
+      
+      // Mot de passe valide, mettre à jour l'URL
+      const updatedUrl = { ...url, originalUrl: data.original_url };
+      setUrl(updatedUrl);
+      
+      if (data.original_url) {
         setPasswordRequired(false);
         setPasswordError('');
         
@@ -203,18 +217,16 @@ const Redirect = () => {
         updateClickStatsAsync(url.id);
         
         // Check if it's a direct link after password verification
-        if (url.directLink) {
-          window.location.href = url.originalUrl;
+        if (data.direct_link) {
+          window.location.href = data.original_url;
         } else {
           setShowBotDetection(false);
           setHumanVerified(true);
           // Redirection immédiate même après mot de passe
           recordClick(url.id);
           updateClickStatsAsync(url.id);
-          window.location.href = url.originalUrl;
+          window.location.href = data.original_url;
         }
-      } else {
-        setPasswordError('Mot de passe incorrect');
       }
     } catch (error) {
       setPasswordError('Erreur de vérification');
