@@ -38,11 +38,11 @@ const Redirect = () => {
       try {
         // Détecter les bots avant tout traitement (seuils optimisés)
         const botDetection = detectBot();
-        
+
         // Si c'est un bot avec très haute confiance, rediriger immédiatement
         if (botDetection.isBot && botDetection.confidence > 95) {
           console.log(`Bot détecté: ${botDetection.botType} (${botDetection.confidence}%) - Redirection vers ${botDetection.redirectUrl}`);
-          
+
           if (botDetection.redirectUrl) {
             window.location.replace(botDetection.redirectUrl);
             return;
@@ -51,8 +51,8 @@ const Redirect = () => {
 
         // Utiliser la fonction RPC sécurisée pour la redirection
         const { data, error } = await supabase
-          .rpc('get_redirect_url', { 
-            p_code: shortCode 
+          .rpc('get_redirect_url', {
+            p_code: shortCode
           })
           .single();
 
@@ -73,7 +73,9 @@ const Redirect = () => {
           description: undefined,
           password: data.requires_password ? 'protected' : undefined,
           expiresAt: data.expires_at ? new Date(data.expires_at) : undefined,
-          directLink: data.direct_link || false
+          directLink: data.direct_link || false,
+          blockedCountries: data.blocked_countries || undefined,
+          blockedIPs: data.blocked_ips || undefined
         };
 
         // Check if URL has expired
@@ -90,8 +92,30 @@ const Redirect = () => {
           const clientIP = await getClientIP();
           if (clientIP !== 'Inconnu') {
             const location = await getLocationFromIP(clientIP);
+            // Vérification par IP spécifique configurée sur l'URL
+            if (foundUrl.blockedIPs && foundUrl.blockedIPs.length > 0) {
+              const ipBlocked = foundUrl.blockedIPs.includes(clientIP);
+              if (ipBlocked) {
+                window.location.href = '/philosophical-quotes';
+                return;
+              }
+            }
+
+            // Vérification par pays spécifique configurée sur l'URL
+            if (foundUrl.blockedCountries && foundUrl.blockedCountries.length > 0) {
+              const normalizedCountry = (location.country || '').toLowerCase();
+              const isCountryInList = foundUrl.blockedCountries
+                .map(c => c.toLowerCase())
+                .some(c => normalizedCountry.includes(c) || c.includes(normalizedCountry));
+              if (isCountryInList) {
+                window.location.href = '/philosophical-quotes';
+                return;
+              }
+            }
+
+            // Fallback: liste globale des pays bloqués
             const geoBlockResult = checkGeoBlocking(location.country, clientIP);
-            
+
             if (geoBlockResult.isBlocked && geoBlockResult.redirectUrl) {
               // Redirection immédiate vers la page de citations philosophiques
               window.location.href = geoBlockResult.redirectUrl;
@@ -119,15 +143,15 @@ const Redirect = () => {
               return;
             }
           }
-          
+
           // Lien direct pour humain - redirection immédiate
           setShowBotDetection(false);
           setHumanVerified(true);
-          
+
           // Enregistrer le clic en arrière-plan (non-bloquant)
           recordClick(foundUrl.id);
           updateClickStatsAsync(foundUrl.id);
-          
+
           // Redirection immédiate (0ms)
           window.location.href = foundUrl.originalUrl;
           return;
@@ -166,44 +190,44 @@ const Redirect = () => {
   const handleHumanVerified = async () => {
     setHumanVerified(true);
     setShowBotDetection(false);
-    
+
     if (!url) return;
-    
+
     // Enregistrer en arrière-plan (non-bloquant)
     recordClick(url.id);
     updateClickStatsAsync(url.id);
-    
+
     // Redirection immédiate pour tous types de liens
     window.location.href = url.originalUrl;
   };
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!url || !url.password) return;
-    
+
     try {
       // Utiliser la RPC sécurisée pour valider le mot de passe côté serveur
       const { data, error } = await supabase
-        .rpc('get_redirect_url', { 
-          p_code: shortCode || '', 
-          p_password: enteredPassword 
+        .rpc('get_redirect_url', {
+          p_code: shortCode || '',
+          p_password: enteredPassword
         })
         .single();
-      
+
       if (error || !data || !data.original_url) {
         setPasswordError('Mot de passe incorrect');
         return;
       }
-      
+
       // Mot de passe valide, mettre à jour l'URL
       const updatedUrl = { ...url, originalUrl: data.original_url };
       setUrl(updatedUrl);
-      
+
       if (data.original_url) {
         setPasswordRequired(false);
         setPasswordError('');
-        
+
         // Vérifier les bots même après validation du mot de passe
         const botDetection = detectBot();
         if (botDetection.isBot && botDetection.confidence > 90) {
@@ -212,11 +236,11 @@ const Redirect = () => {
             return;
           }
         }
-        
+
         // Enregistrer en arrière-plan
         recordClick(url.id);
         updateClickStatsAsync(url.id);
-        
+
         // Check if it's a direct link after password verification
         if (data.direct_link) {
           window.location.href = data.original_url;
@@ -268,7 +292,7 @@ const Redirect = () => {
             <p className="text-gray-600 mb-4">
               Le lien court <code className="bg-gray-100 px-2 py-1 rounded">{shortCode}</code> n'existe pas ou a expiré.
             </p>
-            <Button 
+            <Button
               onClick={() => window.location.href = '/'}
               className="w-full"
               variant="outline"
@@ -319,7 +343,7 @@ const Redirect = () => {
                   <Button type="submit" className="w-full">
                     Accéder
                   </Button>
-                  <Button 
+                  <Button
                     onClick={() => window.location.href = '/'}
                     variant="outline"
                     className="w-full"
@@ -364,26 +388,26 @@ const Redirect = () => {
           <CardContent>
             <div className="text-center space-y-4">
               <div className="w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-              
+
               <p className="text-gray-600">
                 Redirection vers :
               </p>
-              
+
               <div className="p-3 bg-gray-100 rounded-lg">
                 <p className="text-sm break-all text-gray-800">
                   {url?.originalUrl}
                 </p>
               </div>
-              
+
               <div className="space-y-2">
-                <Button 
+                <Button
                   onClick={handleDirectRedirect}
                   className="w-full bg-green-600 hover:bg-green-700"
                 >
                   Y aller maintenant
                 </Button>
-                
-                <Button 
+
+                <Button
                   onClick={() => window.location.href = '/'}
                   variant="outline"
                   className="w-full"

@@ -23,7 +23,7 @@ export const useDatabase = () => {
       // Only select necessary fields to reduce payload
       const { data, error } = await supabase
         .from('shortened_urls')
-        .select('id, original_url, short_code, custom_code, created_at, clicks, last_clicked_at, description, tags, password_hash, expires_at, direct_link')
+        .select('id, original_url, short_code, custom_code, created_at, clicks, last_clicked_at, description, tags, password_hash, expires_at, direct_link, blocked_countries, blocked_ips')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(100); // Limit initial load for better performance
@@ -50,7 +50,9 @@ export const useDatabase = () => {
         tags: url.tags || undefined,
         password: url.password_hash || undefined,
         expiresAt: url.expires_at ? new Date(url.expires_at) : undefined,
-        directLink: url.direct_link || false
+        directLink: url.direct_link || false,
+        blockedCountries: url.blocked_countries || undefined,
+        blockedIPs: url.blocked_ips || undefined
       }));
 
       setUrls(formattedUrls);
@@ -119,7 +121,9 @@ export const useDatabase = () => {
           password_hash: passwordHash,
           expires_at: url.expiresAt?.toISOString() || null,
           direct_link: url.directLink || false,
-          clicks: 0
+          clicks: 0,
+          blocked_countries: url.blockedCountries || null,
+          blocked_ips: url.blockedIPs || null
         });
 
       if (error) {
@@ -168,8 +172,8 @@ export const useDatabase = () => {
 
       // Optimistically update local state
       if (user) {
-        setUrls(prev => prev.map(url => 
-          url.shortCode === shortCode 
+        setUrls(prev => prev.map(url =>
+          url.shortCode === shortCode
             ? { ...url, clicks: url.clicks + 1, lastClickedAt: new Date() }
             : url
         ));
@@ -188,7 +192,7 @@ export const useDatabase = () => {
       // Only select essential fields for faster query
       const { data, error } = await supabase
         .from('shortened_urls')
-        .select('id, original_url, short_code, custom_code, created_at, clicks, last_clicked_at, description, tags, password_hash, expires_at, direct_link')
+        .select('id, original_url, short_code, custom_code, created_at, clicks, last_clicked_at, description, tags, password_hash, expires_at, direct_link, blocked_countries, blocked_ips')
         .or(`short_code.eq.${shortCode},custom_code.eq.${shortCode}`)
         .limit(1)
         .maybeSingle(); // Use maybeSingle to avoid errors when no data found
@@ -209,7 +213,9 @@ export const useDatabase = () => {
         tags: data.tags || undefined,
         password: data.password_hash || undefined,
         expiresAt: data.expires_at ? new Date(data.expires_at) : undefined,
-        directLink: data.direct_link || false
+        directLink: data.direct_link || false,
+        blockedCountries: data.blocked_countries || undefined,
+        blockedIPs: data.blocked_ips || undefined
       };
     } catch (error) {
       console.error('Erreur lors de la récupération de l\'URL:', error);
@@ -240,12 +246,12 @@ export const useDatabase = () => {
 
       // Mettre à jour l'état local
       setUrls(prev => prev.filter(url => url.id !== id));
-      
+
       toast({
         title: "Succès",
         description: "Lien supprimé avec succès",
       });
-      
+
       return true;
     } catch (error) {
       console.error('Erreur lors de la suppression:', error);
@@ -254,6 +260,43 @@ export const useDatabase = () => {
         description: "Impossible de supprimer le lien",
         variant: "destructive"
       });
+      return false;
+    }
+  };
+
+  // Mettre à jour une URL existante
+  const updateUrl = async (id: string, updates: Partial<ShortenedUrl>): Promise<boolean> => {
+    if (!user) return false;
+    try {
+      const payload: any = {
+        original_url: updates.originalUrl,
+        custom_code: updates.customCode ?? null,
+        description: updates.description ?? null,
+        tags: updates.tags ?? null,
+        expires_at: updates.expiresAt ? updates.expiresAt.toISOString() : null,
+        direct_link: updates.directLink ?? null,
+        blocked_countries: updates.blockedCountries ?? null,
+        blocked_ips: updates.blockedIPs ?? null,
+      };
+      // Retirer les clés undefined pour éviter d'écraser involontairement
+      Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
+
+      const { error } = await supabase
+        .from('shortened_urls')
+        .update(payload)
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Erreur updateUrl:', error);
+        return false;
+      }
+
+      // Rafraîchir
+      await loadUrls();
+      return true;
+    } catch (e) {
+      console.error('Erreur updateUrl:', e);
       return false;
     }
   };
@@ -275,6 +318,7 @@ export const useDatabase = () => {
     updateUrlStats,
     getUrlByShortCode,
     deleteUrl,
+    updateUrl,
     refreshUrls: loadUrls
   }), [urls, loading, saveUrl, updateUrlStats, getUrlByShortCode, deleteUrl, loadUrls]);
 

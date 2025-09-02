@@ -3,13 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { 
-  Copy, 
-  ExternalLink, 
-  Trash2, 
-  Eye, 
-  Calendar, 
-  Tag, 
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Copy,
+  ExternalLink,
+  Trash2,
+  Eye,
+  Calendar,
+  Tag,
   Search,
   Filter,
   Link2,
@@ -23,6 +24,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useDatabase } from '@/hooks/useDatabase';
 import { ShortenedUrl } from '@/types/url';
 
 const LinksManager = () => {
@@ -34,7 +36,18 @@ const LinksManager = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'protected' | 'direct' | 'expired'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'protected' | 'direct' | 'expired' | 'blocked'>('all');
+  const [editingLink, setEditingLink] = useState<ShortenedUrl | null>(null);
+  const [editOriginalUrl, setEditOriginalUrl] = useState('');
+  const [editCustomCode, setEditCustomCode] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editTags, setEditTags] = useState('');
+  const [editExpiresAt, setEditExpiresAt] = useState('');
+  const [editBlockedCountries, setEditBlockedCountries] = useState('');
+  const [editBlockedIPs, setEditBlockedIPs] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const { updateUrl, refreshUrls } = useDatabase();
 
   useEffect(() => {
     const fetchLinks = async () => {
@@ -69,7 +82,9 @@ const LinksManager = () => {
           tags: url.tags || undefined,
           password: url.password_hash || undefined,
           expiresAt: url.expires_at ? new Date(url.expires_at) : undefined,
-          directLink: url.direct_link || false
+          directLink: url.direct_link || false,
+          blockedCountries: url.blocked_countries || undefined,
+          blockedIPs: url.blocked_ips || undefined
         }));
 
         setLinks(formattedLinks);
@@ -95,6 +110,8 @@ const LinksManager = () => {
       filtered = filtered.filter(link => link.directLink);
     } else if (filterType === 'expired') {
       filtered = filtered.filter(link => link.expiresAt && new Date() > link.expiresAt);
+    } else if (filterType === 'blocked') {
+      filtered = filtered.filter(link => (link.blockedCountries && link.blockedCountries.length > 0) || (link.blockedIPs && link.blockedIPs.length > 0));
     }
 
     // Recherche textuelle
@@ -165,6 +182,43 @@ const LinksManager = () => {
 
   const handleViewAnalytics = (shortCode: string) => {
     navigate(`/analytics/${shortCode}`);
+  };
+
+  const openEdit = (link: ShortenedUrl) => {
+    setEditingLink(link);
+    setEditOriginalUrl(link.originalUrl || '');
+    setEditCustomCode(link.customCode || '');
+    setEditDescription(link.description || '');
+    setEditTags((link.tags || []).join(','));
+    setEditExpiresAt(link.expiresAt ? link.expiresAt.toISOString().slice(0, 10) : '');
+    setEditBlockedCountries((link.blockedCountries || []).join(','));
+    setEditBlockedIPs((link.blockedIPs || []).join(','));
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingLink) return;
+    setSaving(true);
+    try {
+      const updates: Partial<ShortenedUrl> = {
+        originalUrl: editOriginalUrl.trim(),
+        customCode: editCustomCode.trim() || undefined,
+        description: editDescription.trim() || undefined,
+        tags: editTags.trim() ? editTags.split(',').map(t => t.trim()).filter(Boolean) : undefined,
+        expiresAt: editExpiresAt ? new Date(editExpiresAt) : undefined,
+        blockedCountries: editBlockedCountries.trim() ? editBlockedCountries.split(',').map(c => c.trim()).filter(Boolean) : [],
+        blockedIPs: editBlockedIPs.trim() ? editBlockedIPs.split(',').map(ip => ip.trim()).filter(Boolean) : [],
+      };
+      const ok = await updateUrl(editingLink.id, updates);
+      if (ok) {
+        toast({ title: 'Enregistré', description: 'Lien mis à jour' });
+        setEditingLink(null);
+        await refreshUrls();
+      } else {
+        toast({ title: 'Erreur', description: 'Échec de la mise à jour', variant: 'destructive' });
+      }
+    } finally {
+      setSaving(false);
+    }
   };
 
   const formatDate = (date: Date) => {
@@ -286,6 +340,13 @@ const LinksManager = () => {
                 <Clock className="h-4 w-4 mr-1" />
                 Expirés
               </Button>
+              <Button
+                variant={filterType === 'blocked' ? 'default' : 'outline'}
+                onClick={() => setFilterType('blocked')}
+                size="sm"
+              >
+                Bloqués
+              </Button>
             </div>
           </div>
         </CardContent>
@@ -298,14 +359,14 @@ const LinksManager = () => {
             <div className="text-center py-8">
               <Link2 className="h-12 w-12 mx-auto text-gray-400 mb-4" />
               <p className="text-gray-500 mb-2">
-                {searchTerm || filterType !== 'all' 
-                  ? 'Aucun lien ne correspond à vos critères' 
+                {searchTerm || filterType !== 'all'
+                  ? 'Aucun lien ne correspond à vos critères'
                   : 'Aucun lien trouvé'
                 }
               </p>
               {searchTerm || filterType !== 'all' ? (
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => {
                     setSearchTerm('');
                     setFilterType('all');
@@ -326,13 +387,12 @@ const LinksManager = () => {
           {filteredLinks.map(link => {
             const shortUrl = `${window.location.origin}/${link.shortCode}`;
             const expired = isExpired(link.expiresAt);
-            
+
             return (
-              <Card 
-                key={link.id} 
-                className={`shadow-lg transition-all duration-200 hover:shadow-xl ${
-                  expired ? 'border-red-200 bg-red-50' : 'hover:border-blue-300'
-                }`}
+              <Card
+                key={link.id}
+                className={`shadow-lg transition-all duration-200 hover:shadow-xl ${expired ? 'border-red-200 bg-red-50' : 'hover:border-blue-300'
+                  }`}
               >
                 <CardContent className="pt-6">
                   <div className="flex items-start justify-between gap-4">
@@ -342,67 +402,78 @@ const LinksManager = () => {
                         <code className="text-sm font-mono bg-blue-100 px-2 py-1 rounded text-blue-800">
                           /{link.customCode || link.shortCode}
                         </code>
-                        
+
                         {link.customCode && (
                           <Badge variant="outline" className="text-xs">
                             Personnalisé
                           </Badge>
                         )}
-                        
+
                         {link.directLink && (
                           <Badge className="text-xs bg-green-100 text-green-700">
                             <Zap className="h-3 w-3 mr-1" />
                             Direct
                           </Badge>
                         )}
-                        
+
                         {link.password && (
                           <Badge className="text-xs bg-orange-100 text-orange-700">
                             <Shield className="h-3 w-3 mr-1" />
                             Protégé
                           </Badge>
                         )}
-                        
+
                         {expired && (
                           <Badge variant="destructive" className="text-xs">
                             <Clock className="h-3 w-3 mr-1" />
                             Expiré
                           </Badge>
                         )}
-                        
+
+                        {(link.blockedCountries && link.blockedCountries.length > 0) && (
+                          <Badge className="text-xs bg-red-100 text-red-700">
+                            Pays bloqués: {link.blockedCountries.length}
+                          </Badge>
+                        )}
+                        {(link.blockedIPs && link.blockedIPs.length > 0) && (
+                          <Badge className="text-xs bg-red-50 text-red-600">
+                            IPs bloquées: {link.blockedIPs.length}
+                          </Badge>
+                        )}
+
                         {link.expiresAt && !expired && (
                           <Badge variant="outline" className="text-xs">
                             <Calendar className="h-3 w-3 mr-1" />
                             Expire le {link.expiresAt.toLocaleDateString('fr-FR')}
                           </Badge>
                         )}
-                        
+
                         <Badge variant="secondary" className="text-xs">
                           <Eye className="h-3 w-3 mr-1" />
                           {link.clicks} clics
                         </Badge>
                       </div>
-                      
+
                       {/* Description si présente */}
                       {link.description && (
                         <p className="text-sm text-gray-700 mb-2 font-medium">
                           {link.description}
                         </p>
                       )}
-                      
+
                       {/* URL originale */}
                       <div className="flex items-center gap-2 mb-2">
                         <Globe className="h-4 w-4 text-gray-500 shrink-0" />
-                        <a 
-                          href={link.originalUrl} 
-                          target="_blank" 
+                        <a
+                          href={link.originalUrl}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="text-sm text-blue-600 hover:text-blue-800 underline truncate"
                         >
                           {link.originalUrl}
                         </a>
                       </div>
-                      
+
                       {/* Tags si présents */}
                       {link.tags && link.tags.length > 0 && (
                         <div className="flex items-center gap-1 mb-2 flex-wrap">
@@ -414,7 +485,7 @@ const LinksManager = () => {
                           ))}
                         </div>
                       )}
-                      
+
                       {/* Informations de date */}
                       <div className="text-xs text-gray-500 space-y-1">
                         <p>
@@ -427,7 +498,7 @@ const LinksManager = () => {
                         )}
                       </div>
                     </div>
-                    
+
                     {/* Actions */}
                     <div className="flex items-center gap-2 shrink-0">
                       <Button
@@ -439,7 +510,7 @@ const LinksManager = () => {
                       >
                         <Copy className="h-4 w-4" />
                       </Button>
-                      
+
                       <Button
                         onClick={() => window.open(link.originalUrl, '_blank')}
                         variant="outline"
@@ -459,7 +530,60 @@ const LinksManager = () => {
                       >
                         <BarChart3 className="h-4 w-4" />
                       </Button>
-                      
+
+                      <Dialog open={!!editingLink && editingLink.id === link.id} onOpenChange={(open) => open ? openEdit(link) : setEditingLink(null)}>
+                        <DialogTrigger asChild>
+                          <Button
+                            onClick={() => openEdit(link)}
+                            variant="outline"
+                            size="sm"
+                            className="border-amber-200 hover:bg-amber-50"
+                            title="Éditer le lien"
+                          >
+                            Éditer
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Éditer le lien</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-3">
+                            <div>
+                              <label className="text-sm text-gray-700">URL originale</label>
+                              <Input value={editOriginalUrl} onChange={(e) => setEditOriginalUrl(e.target.value)} />
+                            </div>
+                            <div>
+                              <label className="text-sm text-gray-700">Code personnalisé</label>
+                              <Input value={editCustomCode} onChange={(e) => setEditCustomCode(e.target.value)} />
+                            </div>
+                            <div>
+                              <label className="text-sm text-gray-700">Description</label>
+                              <Input value={editDescription} onChange={(e) => setEditDescription(e.target.value)} />
+                            </div>
+                            <div>
+                              <label className="text-sm text-gray-700">Tags (séparés par virgules)</label>
+                              <Input value={editTags} onChange={(e) => setEditTags(e.target.value)} />
+                            </div>
+                            <div>
+                              <label className="text-sm text-gray-700">Date d'expiration</label>
+                              <Input type="date" value={editExpiresAt} onChange={(e) => setEditExpiresAt(e.target.value)} />
+                            </div>
+                            <div>
+                              <label className="text-sm text-gray-700">Pays bloqués</label>
+                              <Input value={editBlockedCountries} onChange={(e) => setEditBlockedCountries(e.target.value)} placeholder="FR, US, Iran" />
+                            </div>
+                            <div>
+                              <label className="text-sm text-gray-700">IPs bloquées</label>
+                              <Input value={editBlockedIPs} onChange={(e) => setEditBlockedIPs(e.target.value)} placeholder="1.2.3.4, 5.6.7.8" />
+                            </div>
+                          </div>
+                          <div className="flex justify-end gap-2 pt-4">
+                            <Button variant="outline" onClick={() => setEditingLink(null)}>Annuler</Button>
+                            <Button onClick={handleSaveEdit} disabled={saving}>{saving ? 'Enregistrement...' : 'Sauvegarder'}</Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+
                       <Button
                         onClick={() => handleDelete(link.id)}
                         variant="outline"

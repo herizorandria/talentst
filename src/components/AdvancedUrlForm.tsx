@@ -16,6 +16,10 @@ interface AdvancedUrlFormProps {
   setPassword: (value: string) => void;
   expiresAt: string;
   setExpiresAt: (value: string) => void;
+  blockedCountries?: string;
+  setBlockedCountries?: (value: string) => void;
+  blockedIPs?: string;
+  setBlockedIPs?: (value: string) => void;
 }
 
 const AdvancedUrlForm = ({
@@ -26,7 +30,11 @@ const AdvancedUrlForm = ({
   password,
   setPassword,
   expiresAt,
-  setExpiresAt
+  setExpiresAt,
+  blockedCountries = '',
+  setBlockedCountries,
+  blockedIPs = '',
+  setBlockedIPs
 }: AdvancedUrlFormProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -45,7 +53,7 @@ const AdvancedUrlForm = ({
           {isOpen ? <ChevronUp className="h-4 w-4 ml-auto" /> : <ChevronDown className="h-4 w-4 ml-auto" />}
         </Button>
       </CollapsibleTrigger>
-      
+
       <CollapsibleContent className="space-y-4 mt-4">
         <Card className="bg-gray-50 border-purple-200">
           <CardHeader className="pb-4">
@@ -119,6 +127,40 @@ const AdvancedUrlForm = ({
               />
               <p className="text-xs text-gray-500">
                 Le lien expirera automatiquement à cette date
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                <Tag className="h-4 w-4" />
+                Pays bloqués (codes ou noms, séparés par virgules)
+              </label>
+              <Input
+                type="text"
+                placeholder="FR, US, Madagascar, Iran..."
+                value={blockedCountries}
+                onChange={(e) => setBlockedCountries && setBlockedCountries(e.target.value)}
+                className="border-purple-200 focus:border-purple-400"
+              />
+              <p className="text-xs text-gray-500">
+                Correspondances souples (ex: "fr" ou "France"). Laisser vide pour aucun blocage.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                <Tag className="h-4 w-4" />
+                IPs bloquées (séparées par virgules)
+              </label>
+              <Input
+                type="text"
+                placeholder="1.2.3.4, 5.6.7.8"
+                value={blockedIPs}
+                onChange={(e) => setBlockedIPs && setBlockedIPs(e.target.value)}
+                className="border-purple-200 focus:border-purple-400"
+              />
+              <p className="text-xs text-gray-500">
+                Entrez des adresses IPv4/IPv6 exactes. Laisser vide pour aucun blocage.
               </p>
             </div>
           </CardContent>

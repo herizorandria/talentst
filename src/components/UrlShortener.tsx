@@ -28,6 +28,8 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
   const [password, setPassword] = useState('');
   const [expiresAt, setExpiresAt] = useState('');
   const [directLink, setDirectLink] = useState(false);
+  const [blockedCountriesInput, setBlockedCountriesInput] = useState('');
+  const [blockedIPsInput, setBlockedIPsInput] = useState('');
   const [shortenedUrl, setShortenedUrl] = useState<ShortenedUrl | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -41,7 +43,7 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Rate limiting check
     const userIdentifier = 'user-session'; // In production, use actual user ID
     if (!checkRateLimit(userIdentifier, 10, 60000)) {
@@ -82,16 +84,16 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
     }
 
     setIsLoading(true);
-    
+
     await new Promise(resolve => setTimeout(resolve, 200));
-    
+
     try {
       const shortCode = customCode.trim() ? sanitizeInput(customCode.trim()) : await generateShortCode();
       const sanitizedDescription = description.trim() ? sanitizeInput(description.trim()) : undefined;
-      const sanitizedTags = tags.trim() ? 
-        tags.split(',').map(tag => sanitizeInput(tag.trim())).filter(tag => tag) : 
+      const sanitizedTags = tags.trim() ?
+        tags.split(',').map(tag => sanitizeInput(tag.trim())).filter(tag => tag) :
         undefined;
-      
+
       const newUrl: ShortenedUrl = {
         id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
         originalUrl: sanitizeInput(originalUrl),
@@ -103,7 +105,13 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
         tags: sanitizedTags,
         password: password.trim() || undefined, // Will be hashed in storage
         expiresAt: expiresAt ? new Date(expiresAt) : undefined,
-        directLink
+        directLink,
+        blockedCountries: blockedCountriesInput.trim()
+          ? blockedCountriesInput.split(',').map(c => sanitizeInput(c.trim())).filter(Boolean)
+          : undefined,
+        blockedIPs: blockedIPsInput.trim()
+          ? blockedIPsInput.split(',').map(ip => sanitizeInput(ip.trim())).filter(Boolean)
+          : undefined
       };
 
       // Sauvegarder dans la base de données
@@ -168,10 +176,14 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
               setPassword={setPassword}
               expiresAt={expiresAt}
               setExpiresAt={setExpiresAt}
+              blockedCountries={blockedCountriesInput}
+              setBlockedCountries={setBlockedCountriesInput}
+              blockedIPs={blockedIPsInput}
+              setBlockedIPs={setBlockedIPsInput}
             />
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isLoading}
               className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-lg transition-all duration-200"
             >

@@ -11,6 +11,8 @@ export interface ShortenedUrl {
   password?: string;
   expiresAt?: Date;
   directLink?: boolean;
+  blockedCountries?: string[];
+  blockedIPs?: string[];
 }
 
 export interface UrlStatistic {
