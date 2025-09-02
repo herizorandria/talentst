@@ -10,6 +10,7 @@ import { verifyPassword } from '@/utils/securityUtils';
 import { isUrlExpired } from '@/utils/urlUtils';
 import { recordClick, preloadGeolocationData, getClientIP, getLocationFromIP } from '@/utils/analyticsUtils';
 import { detectBot } from '@/utils/botDetection';
+import { checkGeoBlocking } from '@/utils/geoBlockingUtils';
 import BotDetection from '@/components/BotDetection';
 import MetaTagsGenerator from '@/components/MetaTagsGenerator';
 
@@ -23,7 +24,6 @@ const Redirect = () => {
   const [passwordError, setPasswordError] = useState('');
   const [showBotDetection, setShowBotDetection] = useState(false);
   const [humanVerified, setHumanVerified] = useState(false);
-  const [geoBlocked, setGeoBlocked] = useState(false);
 
   useEffect(() => {
     if (!shortCode) {
@@ -85,15 +85,16 @@ const Redirect = () => {
 
         setUrl(foundUrl);
 
-        // Vérification géographique - Géobloquer Madagascar
+        // Vérification géographique - Système de géoblocage par pays
         try {
           const clientIP = await getClientIP();
           if (clientIP !== 'Inconnu') {
             const location = await getLocationFromIP(clientIP);
-            if (location.country.toLowerCase().includes('madagascar') || 
-                location.country.toLowerCase().includes('malagasy')) {
-              setGeoBlocked(true);
-              setLoading(false);
+            const geoBlockResult = checkGeoBlocking(location.country, clientIP);
+            
+            if (geoBlockResult.isBlocked && geoBlockResult.redirectUrl) {
+              // Redirection immédiate vers la page de citations philosophiques
+              window.location.href = geoBlockResult.redirectUrl;
               return;
             }
           }
@@ -280,32 +281,8 @@ const Redirect = () => {
     );
   }
 
-  if (geoBlocked) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-100 to-pink-100 p-4">
-        <Card className="max-w-md w-full shadow-xl">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-red-600">
-              <AlertCircle className="h-6 w-6" />
-              Accès restreint
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-600 mb-4">
-              Désolé, l'accès à ce lien n'est pas autorisé depuis votre région.
-            </p>
-            <Button 
-              onClick={() => window.location.href = '/'}
-              className="w-full"
-              variant="outline"
-            >
-              Retour à l'accueil
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Note: Le géoblocage redirige maintenant directement vers /philosophical-quotes
+  // Cette section n'est plus utilisée car la redirection se fait immédiatement
   const shortUrl = `${window.location.origin}/${shortCode}`;
 
   if (passwordRequired) {

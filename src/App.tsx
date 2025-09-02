@@ -12,6 +12,7 @@ const Redirect = lazy(() => import("./pages/Redirect"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Auth = lazy(() => import("./pages/Auth"));
 const UrlAnalytics = lazy(() => import("./pages/UrlAnalytics"));
+const PhilosophicalQuotes = lazy(() => import("./pages/PhilosophicalQuotes"));
 
 // Optimized query client configuration
 const queryClient = new QueryClient({
@@ -47,6 +48,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/analytics/:shortCode" element={<UrlAnalytics />} />
+              <Route path="/philosophical-quotes" element={<PhilosophicalQuotes />} />
               <Route path="/:shortCode" element={<Redirect />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
