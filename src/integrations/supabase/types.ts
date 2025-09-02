@@ -341,33 +341,7 @@ export type Database = {
       }
     }
     Views: {
-      public_urls: {
-        Row: {
-          custom_code: string | null
-          direct_link: boolean | null
-          expires_at: string | null
-          original_url: string | null
-          password_hash: string | null
-          short_code: string | null
-        }
-        Insert: {
-          custom_code?: string | null
-          direct_link?: boolean | null
-          expires_at?: string | null
-          original_url?: string | null
-          password_hash?: string | null
-          short_code?: string | null
-        }
-        Update: {
-          custom_code?: string | null
-          direct_link?: boolean | null
-          expires_at?: string | null
-          original_url?: string | null
-          password_hash?: string | null
-          short_code?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       get_redirect_url: {
