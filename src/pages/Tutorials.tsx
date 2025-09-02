@@ -75,7 +75,7 @@ const Tutorials = () => {
               <div className="text-sm text-gray-600">Tutoriels terminés</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-amber-600 mb-2">
+              <div className="text-3xl font-bold text-yellow-400 mb-2">
                 {Math.round((completedTutorials.size / tutorials.length) * 100)}%
               </div>
               <div className="text-sm text-gray-600">Progression</div>
@@ -208,7 +208,7 @@ const Tutorials = () => {
       {/* Conseils rapides */}
   <Card className="bg-amber-50 border-amber-200 shadow-lg">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-amber-600">
+          <CardTitle className="flex items-center gap-2 text-yellow-400">
             <Lightbulb className="h-5 w-5" />
             Conseils rapides
           </CardTitle>

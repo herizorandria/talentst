@@ -107,7 +107,7 @@ const TutorialModal = ({ isOpen, onClose, tutorial }: TutorialModalProps) => {
         <DialogHeader className="border-b pb-4">
           <div className="flex items-center justify-between">
             <div>
-              <DialogTitle className="text-2xl font-bold text-amber-600">
+              <DialogTitle className="text-2xl font-bold text-yellow-400">
                 {tutorial.title}
               </DialogTitle>
               <DialogDescription className="mt-2">
@@ -145,7 +145,7 @@ const TutorialModal = ({ isOpen, onClose, tutorial }: TutorialModalProps) => {
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-full ${
                       currentStep === index
-                        ? 'bg-amber-100 text-amber-600'
+                        ? 'bg-amber-100 text-yellow-400'
                         : completedSteps.has(index)
                         ? 'bg-green-100 text-green-600'
                         : 'bg-gray-100 text-gray-600'
@@ -229,7 +229,7 @@ const TutorialModal = ({ isOpen, onClose, tutorial }: TutorialModalProps) => {
                 key={index}
                 className={`w-2 h-2 rounded-full ${
                   index === currentStep
-                    ? 'bg-amber-600'
+                    ? 'bg-yellow-400'
                     : completedSteps.has(index)
                     ? 'bg-green-500'
                     : 'bg-gray-300'

@@ -204,7 +204,7 @@ const UrlAnalytics = () => {
         return (
             <div className="min-h-screen bg-amber-100 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="w-12 h-12 border-4 border-amber-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <div className="w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                     <p className="text-lg text-gray-600">Chargement des analytics...</p>
                 </div>
             </div>
@@ -331,10 +331,10 @@ const UrlAnalytics = () => {
                         <CardContent className="pt-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-2xl font-bold text-amber-600">{topCountries.length}</p>
+                                    <p className="text-2xl font-bold text-yellow-400">{topCountries.length}</p>
                                     <p className="text-sm text-gray-600">Pays uniques</p>
                                 </div>
-                                <Globe className="h-8 w-8 text-amber-600" />
+                                <Globe className="h-8 w-8 text-yellow-400" />
                             </div>
                         </CardContent>
                     </Card>
@@ -431,7 +431,7 @@ const UrlAnalytics = () => {
                                         <div className="flex items-center gap-2">
                                             <div className="w-20 bg-gray-200 rounded-full h-2">
                                                 <div
-                                                    className="bg-amber-600 h-2 rounded-full"
+                                                    className="bg-yellow-400 h-2 rounded-full"
                                                     style={{ width: `${(count / filteredClicks.length) * 100}%` }}
                                                 />
                                             </div>

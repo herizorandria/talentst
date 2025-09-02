@@ -57,7 +57,7 @@ const AdvancedUrlForm = ({
       <CollapsibleContent className="space-y-4 mt-4">
   <Card className="card bg-[color:var(--card-color)] border-[color:var(--border-color)]">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg text-amber-600">
+            <CardTitle className="text-lg text-yellow-400">
               Paramètres avancés
             </CardTitle>
           </CardHeader>

@@ -11,14 +11,14 @@ interface DirectLinkOptionProps {
 
 const DirectLinkOption = ({ directLink, setDirectLink }: DirectLinkOptionProps) => {
   return (
-    <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg border border-orange-200">
+    <div className="flex items-center justify-between p-3 bg-yellow-200 p-3 bg-yellow-200 rounded-lg border border-yellow-200">
       <div className="flex items-center gap-2">
-        <Zap className="h-4 w-4 text-orange-600" />
+        <Zap className="h-4 w-4 text-yellow-400" />
         <div>
-          <Label htmlFor="direct-link" className="text-sm font-medium text-orange-800">
+          <Label htmlFor="direct-link" className="text-sm font-medium text-yellow-800">
             Lien direct
           </Label>
-          <p className="text-xs text-orange-600">
+          <p className="text-xs text-yellow-600">
             Redirige immédiatement sans page de confirmation
           </p>
         </div>

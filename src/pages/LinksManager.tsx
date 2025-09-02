@@ -239,8 +239,8 @@ const LinksManager = () => {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-amber-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement de vos liens...</p>
+          <div className="w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white">Chargement de vos liens...</p>
         </div>
       </div>
     );
@@ -260,36 +260,36 @@ const LinksManager = () => {
   return (
     <div className="space-y-6">
       {/* En-tête avec statistiques */}
-  <Card className="bg-yellow-50 border-yellow-200 shadow-lg">
+  <Card className="bg-black shadow-lg">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-2xl text-yellow-600">
+          <CardTitle className="flex items-center gap-2 text-2xl text-yellow-400">
             <Link2 className="h-6 w-6" />
             Gestion de mes liens
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-3 bg-white rounded-lg border border-yellow-200">
+            <div className="text-center p-3 yellow-400 rounded-lg border border-yellow-200">
               <div className="text-2xl font-bold text-yellow-600">{links.length}</div>
-              <div className="text-sm text-gray-600">Total des liens</div>
+              <div className="text-sm text-white">Total des liens</div>
             </div>
-            <div className="text-center p-3 bg-white rounded-lg border border-green-200">
+            <div className="text-center p-3 yellow-400 rounded-lg border border-green-200">
               <div className="text-2xl font-bold text-green-600">
                 {links.reduce((sum, link) => sum + link.clicks, 0)}
               </div>
-              <div className="text-sm text-gray-600">Total des clics</div>
+              <div className="text-sm text-white">Total des clics</div>
             </div>
-            <div className="text-center p-3 bg-white rounded-lg border border-amber-200">
-              <div className="text-2xl font-bold text-amber-600">
+            <div className="text-center p-3 yellow-400 rounded-lg border border-amber-200">
+              <div className="text-2xl font-bold text-yellow-400">
                 {links.filter(link => link.password).length}
               </div>
-              <div className="text-sm text-gray-600">Liens protégés</div>
+              <div className="text-sm text-white">Liens protégés</div>
             </div>
-            <div className="text-center p-3 bg-white rounded-lg border border-orange-200">
-              <div className="text-2xl font-bold text-orange-600">
+            <div className="text-center p-3 yellow-400 rounded-lg border border-orange-200">
+              <div className="text-2xl font-bold text-yellow-300">
                 {links.filter(link => isExpired(link.expiresAt)).length}
               </div>
-              <div className="text-sm text-gray-600">Liens expirés</div>
+              <div className="text-sm text-white">Liens expirés</div>
             </div>
           </div>
         </CardContent>
@@ -468,7 +468,7 @@ const LinksManager = () => {
                           href={link.originalUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm text-yellow-600 hover:text-yellow-800 underline truncate"
+                          className="text-sm text-yellow-400 hover:text-yellow-300 underline truncate"
                         >
                           {link.originalUrl}
                         </a>

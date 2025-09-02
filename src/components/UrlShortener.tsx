@@ -147,8 +147,8 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
     <div className="space-y-6">
   <Card className="card bg-[color:var(--card-color)] border-[color:var(--border-color)] shadow-lg">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-2xl text-amber-600">
-            <Link className="h-6 w-6 text-amber-600" />
+          <CardTitle className="flex items-center gap-2 text-2xl text-yellow-400">
+            <Link className="h-6 w-6 text-yellow-400" />
             Raccourcir une URL
           </CardTitle>
         </CardHeader>
@@ -185,7 +185,7 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-12 bg-amber-600 hover:bg-amber-700 text-white font-semibold shadow-lg transition-all duration-200"
+              className="w-full h-12 bg-yellow-400 hover:bg-amber-700 text-white font-semibold shadow-lg transition-all duration-200"
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">

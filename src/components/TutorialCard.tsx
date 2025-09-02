@@ -38,7 +38,7 @@ const TutorialCard = ({ tutorial, onStart }: TutorialCardProps) => {
               {tutorial.icon}
             </div>
             <div>
-              <CardTitle className="text-lg font-bold text-gray-800 group-hover:text-amber-600 transition-colors">
+              <CardTitle className="text-lg font-bold text-gray-800 group-hover:text-yellow-400 transition-colors">
                 {tutorial.title}
               </CardTitle>
               <div className="flex items-center gap-2 mt-2">
@@ -68,7 +68,7 @@ const TutorialCard = ({ tutorial, onStart }: TutorialCardProps) => {
           
           <Button
             onClick={() => onStart(tutorial.id)}
-            className="bg-amber-600 hover:bg-amber-700 text-white"
+            className="bg-yellow-400 hover:bg-amber-700 text-white"
             size="sm"
           >
             <Play className="h-4 w-4 mr-2" />

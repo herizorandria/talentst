@@ -22,7 +22,7 @@ export const tutorials = [
     description: 'Apprenez les bases pour créer votre premier lien raccourci et découvrir les fonctionnalités principales.',
     duration: '5 min',
     difficulty: 'Débutant' as const,
-  icon: <Link className="h-5 w-5 text-amber-600" />,
+  icon: <Link className="h-5 w-5 text-yellow-400" />,
     stepsCount: 4,
     steps: [
       {
@@ -38,8 +38,8 @@ export const tutorials = [
                 L'application est organisée en 4 onglets principaux :
               </p>
               <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-center gap-2 p-2 bg-amber-50 rounded">
-                  <Link className="h-4 w-4 text-amber-600" />
+                <div className="flex items-center gap-2 p-2 bg-yellow-50 rounded">
+                  <Link className="h-4 w-4 text-yellow-400" />
                   <span className="text-sm">Raccourcir</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 bg-orange-50 rounded">
@@ -74,21 +74,21 @@ export const tutorials = [
               <h4 className="font-semibold mb-3">Étapes pour créer un lien :</h4>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-xs font-bold text-amber-600">1</div>
+                  <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-xs font-bold text-yellow-400">1</div>
                   <div>
                     <p className="font-medium">Collez votre URL</p>
                     <p className="text-sm text-gray-600">Dans le champ "https://example.com/..."</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-xs font-bold text-amber-600">2</div>
+                  <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-xs font-bold text-yellow-400">2</div>
                   <div>
                     <p className="font-medium">Personnalisez (optionnel)</p>
                     <p className="text-sm text-gray-600">Ajoutez un code personnalisé ou laissez vide</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-xs font-bold text-amber-600">3</div>
+                  <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-xs font-bold text-yellow-400">3</div>
                   <div>
                     <p className="font-medium">Cliquez sur "Raccourcir"</p>
                     <p className="text-sm text-gray-600">Votre lien sera créé instantanément</p>
@@ -122,7 +122,7 @@ export const tutorials = [
                   <span className="text-sm">Télécharger le QR Code</span>
                 </div>
                 <div className="flex items-center gap-3 p-2 border rounded">
-                  <ExternalLink className="h-4 w-4 text-amber-600" />
+                  <ExternalLink className="h-4 w-4 text-yellow-400" />
                   <span className="text-sm">Tester le lien dans un nouvel onglet</span>
                 </div>
               </div>
@@ -153,7 +153,7 @@ export const tutorials = [
                   <div className="text-xs text-green-700">Liens créés</div>
                 </div>
                 <div className="p-3 bg-amber-50 rounded">
-                  <div className="text-lg font-bold text-amber-600">0</div>
+                  <div className="text-lg font-bold text-yellow-400">0</div>
                   <div className="text-xs text-amber-700">Moyenne/lien</div>
                 </div>
                 <div className="p-3 bg-orange-50 rounded">
@@ -431,9 +431,9 @@ export const tutorials = [
                   <div className="text-xs text-green-600 mt-1">Engagement global</div>
                 </div>
                 <div className="p-3 bg-amber-50 rounded">
-                  <div className="text-2xl font-bold text-amber-600">18</div>
+                  <div className="text-2xl font-bold text-yellow-400">18</div>
                   <div className="text-sm text-amber-700">Moyenne par lien</div>
-                  <div className="text-xs text-amber-600 mt-1">Performance moyenne</div>
+                  <div className="text-xs text-yellow-400 mt-1">Performance moyenne</div>
                 </div>
                 <div className="p-3 bg-orange-50 rounded">
                   <div className="text-2xl font-bold text-orange-600">12</div>

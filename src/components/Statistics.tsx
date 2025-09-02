@@ -44,7 +44,7 @@ const Statistics = ({ urls }: StatisticsProps) => {
       title: "Moyenne par lien",
       value: averageClicks,
       icon: TrendingUp,
-      color: "text-amber-600",
+      color: "text-yellow-400",
     bgColor: "bg-amber-100"
     },
     {
@@ -61,7 +61,7 @@ const Statistics = ({ urls }: StatisticsProps) => {
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
-            <BarChart className="h-5 w-5 text-amber-600" />
+            <BarChart className="h-5 w-5 text-yellow-400" />
             Statistiques
           </CardTitle>
         </CardHeader>
