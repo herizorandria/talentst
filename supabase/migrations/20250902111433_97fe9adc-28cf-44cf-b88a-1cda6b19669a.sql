@@ -15,7 +15,9 @@ RETURNS TABLE (
   original_url text,
   expires_at timestamptz,
   direct_link boolean,
-  requires_password boolean
+  requires_password boolean,
+  blocked_countries text[],
+  blocked_ips text[]
 ) AS $$
 DECLARE
   rec public.shortened_urls%ROWTYPE;
@@ -46,11 +48,14 @@ BEGIN
   END IF;
 
   IF NOT pass_ok THEN
-    -- Return only flags without the URL
+    -- Return only flags and blocking arrays without the URL
     id := rec.id;
     original_url := NULL;
     expires_at := rec.expires_at;
     direct_link := rec.direct_link;
+    requires_password := true;
+    blocked_countries := rec.blocked_countries;
+    blocked_ips := rec.blocked_ips;
     RETURN NEXT;
     RETURN;
   END IF;
@@ -59,6 +64,9 @@ BEGIN
   original_url := rec.original_url;
   expires_at := rec.expires_at;
   direct_link := rec.direct_link;
+  requires_password := rec.password_hash IS NOT NULL;
+  blocked_countries := rec.blocked_countries;
+  blocked_ips := rec.blocked_ips;
   RETURN NEXT;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;

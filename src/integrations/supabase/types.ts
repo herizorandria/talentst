@@ -352,6 +352,8 @@ export type Database = {
           id: string
           original_url: string
           requires_password: boolean
+          blocked_countries: string[] | null
+          blocked_ips: string[] | null
         }[]
       }
       increment_photo_clicks: {

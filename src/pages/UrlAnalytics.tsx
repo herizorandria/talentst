@@ -43,6 +43,21 @@ interface UrlInfo {
     clicks: number;
 }
 
+// Values that indicate a placeholder / in-progress state from the recorder
+const PLACEHOLDER_VALUES = new Set(['', 'en cours...', 'in progress', 'pending', 'inconnu']);
+
+const normalizeStringField = (v?: unknown) => {
+    const s = String(v ?? '').trim();
+    if (!s) return '';
+    return PLACEHOLDER_VALUES.has(s.toLowerCase()) ? '' : s;
+};
+
+const normalizeIpField = (v?: unknown) => {
+    const s = String(v ?? '').trim();
+    if (!s) return 'Inconnu';
+    return PLACEHOLDER_VALUES.has(s.toLowerCase()) ? 'Inconnu' : s;
+};
+
 const UrlAnalytics = () => {
     const { shortCode } = useParams<{ shortCode: string }>();
     const navigate = useNavigate();
@@ -93,10 +108,10 @@ const UrlAnalytics = () => {
             const daysAgo = parseInt(dateFilter);
             const startDate = new Date(now.getTime() - (daysAgo * 24 * 60 * 60 * 1000));
 
-            // Récupérer les clics
+            // Récupérer les clics - sélectionner seulement les colonnes utiles
             const { data: clicksData, error: clicksError } = await supabase
                 .from('url_clicks')
-                .select('*')
+                .select('id, ip, location_city, location_country, device, browser, os, referrer, clicked_at')
                 .eq('short_url_id', urlData.id)
                 .gte('clicked_at', startDate.toISOString())
                 .order('clicked_at', { ascending: false });
@@ -104,7 +119,21 @@ const UrlAnalytics = () => {
             if (clicksError) {
                 console.error('Erreur lors de la récupération des clics:', clicksError);
             } else {
-                setClicks(clicksData || []);
+                // Normalize rows to ensure our Click type fields exist and have defaults
+                type RawClick = Partial<Record<keyof Click, unknown>> & { id?: unknown, clicked_at?: unknown };
+                const normalized: Click[] = (clicksData || []).map((c: RawClick) => ({
+                    id: String(c.id || ''),
+                    ip: normalizeIpField(c.ip),
+                    location_city: normalizeStringField(c.location_city),
+                    location_country: normalizeStringField(c.location_country),
+                    device: normalizeStringField(c.device) || 'Inconnu',
+                    browser: normalizeStringField(c.browser) || 'Inconnu',
+                    os: normalizeStringField(c.os) || 'Inconnu',
+                    referrer: normalizeStringField(c.referrer) || '',
+                    clicked_at: String(c.clicked_at || new Date().toISOString()),
+                }));
+
+                setClicks(normalized);
             }
         } catch (error) {
             console.error('Erreur:', error);
@@ -131,18 +160,18 @@ const UrlAnalytics = () => {
             .slice(0, topN);
     };
 
-    const getHourlyData = () => {
+    const getHourlyData = (arr: Click[]) => {
         const hours = Array(24).fill(0);
-        clicks.forEach(click => {
+        arr.forEach(click => {
             const hour = new Date(click.clicked_at).getHours();
             hours[hour]++;
         });
         return hours;
     };
 
-    const getDailyData = () => {
+    const getDailyData = (arr: Click[]) => {
         const days = {} as Record<string, number>;
-        clicks.forEach(click => {
+        arr.forEach(click => {
             const date = new Date(click.clicked_at).toLocaleDateString('fr-FR');
             days[date] = (days[date] || 0) + 1;
         });
@@ -150,22 +179,22 @@ const UrlAnalytics = () => {
     };
 
     // Filtrer les clics
-    const filteredClicks = clicks.filter(click => {
+    const filteredClicks = React.useMemo(() => clicks.filter(click => {
         if (countryFilter && click.location_country !== countryFilter) return false;
         if (deviceFilter && click.device !== deviceFilter) return false;
         return true;
-    });
+    }), [clicks, countryFilter, deviceFilter]);
 
-    const topCountries = getTopCounts(filteredClicks, 'location_country');
-    const topDevices = getTopCounts(filteredClicks, 'device');
-    const topBrowsers = getTopCounts(filteredClicks, 'browser');
-    const topOS = getTopCounts(filteredClicks, 'os');
-    const hourlyData = getHourlyData();
-    const dailyData = getDailyData();
+    const topCountries = React.useMemo(() => getTopCounts(filteredClicks, 'location_country'), [filteredClicks]);
+    const topDevices = React.useMemo(() => getTopCounts(filteredClicks, 'device'), [filteredClicks]);
+    const topBrowsers = React.useMemo(() => getTopCounts(filteredClicks, 'browser'), [filteredClicks]);
+    const topOS = React.useMemo(() => getTopCounts(filteredClicks, 'os'), [filteredClicks]);
+    const hourlyData = React.useMemo(() => getHourlyData(filteredClicks), [filteredClicks]);
+    const dailyData = React.useMemo(() => getDailyData(filteredClicks), [filteredClicks]);
 
     // Listes pour les filtres
-    const countries = Array.from(new Set(clicks.map(c => c.location_country).filter(Boolean)));
-    const devices = Array.from(new Set(clicks.map(c => c.device).filter(Boolean)));
+    const countries = React.useMemo(() => Array.from(new Set(clicks.map(c => c.location_country).filter(Boolean))), [clicks]);
+    const devices = React.useMemo(() => Array.from(new Set(clicks.map(c => c.device).filter(Boolean))), [clicks]);
 
     const getDeviceIcon = (device: string) => {
         if (device?.toLowerCase().includes('mobile')) return <Smartphone className="h-4 w-4" />;
@@ -174,18 +203,19 @@ const UrlAnalytics = () => {
     };
 
     const exportData = () => {
-        const csvContent = [
-            ['Date/Heure', 'Pays', 'Ville', 'Appareil', 'Navigateur', 'OS', 'Référent', 'IP'].join(','),
-            ...filteredClicks.map(click => [
-                new Date(click.clicked_at).toLocaleString('fr-FR'),
-                click.location_country || '',
-                click.location_city || '',
-                click.browser || '',
-                click.os || '',
-                click.referrer || '',
-                click.ip || ''
-            ].join(','))
-        ].join('\n');
+        const header = ['Date/Heure', 'Pays', 'Ville', 'Appareil', 'Navigateur', 'OS', 'Référent', 'IP'];
+        const rows = filteredClicks.map(click => [
+            new Date(click.clicked_at).toLocaleString('fr-FR'),
+            click.location_country || '',
+            click.location_city || '',
+            click.device || '',
+            click.browser || '',
+            click.os || '',
+            click.referrer || '',
+            click.ip || ''
+        ]);
+
+        const csvContent = [header, ...rows].map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
 
         const blob = new Blob([csvContent], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
