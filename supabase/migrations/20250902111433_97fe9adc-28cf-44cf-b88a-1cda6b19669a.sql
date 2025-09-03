@@ -17,11 +17,15 @@ RETURNS TABLE (
   direct_link boolean,
   requires_password boolean,
   blocked_countries text[],
-  blocked_ips text[]
+  blocked_ips text[],
+  is_blocked boolean
 ) AS $$
 DECLARE
   rec public.shortened_urls%ROWTYPE;
   pass_ok boolean := true;
+  client_ip_text text := NULL;
+  client_inet inet := NULL;
+  ip_blocked boolean := false;
 BEGIN
   SELECT * INTO rec
   FROM public.shortened_urls
@@ -47,6 +51,40 @@ BEGIN
     END IF;
   END IF;
 
+  -- Resolve client IP (as seen by the DB connection) and check blocked_ips safely
+  BEGIN
+    client_ip_text := inet_client_addr()::text;
+    client_inet := inet_client_addr();
+  EXCEPTION WHEN OTHERS THEN
+    client_ip_text := NULL;
+    client_inet := NULL;
+  END;
+
+  IF rec.blocked_ips IS NOT NULL AND client_inet IS NOT NULL THEN
+    SELECT EXISTS (
+      SELECT 1 FROM unnest(rec.blocked_ips) AS b
+      WHERE b IS NOT NULL AND (
+        b = client_ip_text
+        OR (b ~ '^[0-9]{1,3}(\.[0-9]{1,3}){3}/[0-9]{1,2}$' AND client_inet <<= b::cidr)
+        OR (b ~ '^[0-9]{1,3}(\.[0-9]{1,3}){3}$' AND b::inet = client_inet)
+      )
+    ) INTO ip_blocked;
+  END IF;
+
+  IF ip_blocked THEN
+    -- If IP is blocked, return blocked status immediately (no original URL)
+    id := rec.id;
+    original_url := NULL;
+    expires_at := rec.expires_at;
+    direct_link := rec.direct_link;
+    requires_password := rec.password_hash IS NOT NULL;
+    blocked_countries := rec.blocked_countries;
+    blocked_ips := rec.blocked_ips;
+    is_blocked := true;
+    RETURN NEXT;
+    RETURN;
+  END IF;
+
   IF NOT pass_ok THEN
     -- Return only flags and blocking arrays without the URL
     id := rec.id;
@@ -56,6 +94,7 @@ BEGIN
     requires_password := true;
     blocked_countries := rec.blocked_countries;
     blocked_ips := rec.blocked_ips;
+    is_blocked := false;
     RETURN NEXT;
     RETURN;
   END IF;
@@ -67,6 +106,7 @@ BEGIN
   requires_password := rec.password_hash IS NOT NULL;
   blocked_countries := rec.blocked_countries;
   blocked_ips := rec.blocked_ips;
+  is_blocked := false;
   RETURN NEXT;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;

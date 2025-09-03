@@ -113,6 +113,7 @@ const Redirect: React.FC = () => {
           description?: string;
           blocked_countries?: string[];
           blocked_ips?: string[];
+          is_blocked?: boolean;
         };
         const d = data as RpcUrlData;
         const foundUrl: ShortenedUrl = {
@@ -136,30 +137,64 @@ const Redirect: React.FC = () => {
           return;
         }
 
+        // If server reports the URL as blocked (IP-based enforcement), stop here
+        if ((d.is_blocked ?? false) === true) {
+          window.location.href = '/philosophical-quotes';
+          return;
+        }
+
         setUrl(foundUrl);
 
         try {
-          const clientIP = await getClientIP();
-          if (clientIP !== 'Inconnu') {
-            const location = await getLocationFromIP(clientIP);
-
-            if (foundUrl.blockedIPs && foundUrl.blockedIPs.length > 0) {
-              const ipBlocked = isIpBlocked(foundUrl.blockedIPs, clientIP);
-              if (ipBlocked) {
-                window.location.href = '/philosophical-quotes';
-                return;
+          // Resolve client IP and location with a more reliable fallback
+          const resolveIpAndLocation = async (): Promise<{ ip: string; country: string; city: string }> => {
+            try {
+              const ip = await getClientIP();
+              if (ip && ip !== 'Inconnu') {
+                const loc = await getLocationFromIP(ip);
+                return { ip, country: loc.country || 'Inconnu', city: loc.city || 'Inconnu' };
               }
+            } catch (e) {
+              // continue to fallback
             }
 
-            if (foundUrl.blockedCountries && foundUrl.blockedCountries.length > 0) {
-              const normalizedCountry = (location.country || '').toLowerCase();
-              const isCountryInList = foundUrl.blockedCountries
-                .map((c: string) => c.toLowerCase())
-                .some((c: string) => normalizedCountry.includes(c) || c.includes(normalizedCountry));
-              if (isCountryInList) {
-                window.location.href = '/philosophical-quotes';
-                return;
+            // Fallback: try ipapi.co without IP (returns caller info)
+            try {
+              const controller = new AbortController();
+              const timeoutId = setTimeout(() => controller.abort(), 3000);
+              const resp = await fetch('https://ipapi.co/json/', { signal: controller.signal, headers: { Accept: 'application/json' } });
+              clearTimeout(timeoutId);
+              if (resp.ok) {
+                const j = await resp.json();
+                return { ip: j.ip || 'Inconnu', country: j.country_name || 'Inconnu', city: j.city || 'Inconnu' };
               }
+            } catch (e) {
+              // ignore
+            }
+
+            return { ip: 'Inconnu', country: 'Inconnu', city: 'Inconnu' };
+          };
+
+          const { ip: resolvedIp, country: resolvedCountry, city: resolvedCity } = await resolveIpAndLocation();
+
+          // IP-based blocking (supports exact IPs and CIDR ranges via isIpBlocked)
+          if (foundUrl.blockedIPs && foundUrl.blockedIPs.length > 0 && resolvedIp && resolvedIp !== 'Inconnu') {
+            const ipBlocked = isIpBlocked(foundUrl.blockedIPs, resolvedIp);
+            if (ipBlocked) {
+              window.location.href = '/philosophical-quotes';
+              return;
+            }
+          }
+
+          // Country-based blocking (robust lowercase matching)
+          if (foundUrl.blockedCountries && foundUrl.blockedCountries.length > 0 && resolvedCountry && resolvedCountry !== 'Inconnu') {
+            const normalizedCountry = resolvedCountry.toLowerCase().trim();
+            const isCountryInList = foundUrl.blockedCountries
+              .map((c: string) => String(c).toLowerCase().trim())
+              .some((c: string) => normalizedCountry.includes(c) || c.includes(normalizedCountry));
+            if (isCountryInList) {
+              window.location.href = '/philosophical-quotes';
+              return;
             }
           }
         } catch (err) {

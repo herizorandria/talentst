@@ -354,6 +354,7 @@ export type Database = {
           requires_password: boolean
           blocked_countries: string[] | null
           blocked_ips: string[] | null
+          is_blocked: boolean
         }[]
       }
       increment_photo_clicks: {
