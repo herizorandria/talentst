@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, ChevronUp, Settings, Calendar, Lock, Tag } from 'lucide-react';
+import { ChevronDown, ChevronUp, Settings, Calendar, Lock, Tag, Globe } from 'lucide-react';
+import CountrySelector from '@/components/CountrySelector';
 
 interface AdvancedUrlFormProps {
   description: string;
@@ -16,8 +17,8 @@ interface AdvancedUrlFormProps {
   setPassword: (value: string) => void;
   expiresAt: string;
   setExpiresAt: (value: string) => void;
-  blockedCountries?: string;
-  setBlockedCountries?: (value: string) => void;
+  blockedCountries?: string[];
+  setBlockedCountries?: (value: string[]) => void;
   blockedIPs?: string;
   setBlockedIPs?: (value: string) => void;
 }
@@ -31,7 +32,7 @@ const AdvancedUrlForm = ({
   setPassword,
   expiresAt,
   setExpiresAt,
-  blockedCountries = '',
+  blockedCountries = [],
   setBlockedCountries,
   blockedIPs = '',
   setBlockedIPs
@@ -132,18 +133,16 @@ const AdvancedUrlForm = ({
 
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                <Tag className="h-4 w-4" />
-                Pays bloqués (codes ou noms, séparés par virgules)
+                <Globe className="h-4 w-4" />
+                Pays bloqués
               </label>
-              <Input
-                type="text"
-                placeholder="FR, US, Madagascar, Iran..."
-                value={blockedCountries}
-                onChange={(e) => setBlockedCountries && setBlockedCountries(e.target.value)}
-                className="border-[color:var(--border-color)] focus:border-[color:var(--primary-color)]"
+              <CountrySelector
+                selectedCountries={blockedCountries}
+                onCountriesChange={(countries) => setBlockedCountries && setBlockedCountries(countries)}
+                placeholder="Sélectionner les pays à bloquer..."
               />
               <p className="text-xs text-gray-500">
-                Correspondances souples (ex: "fr" ou "France"). Laisser vide pour aucun blocage.
+                Utilisateurs de ces pays seront redirigés. Laisser vide pour aucun blocage.
               </p>
             </div>
 

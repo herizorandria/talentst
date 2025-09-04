@@ -28,7 +28,7 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
   const [password, setPassword] = useState('');
   const [expiresAt, setExpiresAt] = useState('');
   const [directLink, setDirectLink] = useState(false);
-  const [blockedCountriesInput, setBlockedCountriesInput] = useState('');
+  const [blockedCountriesInput, setBlockedCountriesInput] = useState<string[]>([]);
   const [blockedIPsInput, setBlockedIPsInput] = useState('');
   const [shortenedUrl, setShortenedUrl] = useState<ShortenedUrl | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -106,9 +106,7 @@ const UrlShortener = ({ onUrlShortened }: UrlShortenerProps) => {
         password: password.trim() || undefined, // Will be hashed in storage
         expiresAt: expiresAt ? new Date(expiresAt) : undefined,
         directLink,
-        blockedCountries: blockedCountriesInput.trim()
-          ? blockedCountriesInput.split(',').map(c => sanitizeInput(c.trim())).filter(Boolean)
-          : undefined,
+        blockedCountries: blockedCountriesInput.length > 0 ? blockedCountriesInput : undefined,
         blockedIPs: blockedIPsInput.trim()
           ? blockedIPsInput.split(',').map(ip => sanitizeInput(ip.trim())).filter(Boolean)
           : undefined

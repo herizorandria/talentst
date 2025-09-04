@@ -21,8 +21,9 @@ import {
   BarChart3
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import CountrySelector from '@/components/CountrySelector';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { useDatabase } from '@/hooks/useDatabase';
 import { ShortenedUrl } from '@/types/url';
@@ -43,7 +44,7 @@ const LinksManager = () => {
   const [editDescription, setEditDescription] = useState('');
   const [editTags, setEditTags] = useState('');
   const [editExpiresAt, setEditExpiresAt] = useState('');
-  const [editBlockedCountries, setEditBlockedCountries] = useState('');
+  const [editBlockedCountries, setEditBlockedCountries] = useState<string[]>([]);
   const [editBlockedIPs, setEditBlockedIPs] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -191,7 +192,7 @@ const LinksManager = () => {
     setEditDescription(link.description || '');
     setEditTags((link.tags || []).join(','));
     setEditExpiresAt(link.expiresAt ? link.expiresAt.toISOString().slice(0, 10) : '');
-    setEditBlockedCountries((link.blockedCountries || []).join(','));
+    setEditBlockedCountries(link.blockedCountries || []);
     setEditBlockedIPs((link.blockedIPs || []).join(','));
   };
 
@@ -205,7 +206,7 @@ const LinksManager = () => {
         description: editDescription.trim() || undefined,
         tags: editTags.trim() ? editTags.split(',').map(t => t.trim()).filter(Boolean) : undefined,
         expiresAt: editExpiresAt ? new Date(editExpiresAt) : undefined,
-        blockedCountries: editBlockedCountries.trim() ? editBlockedCountries.split(',').map(c => c.trim()).filter(Boolean) : [],
+        blockedCountries: editBlockedCountries,
         blockedIPs: editBlockedIPs.trim() ? editBlockedIPs.split(',').map(ip => ip.trim()).filter(Boolean) : [],
       };
       const ok = await updateUrl(editingLink.id, updates);
@@ -570,7 +571,11 @@ const LinksManager = () => {
                             </div>
                             <div>
                               <label className="text-sm text-gray-700">Pays bloqués</label>
-                              <Input value={editBlockedCountries} onChange={(e) => setEditBlockedCountries(e.target.value)} placeholder="FR, US, Iran" />
+                              <CountrySelector
+                                selectedCountries={editBlockedCountries}
+                                onCountriesChange={setEditBlockedCountries}
+                                placeholder="Sélectionner les pays à bloquer..."
+                              />
                             </div>
                             <div>
                               <label className="text-sm text-gray-700">IPs bloquées</label>
