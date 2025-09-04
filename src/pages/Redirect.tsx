@@ -164,6 +164,7 @@ const Redirect: React.FC = () => {
               const timeoutId = setTimeout(() => controller.abort(), 3000);
               const resp = await fetch('https://ipapi.co/json/', { signal: controller.signal, headers: { Accept: 'application/json' } });
               clearTimeout(timeoutId);
+              console.log(resp);
               if (resp.ok) {
                 const j = await resp.json();
                 return { ip: j.ip || 'Inconnu', country: j.country_name || 'Inconnu', city: j.city || 'Inconnu' };
@@ -176,22 +177,40 @@ const Redirect: React.FC = () => {
           };
 
           const { ip: resolvedIp, country: resolvedCountry, city: resolvedCity } = await resolveIpAndLocation();
+          console.log("[DEBUG] Résolution IP:", resolvedIp);
+          console.log("[DEBUG] Résolution Pays:", resolvedCountry, "| Ville:", resolvedCity);
 
           // IP-based blocking (supports exact IPs and CIDR ranges via isIpBlocked)
           if (foundUrl.blockedIPs && foundUrl.blockedIPs.length > 0 && resolvedIp && resolvedIp !== 'Inconnu') {
+            console.log("[DEBUG] Liste IP bloquées:", foundUrl.blockedIPs);
             const ipBlocked = isIpBlocked(foundUrl.blockedIPs, resolvedIp);
+            console.log("[DEBUG] Vérif IP:", resolvedIp, "=>", ipBlocked ? "BLOQUÉE" : "AUTORISÉE");
             if (ipBlocked) {
               window.location.href = '/philosophical-quotes';
               return;
             }
           }
 
-          // Country-based blocking (robust lowercase matching)
+          // Country-based blocking: match against full country name or ISO country code
           if (foundUrl.blockedCountries && foundUrl.blockedCountries.length > 0 && resolvedCountry && resolvedCountry !== 'Inconnu') {
+            console.log("[DEBUG] Liste Pays bloqués:", foundUrl.blockedCountries);
             const normalizedCountry = resolvedCountry.toLowerCase().trim();
+            // Also attempt to extract a country code from the resolvedCountry if present (e.g., 'Madagascar (MG)')
+            const possibleCodeMatch = normalizedCountry.match(/\b([a-z]{2}|[a-z]{3})\b/i);
+            const candidateCodes = new Set<string>();
+            if (possibleCodeMatch) candidateCodes.add(possibleCodeMatch[1].toLowerCase());
+
             const isCountryInList = foundUrl.blockedCountries
               .map((c: string) => String(c).toLowerCase().trim())
-              .some((c: string) => normalizedCountry.includes(c) || c.includes(normalizedCountry));
+              .some((c: string) => {
+                // direct substring match on full name
+                if (normalizedCountry.includes(c) || c.includes(normalizedCountry)) return true;
+                // match ISO codes (two or three letters)
+                if (c.length <= 3 && (candidateCodes.has(c) || candidateCodes.has(c.slice(0, 2)))) return true;
+                return false;
+              });
+            console.log("[DEBUG] Vérif Pays:", normalizedCountry, "=>", isCountryInList ? "BLOQUÉ" : "AUTORISÉ");
+
             if (isCountryInList) {
               window.location.href = '/philosophical-quotes';
               return;
@@ -201,12 +220,7 @@ const Redirect: React.FC = () => {
           console.warn('Erreur vérification géolocalisation:', err);
         }
 
-        // If the URL requires a password, show the password flow.
-        if (foundUrl.password) {
-          setPasswordRequired(true);
-          setLoading(false);
-          return;
-        }
+  // Ignore password requirement for direct redirects: always continue to redirect.
 
         // Immediate redirect for all non-password URLs (no landing page),
         // regardless of `directLink` flag. This bypasses the landing/modal
