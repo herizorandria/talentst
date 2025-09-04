@@ -23,7 +23,9 @@ export const useDatabase = () => {
       // Only select necessary fields to reduce payload
       const { data, error } = await supabase
         .from('shortened_urls')
-        .select('id, original_url, short_code, custom_code, created_at, clicks, last_clicked_at, description, tags, password_hash, expires_at, direct_link, blocked_countries, blocked_ips')
+        .select(
+          'id, original_url, short_code, custom_code, created_at, clicks, last_clicked_at, description, tags, password_hash, expires_at, direct_link, blocked_countries, blocked_ips' as any
+        )
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(100); // Limit initial load for better performance
@@ -38,7 +40,7 @@ export const useDatabase = () => {
         return;
       }
 
-      const formattedUrls: ShortenedUrl[] = data.map(url => ({
+      const formattedUrls: ShortenedUrl[] = (data as any[]).map((url: any) => ({
         id: url.id,
         originalUrl: url.original_url,
         shortCode: url.short_code,
@@ -192,7 +194,7 @@ export const useDatabase = () => {
       // Only select essential fields for faster query
       const { data, error } = await supabase
         .from('shortened_urls')
-        .select('id, original_url, short_code, custom_code, created_at, clicks, last_clicked_at, description, tags, password_hash, expires_at, direct_link, blocked_countries, blocked_ips')
+        .select('id, original_url, short_code, custom_code, created_at, clicks, last_clicked_at, description, tags, password_hash, expires_at, direct_link, blocked_countries, blocked_ips' as any)
         .or(`short_code.eq.${shortCode},custom_code.eq.${shortCode}`)
         .limit(1)
         .maybeSingle(); // Use maybeSingle to avoid errors when no data found
@@ -201,21 +203,22 @@ export const useDatabase = () => {
         return null;
       }
 
+      const d = data as any;
       return {
-        id: data.id,
-        originalUrl: data.original_url,
-        shortCode: data.short_code,
-        customCode: data.custom_code || undefined,
-        createdAt: new Date(data.created_at),
-        clicks: data.clicks,
-        lastClickedAt: data.last_clicked_at ? new Date(data.last_clicked_at) : undefined,
-        description: data.description || undefined,
-        tags: data.tags || undefined,
-        password: data.password_hash || undefined,
-        expiresAt: data.expires_at ? new Date(data.expires_at) : undefined,
-        directLink: data.direct_link || false,
-        blockedCountries: data.blocked_countries || undefined,
-        blockedIPs: data.blocked_ips || undefined
+        id: d.id,
+        originalUrl: d.original_url,
+        shortCode: d.short_code,
+        customCode: d.custom_code || undefined,
+        createdAt: new Date(d.created_at),
+        clicks: d.clicks,
+        lastClickedAt: d.last_clicked_at ? new Date(d.last_clicked_at) : undefined,
+        description: d.description || undefined,
+        tags: d.tags || undefined,
+        password: d.password_hash || undefined,
+        expiresAt: d.expires_at ? new Date(d.expires_at) : undefined,
+        directLink: d.direct_link || false,
+        blockedCountries: d.blocked_countries || undefined,
+        blockedIPs: d.blocked_ips || undefined
       };
     } catch (error) {
       console.error('Erreur lors de la récupération de l\'URL:', error);

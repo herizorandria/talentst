@@ -64,6 +64,9 @@ const Redirect: React.FC = () => {
   const [passwordError, setPasswordError] = useState('');
   const [showBotDetection, setShowBotDetection] = useState(false);
   const [humanVerified, setHumanVerified] = useState(false);
+  const [clientIp, setClientIp] = useState('Inconnu');
+  const [clientCountry, setClientCountry] = useState('Inconnu');
+  const [clientCity, setClientCity] = useState('Inconnu');
 
   const updateClickStatsAsync = useCallback(async (shortCodeParam?: string) => {
     try {
@@ -145,6 +148,10 @@ const Redirect: React.FC = () => {
 
         setUrl(foundUrl);
 
+        let resolvedIp = 'Inconnu';
+        let resolvedCountry = 'Inconnu';
+        let resolvedCity = 'Inconnu';
+
         try {
           // Resolve client IP and location with a more reliable fallback
           const resolveIpAndLocation = async (): Promise<{ ip: string; country: string; city: string }> => {
@@ -176,7 +183,13 @@ const Redirect: React.FC = () => {
             return { ip: 'Inconnu', country: 'Inconnu', city: 'Inconnu' };
           };
 
-          const { ip: resolvedIp, country: resolvedCountry, city: resolvedCity } = await resolveIpAndLocation();
+          const res = await resolveIpAndLocation();
+          resolvedIp = res.ip;
+          resolvedCountry = res.country;
+          resolvedCity = res.city;
+          setClientIp(resolvedIp);
+          setClientCountry(resolvedCountry);
+          setClientCity(resolvedCity);
           console.log("[DEBUG] Résolution IP:", resolvedIp);
           console.log("[DEBUG] Résolution Pays:", resolvedCountry, "| Ville:", resolvedCity);
 
@@ -226,7 +239,7 @@ const Redirect: React.FC = () => {
         // regardless of `directLink` flag. This bypasses the landing/modal
         // and bot-detection UI so users are taken directly to the original URL.
         try {
-          recordClick(foundUrl.id);
+          recordClick(foundUrl.id, { ip: resolvedIp, country: resolvedCountry, city: resolvedCity });
           updateClickStatsAsync(foundUrl.shortCode);
         } catch (err) {
           // Logging only; failure to record stats shouldn't block redirect
@@ -252,7 +265,7 @@ const Redirect: React.FC = () => {
 
     if (!url) return;
 
-    recordClick(url.id);
+    recordClick(url.id, { ip: clientIp, country: clientCountry, city: clientCity });
     updateClickStatsAsync(url.shortCode);
     window.location.href = url.originalUrl;
   };
@@ -284,7 +297,7 @@ const Redirect: React.FC = () => {
         return;
       }
 
-      recordClick(url.id);
+      recordClick(url.id, { ip: clientIp, country: clientCountry, city: clientCity });
       updateClickStatsAsync(url.shortCode);
 
       if (data.direct_link) {
@@ -292,7 +305,7 @@ const Redirect: React.FC = () => {
       } else {
         setShowBotDetection(false);
         setHumanVerified(true);
-        recordClick(url.id);
+         recordClick(url.id, { ip: clientIp, country: clientCountry, city: clientCity });
         updateClickStatsAsync(url.shortCode);
         window.location.href = data.original_url;
       }
@@ -386,7 +399,7 @@ const Redirect: React.FC = () => {
               <p className="text-gray-600">Redirection vers :</p>
               <div className="p-3 bg-gray-100 rounded-lg"><p className="text-sm break-all text-gray-800">{url?.originalUrl}</p></div>
               <div className="space-y-2">
-                <Button onClick={() => { recordClick(url.id); updateClickStatsAsync(url.shortCode); window.location.href = url.originalUrl; }} className="w-full bg-green-600 hover:bg-green-700">Y aller maintenant</Button>
+                <Button onClick={() => { recordClick(url.id, { ip: clientIp, country: clientCountry, city: clientCity }); updateClickStatsAsync(url.shortCode); window.location.href = url.originalUrl; }} className="w-full bg-green-600 hover:bg-green-700">Y aller maintenant</Button>
                 <Button onClick={() => window.location.href = '/'} variant="outline" className="w-full">Annuler</Button>
               </div>
             </div>

@@ -217,13 +217,21 @@ export const getLocationFromIP = async (ip: string): Promise<{ country: string; 
 };
 
 // Fonction optimisée pour enregistrer les clics en arrière-plan
-export const recordClick = async (shortUrlId: string) => {
+export const recordClick = async (
+  shortUrlId: string,
+  opts?: { ip?: string; country?: string; city?: string }
+) => {
   // Enregistrer immédiatement les données de base sans attendre les APIs
   const userAgent = navigator.userAgent;
   const deviceInfo = detectDeviceInfo(userAgent);
   const referrer = document.referrer || 'Direct';
-  
-  // Données de base à enregistrer immédiatement
+
+  // Normaliser les valeurs fournies
+  const providedIp = (opts?.ip && opts.ip !== 'Inconnu') ? opts.ip : undefined;
+  const providedCountry = (opts?.country && opts.country !== 'Inconnu') ? opts.country : undefined;
+  const providedCity = (opts?.city && opts.city !== 'Inconnu') ? opts.city : undefined;
+
+  // Données à enregistrer immédiatement (si données fournies, les utiliser directement)
   const baseClickData = {
     short_url_id: shortUrlId,
     user_agent: userAgent,
@@ -231,26 +239,24 @@ export const recordClick = async (shortUrlId: string) => {
     device: deviceInfo.device,
     os: deviceInfo.os,
     referrer: referrer,
-    ip: 'En cours...',
-    location_country: 'En cours...',
-    location_city: 'En cours...'
+    ip: providedIp ?? 'En cours...',
+    location_country: providedCountry ?? 'En cours...',
+    location_city: providedCity ?? 'En cours...'
   };
-  
+
   try {
-    // Enregistrer immédiatement avec des données partielles
     const { supabase } = await import('@/integrations/supabase/client');
     const { data: insertedData, error: insertError } = await supabase
       .from('url_clicks')
       .insert(baseClickData)
       .select('id')
       .single();
-    
+
     if (insertError) {
       console.error('Erreur lors de l\'enregistrement initial:', insertError);
       return;
     }
-    
-    // debug: log what Supabase returned
+
     console.debug('Inserted click row response:', insertedData);
     const clickId = insertedData?.id;
     if (!clickId) {
@@ -258,9 +264,12 @@ export const recordClick = async (shortUrlId: string) => {
       return;
     }
 
-    // Mettre à jour en arrière-plan avec les données géographiques
-    updateLocationDataInBackground(String(clickId));
-    
+    // Si aucune donnée fiable n'a été fournie, compléter en arrière-plan
+    const needsBgUpdate = !providedIp || !providedCountry || !providedCity;
+    if (needsBgUpdate) {
+      updateLocationDataInBackground(String(clickId));
+    }
+
   } catch (error) {
     console.error('Erreur lors de l\'enregistrement du clic:', error);
   }
