@@ -163,7 +163,7 @@ const Index = () => {
 
           <TabsContent value="statistics" className="space-y-6">
             <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-400"></div></div>}>
-              <Statistics urls={urls} />
+              <Statistics />
             </Suspense>
           </TabsContent>
 
