@@ -13,7 +13,7 @@ export default async function handler(req, res) {
 
   try {
     const { data, error } = await supabase
-      .from('urls')
+      .from('shortened_urls')
       .select('original_url')
       .eq('short_code', code)
       .single()

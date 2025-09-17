@@ -210,6 +210,8 @@ export type Database = {
       }
       shortened_urls: {
         Row: {
+          blocked_countries: string[] | null
+          blocked_ips: string[] | null
           clicks: number | null
           created_at: string
           custom_code: string | null
@@ -226,6 +228,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          blocked_countries?: string[] | null
+          blocked_ips?: string[] | null
           clicks?: number | null
           created_at?: string
           custom_code?: string | null
@@ -242,6 +246,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          blocked_countries?: string[] | null
+          blocked_ips?: string[] | null
           clicks?: number | null
           created_at?: string
           custom_code?: string | null
@@ -339,6 +345,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -347,15 +374,22 @@ export type Database = {
       get_redirect_url: {
         Args: { p_code: string; p_password?: string }
         Returns: {
+          blocked_countries: string[]
+          blocked_ips: string[]
           direct_link: boolean
           expires_at: string
           id: string
+          is_blocked: boolean
           original_url: string
           requires_password: boolean
-          blocked_countries: string[] | null
-          blocked_ips: string[] | null
-          is_blocked: boolean
         }[]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
       }
       increment_photo_clicks: {
         Args: { photo_id: string }
@@ -373,9 +407,13 @@ export type Database = {
         Args: { p_short_code: string }
         Returns: undefined
       }
+      is_admin: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -502,6 +540,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const

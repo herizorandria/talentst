@@ -11,6 +11,7 @@ const Index = lazy(() => import("./pages/Index"));
 const Redirect = lazy(() => import("./pages/Redirect"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Auth = lazy(() => import("./pages/Auth"));
+const Admin = lazy(() => import("./pages/Admin"));
 const UrlAnalytics = lazy(() => import("./pages/UrlAnalytics"));
 const PhilosophicalQuotes = lazy(() => import("./pages/PhilosophicalQuotes"));
 
@@ -47,6 +48,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/admin" element={<Admin />} />
               <Route path="/analytics/:shortCode" element={<UrlAnalytics />} />
               <Route path="/philosophical-quotes" element={<PhilosophicalQuotes />} />
               <Route path="/:shortCode" element={<Redirect />} />

@@ -83,8 +83,10 @@ export const sanitizeUrlInput = (url: string): string => {
   return sanitized;
 };
 
-// Password hashing using Web Crypto API
+// DEPRECATED: Password hashing using Web Crypto API
+// WARNING: This is deprecated and insecure. Use bcrypt via edge functions instead.
 export const hashPassword = async (password: string): Promise<string> => {
+  console.warn('DEPRECATED: hashPassword using SHA-256 is insecure. Use bcrypt via edge functions.');
   const encoder = new TextEncoder();
   const data = encoder.encode(password);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
@@ -92,15 +94,17 @@ export const hashPassword = async (password: string): Promise<string> => {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 };
 
-// Verify password
+// DEPRECATED: Verify password
+// WARNING: This is deprecated and insecure. Use bcrypt via edge functions instead.
 export const verifyPassword = async (password: string, hash: string): Promise<boolean> => {
+  console.warn('DEPRECATED: verifyPassword using SHA-256 is insecure. Use bcrypt via edge functions.');
   const passwordHash = await hashPassword(password);
   return passwordHash === hash;
 };
 
-// DEPRECATED: Basic XOR encryption for localStorage 
-// WARNING: This is not cryptographically secure and should only be used for obfuscation
-// For production applications, use proper encryption or store sensitive data server-side
+// DEPRECATED AND REMOVED: Basic XOR encryption for localStorage 
+// WARNING: This is not cryptographically secure and has been removed for security
+// Use server-side storage for sensitive data instead
 const generateEncryptionKey = (): Uint8Array => {
   // Generate a random key each session for basic obfuscation
   const key = new Uint8Array(32);
@@ -110,51 +114,16 @@ const generateEncryptionKey = (): Uint8Array => {
 
 let sessionKey: Uint8Array | null = null;
 
+// DEPRECATED AND REMOVED: Insecure client-side encryption functions
+// These functions have been removed for security reasons
 export const encryptData = async (data: string): Promise<string> => {
-  try {
-    console.warn('WARNING: Using deprecated client-side encryption. Consider server-side storage.');
-    
-    if (!sessionKey) {
-      sessionKey = generateEncryptionKey();
-    }
-    
-    const encoder = new TextEncoder();
-    const dataArray = encoder.encode(data);
-    
-    const encrypted = dataArray.map((byte, index) => 
-      byte ^ sessionKey![index % sessionKey!.length]
-    );
-    
-    // Prepend the key for this session
-    const keyAndData = new Uint8Array(sessionKey.length + encrypted.length);
-    keyAndData.set(sessionKey);
-    keyAndData.set(encrypted, sessionKey.length);
-    
-    return btoa(String.fromCharCode(...keyAndData));
-  } catch {
-    return data; // Fallback to unencrypted if encryption fails
-  }
+  console.error('SECURITY ERROR: encryptData has been disabled. Use server-side storage for sensitive data.');
+  throw new Error('Client-side encryption has been disabled for security reasons. Use server-side storage.');
 };
 
 export const decryptData = async (encryptedData: string): Promise<string> => {
-  try {
-    const keyAndData = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0));
-    
-    if (keyAndData.length < 32) {
-      throw new Error('Invalid encrypted data format');
-    }
-    
-    const key = keyAndData.slice(0, 32);
-    const encrypted = keyAndData.slice(32);
-    
-    const decrypted = encrypted.map((byte, index) => 
-      byte ^ key[index % key.length]
-    );
-    
-    return new TextDecoder().decode(decrypted);
-  } catch {
-    return encryptedData; // Fallback if decryption fails
-  }
+  console.error('SECURITY ERROR: decryptData has been disabled. Use server-side storage for sensitive data.');
+  throw new Error('Client-side decryption has been disabled for security reasons. Use server-side storage.');
 };
 
 // Enhanced rate limiting with different tiers
