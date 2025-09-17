@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import DateRangePicker from '@/components/DateRangePicker';
 import {
     ArrowLeft,
     BarChart3,
@@ -16,11 +17,14 @@ import {
     Users,
     Eye,
     Filter,
-    Download
+    Download,
+    Sun
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { format, startOfDay, endOfDay, isToday } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface Click {
     id: string;
@@ -70,6 +74,9 @@ const UrlAnalytics = () => {
     const [dateFilter, setDateFilter] = useState('7'); // derniers 7 jours par défaut
     const [countryFilter, setCountryFilter] = useState('');
     const [deviceFilter, setDeviceFilter] = useState('');
+    const [customStartDate, setCustomStartDate] = useState<Date | null>(null);
+    const [customEndDate, setCustomEndDate] = useState<Date | null>(null);
+    const [useCustomRange, setUseCustomRange] = useState(false);
 
     useEffect(() => {
         if (!user || !shortCode) {
@@ -78,7 +85,7 @@ const UrlAnalytics = () => {
         }
         fetchAnalytics();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user, shortCode, dateFilter]);
+    }, [user, shortCode, dateFilter, customStartDate, customEndDate, useCustomRange]);
 
     const fetchAnalytics = async () => {
         setLoading(true);
@@ -103,18 +110,32 @@ const UrlAnalytics = () => {
 
             setUrlInfo(urlData);
 
-            // Calculer la date de début selon le filtre
-            const now = new Date();
-            const daysAgo = parseInt(dateFilter);
-            const startDate = new Date(now.getTime() - (daysAgo * 24 * 60 * 60 * 1000));
+            // Calculer les dates selon le filtre
+            let startDate: Date;
+            let endDate: Date;
+            
+            if (useCustomRange && customStartDate && customEndDate) {
+                startDate = startOfDay(customStartDate);
+                endDate = endOfDay(customEndDate);
+            } else {
+                const now = new Date();
+                const daysAgo = parseInt(dateFilter);
+                startDate = new Date(now.getTime() - (daysAgo * 24 * 60 * 60 * 1000));
+                endDate = now;
+            }
 
             // Récupérer les clics - sélectionner seulement les colonnes utiles
-            const { data: clicksData, error: clicksError } = await supabase
+            let query = supabase
                 .from('url_clicks')
                 .select('id, ip, location_city, location_country, device, browser, os, referrer, clicked_at')
                 .eq('short_url_id', urlData.id)
-                .gte('clicked_at', startDate.toISOString())
-                .order('clicked_at', { ascending: false });
+                .gte('clicked_at', startDate.toISOString());
+            
+            if (useCustomRange && customEndDate) {
+                query = query.lte('clicked_at', endDate.toISOString());
+            }
+            
+            const { data: clicksData, error: clicksError } = await query.order('clicked_at', { ascending: false });
 
             if (clicksError) {
                 console.error('Erreur lors de la récupération des clics:', clicksError);
@@ -184,6 +205,20 @@ const UrlAnalytics = () => {
         if (deviceFilter && click.device !== deviceFilter) return false;
         return true;
     }), [clicks, countryFilter, deviceFilter]);
+
+    // Statistiques pour aujourd'hui seulement
+    const todayClicks = React.useMemo(() => 
+        clicks.filter(click => isToday(new Date(click.clicked_at)))
+    , [clicks]);
+
+    const handleCustomDateRangeChange = (startDate: Date | null, endDate: Date | null) => {
+        setCustomStartDate(startDate);
+        setCustomEndDate(endDate);
+        setUseCustomRange(!!(startDate && endDate));
+        if (startDate && endDate) {
+            setDateFilter('custom');
+        }
+    };
 
     const topCountries = React.useMemo(() => getTopCounts(filteredClicks, 'location_country'), [filteredClicks]);
     const topDevices = React.useMemo(() => getTopCounts(filteredClicks, 'device'), [filteredClicks]);
@@ -288,15 +323,34 @@ const UrlAnalytics = () => {
                                 <label className="block text-sm font-medium mb-1">Période</label>
                                 <select
                                     value={dateFilter}
-                                    onChange={(e) => setDateFilter(e.target.value)}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        setDateFilter(value);
+                                        if (value !== 'custom') {
+                                            setUseCustomRange(false);
+                                            setCustomStartDate(null);
+                                            setCustomEndDate(null);
+                                        }
+                                    }}
                                     className="border rounded px-3 py-2"
                                 >
                                     <option value="1">Dernières 24h</option>
                                     <option value="7">7 derniers jours</option>
                                     <option value="30">30 derniers jours</option>
                                     <option value="90">90 derniers jours</option>
+                                    <option value="custom">Période personnalisée</option>
                                 </select>
                             </div>
+                            {dateFilter === 'custom' && (
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Dates personnalisées</label>
+                                    <DateRangePicker
+                                        startDate={customStartDate}
+                                        endDate={customEndDate}
+                                        onDateRangeChange={handleCustomDateRangeChange}
+                                    />
+                                </div>
+                            )}
                             <div>
                                 <label className="block text-sm font-medium mb-1">Pays</label>
                                 <select
@@ -328,6 +382,48 @@ const UrlAnalytics = () => {
                                 Exporter CSV
                             </Button>
                         </div>
+                    </CardContent>
+                </Card>
+
+                {/* Statistiques du jour */}
+                <Card className="mb-6 bg-gradient-to-r from-yellow-50 to-amber-50 border-amber-200">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-amber-700">
+                            <Sun className="h-5 w-5" />
+                            Statistiques d'aujourd'hui
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div className="text-center">
+                                <p className="text-2xl font-bold text-amber-600">{todayClicks.length}</p>
+                                <p className="text-sm text-amber-700">Clics aujourd'hui</p>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-2xl font-bold text-amber-600">
+                                    {new Set(todayClicks.map(c => c.location_country).filter(Boolean)).size}
+                                </p>
+                                <p className="text-sm text-amber-700">Pays uniques</p>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-2xl font-bold text-amber-600">
+                                    {todayClicks.length > 0 ? Math.round(todayClicks.length / 24 * 10) / 10 : 0}
+                                </p>
+                                <p className="text-sm text-amber-700">Clics/heure moy.</p>
+                            </div>
+                        </div>
+                        {todayClicks.length > 0 && (
+                            <div className="mt-4 pt-4 border-t border-amber-200">
+                                <p className="text-sm text-amber-700 mb-2">Top pays aujourd'hui:</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {getTopCounts(todayClicks, 'location_country', 3).map(([country, count]) => (
+                                        <Badge key={country} variant="secondary" className="bg-amber-100 text-amber-800">
+                                            {country} ({count})
+                                        </Badge>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 
@@ -374,7 +470,9 @@ const UrlAnalytics = () => {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-2xl font-bold text-orange-600">
-                                        {filteredClicks.length > 0 ? Math.round(filteredClicks.length / Math.max(1, parseInt(dateFilter))) : 0}
+                                        {filteredClicks.length > 0 ? Math.round(filteredClicks.length / Math.max(1, useCustomRange && customStartDate && customEndDate ? 
+                                            Math.ceil((customEndDate.getTime() - customStartDate.getTime()) / (1000 * 60 * 60 * 24)) : 
+                                            parseInt(dateFilter))) : 0}
                                     </p>
                                     <p className="text-sm text-gray-600">Clics/jour moy.</p>
                                 </div>
