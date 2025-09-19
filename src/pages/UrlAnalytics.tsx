@@ -114,12 +114,13 @@ const UrlAnalytics = () => {
             let startDate: Date;
             let endDate: Date;
             
-            if (useCustomRange && customStartDate && customEndDate) {
+            if (useCustomRange && customStartDate && customEndDate && 
+                !isNaN(customStartDate.getTime()) && !isNaN(customEndDate.getTime())) {
                 startDate = startOfDay(customStartDate);
                 endDate = endOfDay(customEndDate);
             } else {
                 const now = new Date();
-                const daysAgo = parseInt(dateFilter);
+                const daysAgo = parseInt(dateFilter) || 7;
                 startDate = new Date(now.getTime() - (daysAgo * 24 * 60 * 60 * 1000));
                 endDate = now;
             }
@@ -214,8 +215,14 @@ const UrlAnalytics = () => {
     const handleCustomDateRangeChange = (startDate: Date | null, endDate: Date | null) => {
         setCustomStartDate(startDate);
         setCustomEndDate(endDate);
-        setUseCustomRange(!!(startDate && endDate));
-        if (startDate && endDate) {
+        
+        // Only enable custom range if both dates are valid
+        const bothDatesValid = startDate && endDate && 
+                              !isNaN(startDate.getTime()) && !isNaN(endDate.getTime());
+        
+        setUseCustomRange(!!bothDatesValid);
+        
+        if (bothDatesValid) {
             setDateFilter('custom');
         }
     };
