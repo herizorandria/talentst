@@ -1,5 +1,6 @@
 import { StrictMode, lazy, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
+import { Analytics } from '@vercel/analytics/react'
 import './index.css'
 
 // Lazy load the main app for better initial load performance
@@ -16,6 +17,7 @@ createRoot(document.getElementById("root")!).render(
       </div>
     }>
       <App />
+      <Analytics />
     </Suspense>
   </StrictMode>
 );
