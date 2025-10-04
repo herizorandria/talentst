@@ -387,19 +387,34 @@ const Redirect: React.FC = () => {
     return (
       <>
         <MetaTagsGenerator url={url} shortUrl={shortUrl} />
-        <div className="min-h-screen flex items-center justify-center bg-amber-50 p-4">
-          <Card className="max-w-md w-full shadow-xl">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-amber-600">
-                <AlertCircle className="h-6 w-6" />
-                Avertissement
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center space-y-4">
-                <p className="text-lg font-semibold text-gray-800">Contenu explicite</p>
-                <div className="w-8 h-8 border-4 border-amber-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                <p className="text-gray-600 text-sm">Redirection en cours...</p>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 p-4">
+          <Card className="max-w-md w-full shadow-2xl border-2 border-amber-200/50 backdrop-blur-sm bg-white/95">
+            <CardContent className="pt-8 pb-8">
+              <div className="text-center space-y-6">
+                <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center animate-pulse shadow-lg">
+                  <AlertCircle className="h-8 w-8 text-white" strokeWidth={2.5} />
+                </div>
+                
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                    Contenu Explicite
+                  </h2>
+                  <p className="text-gray-600 text-sm font-medium">
+                    Veuillez noter la nature du contenu
+                  </p>
+                </div>
+
+                <div className="py-4">
+                  <div className="relative w-12 h-12 mx-auto">
+                    <div className="absolute inset-0 border-4 border-amber-200 rounded-full"></div>
+                    <div className="absolute inset-0 border-4 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <p className="text-gray-700 font-medium">Redirection automatique</p>
+                  <p className="text-gray-500 text-xs">Vous serez redirigé dans quelques instants...</p>
+                </div>
               </div>
             </CardContent>
           </Card>
