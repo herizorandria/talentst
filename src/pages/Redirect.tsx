@@ -67,6 +67,7 @@ const Redirect: React.FC = () => {
   const [clientIp, setClientIp] = useState('Inconnu');
   const [clientCountry, setClientCountry] = useState('Inconnu');
   const [clientCity, setClientCity] = useState('Inconnu');
+  const [showContentWarning, setShowContentWarning] = useState(false);
 
   const updateClickStatsAsync = useCallback(async (shortCodeParam?: string) => {
     try {
@@ -233,20 +234,9 @@ const Redirect: React.FC = () => {
           console.warn('Erreur vérification géolocalisation:', err);
         }
 
-  // Ignore password requirement for direct redirects: always continue to redirect.
-
-        // Immediate redirect for all non-password URLs (no landing page),
-        // regardless of `directLink` flag. This bypasses the landing/modal
-        // and bot-detection UI so users are taken directly to the original URL.
-        try {
-          recordClick(foundUrl.id, { ip: resolvedIp, country: resolvedCountry, city: resolvedCity });
-          updateClickStatsAsync(foundUrl.shortCode);
-        } catch (err) {
-          // Logging only; failure to record stats shouldn't block redirect
-          console.warn('Failed to record click before redirect:', err);
-        }
-
-        window.location.href = foundUrl.originalUrl;
+        // Show content warning page instead of immediate redirect
+        setShowContentWarning(true);
+        setLoading(false);
         return;
 
       } catch (err) {
@@ -347,6 +337,58 @@ const Redirect: React.FC = () => {
   }
 
   const shortUrl = `${window.location.origin}/${shortCode}`;
+
+  const handleContentWarningConfirm = () => {
+    if (!url) return;
+    
+    try {
+      recordClick(url.id, { ip: clientIp, country: clientCountry, city: clientCity });
+      updateClickStatsAsync(url.shortCode);
+    } catch (err) {
+      console.warn('Failed to record click before redirect:', err);
+    }
+    
+    window.location.href = url.originalUrl;
+  };
+
+  if (showContentWarning) {
+    return (
+      <>
+        <MetaTagsGenerator url={url} shortUrl={shortUrl} />
+        <div className="min-h-screen flex items-center justify-center bg-amber-50 p-4">
+          <Card className="max-w-md w-full shadow-xl">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-amber-600">
+                <AlertCircle className="h-6 w-6" />
+                Avertissement
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center space-y-6">
+                <p className="text-lg font-semibold text-gray-800">Contenu explicite</p>
+                <p className="text-gray-600">En cliquant sur "Oui", vous confirmez avoir pris connaissance de cet avertissement.</p>
+                <div className="space-y-2">
+                  <Button 
+                    onClick={handleContentWarningConfirm} 
+                    className="w-full bg-amber-600 hover:bg-amber-700"
+                  >
+                    Oui
+                  </Button>
+                  <Button 
+                    onClick={() => window.location.href = '/'} 
+                    variant="outline" 
+                    className="w-full"
+                  >
+                    Annuler
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </>
+    );
+  }
 
   if (passwordRequired) {
     return (
