@@ -89,11 +89,11 @@ const Redirect: React.FC = () => {
 
     const loadAndValidateUrl = async () => {
       try {
-        const botDetection = detectBot();
+        const initialBotDetection = detectBot();
 
-        if (botDetection.isBot && botDetection.confidence > 95) {
-          if (botDetection.redirectUrl) {
-            window.location.replace(botDetection.redirectUrl);
+        if (initialBotDetection.isBot && initialBotDetection.confidence > 95) {
+          if (initialBotDetection.redirectUrl) {
+            window.location.replace(initialBotDetection.redirectUrl);
             return;
           }
         }
@@ -234,7 +234,23 @@ const Redirect: React.FC = () => {
           console.warn('Erreur vérification géolocalisation:', err);
         }
 
-        // Show content warning page instead of immediate redirect
+        // Check if password is required
+        if (foundUrl.password) {
+          setPasswordRequired(true);
+          setLoading(false);
+          return;
+        }
+
+        // Bot detection for non-password URLs
+        const botDetection = detectBot();
+        if (botDetection.isBot && botDetection.confidence > 90) {
+          // High confidence bot detected - show bot detection challenge
+          setShowBotDetection(true);
+          setLoading(false);
+          return;
+        }
+
+        // Show content warning page for verified humans
         setShowContentWarning(true);
         setLoading(false);
         return;
@@ -255,9 +271,8 @@ const Redirect: React.FC = () => {
 
     if (!url) return;
 
-    recordClick(url.id, { ip: clientIp, country: clientCountry, city: clientCity });
-    updateClickStatsAsync(url.shortCode);
-    window.location.href = url.originalUrl;
+    // After bot verification, show content warning
+    setShowContentWarning(true);
   };
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
