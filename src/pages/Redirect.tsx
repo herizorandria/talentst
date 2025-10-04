@@ -366,6 +366,23 @@ const Redirect: React.FC = () => {
     window.location.href = url.originalUrl;
   };
 
+  // Auto-redirect after showing content warning
+  useEffect(() => {
+    if (showContentWarning && url) {
+      const timer = setTimeout(() => {
+        try {
+          recordClick(url.id, { ip: clientIp, country: clientCountry, city: clientCity });
+          updateClickStatsAsync(url.shortCode);
+        } catch (err) {
+          console.warn('Failed to record click before redirect:', err);
+        }
+        window.location.href = url.originalUrl;
+      }, 2500); // 2.5 seconds delay
+
+      return () => clearTimeout(timer);
+    }
+  }, [showContentWarning, url, clientIp, clientCountry, clientCity, updateClickStatsAsync]);
+
   if (showContentWarning) {
     return (
       <>
@@ -379,24 +396,10 @@ const Redirect: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center space-y-6">
+              <div className="text-center space-y-4">
                 <p className="text-lg font-semibold text-gray-800">Contenu explicite</p>
-                <p className="text-gray-600">En cliquant sur "Oui", vous confirmez avoir pris connaissance de cet avertissement.</p>
-                <div className="space-y-2">
-                  <Button 
-                    onClick={handleContentWarningConfirm} 
-                    className="w-full bg-amber-600 hover:bg-amber-700"
-                  >
-                    Oui
-                  </Button>
-                  <Button 
-                    onClick={() => window.location.href = '/'} 
-                    variant="outline" 
-                    className="w-full"
-                  >
-                    Annuler
-                  </Button>
-                </div>
+                <div className="w-8 h-8 border-4 border-amber-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                <p className="text-gray-600 text-sm">Redirection en cours...</p>
               </div>
             </CardContent>
           </Card>
