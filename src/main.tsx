@@ -17,7 +17,7 @@ createRoot(document.getElementById("root")!).render(
       </div>
     }>
       <App />
-      <Analytics />
     </Suspense>
+    <Analytics />
   </StrictMode>
 );
