@@ -2,6 +2,7 @@
 
 **ShortLink Pro** est un raccourcisseur d'URLs professionnel et sécurisé, développé avec React, TypeScript et Supabase. Il offre des fonctionnalités avancées pour créer, gérer et analyser vos liens raccourcis.
 
+
 ## ✨ Fonctionnalités principales
 
 ### 🎯 Raccourcissement d'URLs
