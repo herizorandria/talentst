@@ -5,6 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import DateRangePicker from '@/components/DateRangePicker';
+import AdvancedStats from '@/components/AdvancedStats';
+import GeographicMap from '@/components/GeographicMap';
+import LandingPageConfig from '@/components/LandingPageConfig';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     ArrowLeft,
     BarChart3,
@@ -805,6 +809,27 @@ const UrlAnalytics = () => {
                         </div>
                     </CardContent>
                 </Card>
+
+                {/* Tabs for Advanced Stats, Map, and Landing Page */}
+                <Tabs defaultValue="advanced" className="mt-8">
+                    <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="advanced">Stats Avancées</TabsTrigger>
+                        <TabsTrigger value="map">Carte Géographique</TabsTrigger>
+                        <TabsTrigger value="landing">Landing Page</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="advanced" className="mt-6">
+                        <AdvancedStats clicks={filteredClicks} shortCode={shortCode || ''} />
+                    </TabsContent>
+                    
+                    <TabsContent value="map" className="mt-6">
+                        <GeographicMap clicks={filteredClicks} />
+                    </TabsContent>
+                    
+                    <TabsContent value="landing" className="mt-6">
+                        <LandingPageConfig shortUrlId={urlInfo.id} shortCode={shortCode || ''} />
+                    </TabsContent>
+                </Tabs>
             </div>
         </div>
     );

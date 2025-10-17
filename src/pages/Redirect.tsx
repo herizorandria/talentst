@@ -148,6 +148,20 @@ const Redirect: React.FC = () => {
 
         setUrl(foundUrl);
 
+        // Check if landing page is configured and enabled
+        const { data: landingData } = await supabase
+          .from('landing_pages')
+          .select('enabled')
+          .eq('short_url_id', foundUrl.id)
+          .eq('enabled', true)
+          .maybeSingle();
+
+        if (landingData?.enabled) {
+          // Redirect to landing page
+          window.location.href = `/landing/${shortCode}`;
+          return;
+        }
+
         let resolvedIp = 'Inconnu';
         let resolvedCountry = 'Inconnu';
         let resolvedCity = 'Inconnu';

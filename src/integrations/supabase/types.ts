@@ -107,6 +107,86 @@ export type Database = {
         }
         Relationships: []
       }
+      landing_pages: {
+        Row: {
+          background_color: string | null
+          background_gradient_end: string | null
+          background_gradient_start: string | null
+          background_image_url: string | null
+          background_type: string
+          button_color: string | null
+          button_text: string | null
+          created_at: string
+          description: string | null
+          enabled: boolean
+          id: string
+          layout_type: string
+          logo_url: string | null
+          redirect_delay: number | null
+          redirect_mode: string
+          short_url_id: string
+          show_countdown: boolean | null
+          show_url_preview: boolean | null
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          background_color?: string | null
+          background_gradient_end?: string | null
+          background_gradient_start?: string | null
+          background_image_url?: string | null
+          background_type?: string
+          button_color?: string | null
+          button_text?: string | null
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          layout_type?: string
+          logo_url?: string | null
+          redirect_delay?: number | null
+          redirect_mode?: string
+          short_url_id: string
+          show_countdown?: boolean | null
+          show_url_preview?: boolean | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          background_color?: string | null
+          background_gradient_end?: string | null
+          background_gradient_start?: string | null
+          background_image_url?: string | null
+          background_type?: string
+          button_color?: string | null
+          button_text?: string | null
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          layout_type?: string
+          logo_url?: string | null
+          redirect_delay?: number | null
+          redirect_mode?: string
+          short_url_id?: string
+          show_countdown?: boolean | null
+          show_url_preview?: boolean | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "landing_pages_short_url_id_fkey"
+            columns: ["short_url_id"]
+            isOneToOne: false
+            referencedRelation: "shortened_urls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       photos: {
         Row: {
           category_id: string | null
