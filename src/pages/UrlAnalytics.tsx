@@ -588,7 +588,7 @@ const UrlAnalytics = () => {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {filteredClicks.slice(0, 50).map((click) => {
+                                                    {filteredClicks.slice(0, 100).map((click) => {
                                                         const clickDate = new Date(click.clicked_at);
                                                         return (
                                                             <tr key={click.id} className="border-b hover:bg-gray-50">
@@ -605,7 +605,7 @@ const UrlAnalytics = () => {
                                                     })}
                                                 </tbody>
                                             </table>
-                                            {filteredClicks.length > 50 && (<p className="text-center text-gray-500 mt-4">Affichage des 50 premiers clics sur {filteredClicks.length} total</p>)}
+                                            {filteredClicks.length > 100 && (<p className="text-center text-gray-500 mt-4">Affichage des 100 premiers clics sur {filteredClicks.length} total</p>)}
                                         </div>
                                     </CardContent>
                                 </Card>
