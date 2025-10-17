@@ -73,7 +73,10 @@ const UrlAnalytics = () => {
     const [loading, setLoading] = useState(true);
     const [dateFilter, setDateFilter] = useState('7'); // derniers 7 jours par défaut
     const [countryFilter, setCountryFilter] = useState('');
+    const [countryFilterMode, setCountryFilterMode] = useState<'include' | 'exclude'>('include');
+    const [referrerFilter, setReferrerFilter] = useState('');
     const [deviceFilter, setDeviceFilter] = useState('');
+    const [hourFilter, setHourFilter] = useState('');
     const [customStartDate, setCustomStartDate] = useState<Date | null>(null);
     const [customEndDate, setCustomEndDate] = useState<Date | null>(null);
     const [useCustomRange, setUseCustomRange] = useState(false);
@@ -202,10 +205,31 @@ const UrlAnalytics = () => {
 
     // Filtrer les clics
     const filteredClicks = React.useMemo(() => clicks.filter(click => {
-        if (countryFilter && click.location_country !== countryFilter) return false;
+        // Filtre pays avec mode inclusion/exclusion
+        if (countryFilter) {
+            const countryMatch = click.location_country === countryFilter;
+            if (countryFilterMode === 'include' && !countryMatch) return false;
+            if (countryFilterMode === 'exclude' && countryMatch) return false;
+        }
+        
+        // Filtre référent
+        if (referrerFilter) {
+            const referrer = click.referrer?.toLowerCase() || '';
+            if (!referrer.includes(referrerFilter.toLowerCase()) && referrerFilter.toLowerCase() !== 'direct') return false;
+            if (referrerFilter.toLowerCase() === 'direct' && referrer && referrer !== 'direct') return false;
+        }
+        
+        // Filtre appareil
         if (deviceFilter && click.device !== deviceFilter) return false;
+        
+        // Filtre heure
+        if (hourFilter) {
+            const clickHour = new Date(click.clicked_at).getHours();
+            if (clickHour.toString() !== hourFilter) return false;
+        }
+        
         return true;
-    }), [clicks, countryFilter, deviceFilter]);
+    }), [clicks, countryFilter, countryFilterMode, referrerFilter, deviceFilter, hourFilter]);
 
     // Statistiques pour aujourd'hui seulement
     const todayClicks = React.useMemo(() => 
@@ -237,6 +261,23 @@ const UrlAnalytics = () => {
     // Listes pour les filtres
     const countries = React.useMemo(() => Array.from(new Set(clicks.map(c => c.location_country).filter(Boolean))), [clicks]);
     const devices = React.useMemo(() => Array.from(new Set(clicks.map(c => c.device).filter(Boolean))), [clicks]);
+    const referrers = React.useMemo(() => {
+        const refs = clicks.map(c => {
+            const ref = c.referrer;
+            if (!ref || ref === 'Direct') return 'Direct';
+            if (ref.includes('facebook.com')) return 'Facebook';
+            if (ref.includes('instagram.com')) return 'Instagram';
+            if (ref.includes('twitter.com')) return 'Twitter';
+            if (ref.includes('linkedin.com')) return 'LinkedIn';
+            if (ref.includes('google.com')) return 'Google';
+            try {
+                return new URL(ref).hostname;
+            } catch {
+                return ref;
+            }
+        });
+        return Array.from(new Set(refs)).sort();
+    }, [clicks]);
 
     const getDeviceIcon = (device: string) => {
         if (device?.toLowerCase().includes('mobile')) return <Smartphone className="h-4 w-4" />;
@@ -245,17 +286,21 @@ const UrlAnalytics = () => {
     };
 
     const exportData = () => {
-        const header = ['Date/Heure', 'Pays', 'Ville', 'Appareil', 'Navigateur', 'OS', 'Référent', 'IP'];
-        const rows = filteredClicks.map(click => [
-            new Date(click.clicked_at).toLocaleString('fr-FR'),
-            click.location_country || '',
-            click.location_city || '',
-            click.device || '',
-            click.browser || '',
-            click.os || '',
-            click.referrer || '',
-            click.ip || ''
-        ]);
+        const header = ['Date', 'Heure', 'Pays', 'Ville', 'Appareil', 'Navigateur', 'OS', 'Référent', 'IP'];
+        const rows = filteredClicks.map(click => {
+            const date = new Date(click.clicked_at);
+            return [
+                date.toLocaleDateString('fr-FR'),
+                date.toLocaleTimeString('fr-FR'),
+                click.location_country || '',
+                click.location_city || '',
+                click.device || '',
+                click.browser || '',
+                click.os || '',
+                click.referrer || '',
+                click.ip || ''
+            ];
+        });
 
         const csvContent = [header, ...rows].map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
 
@@ -359,15 +404,56 @@ const UrlAnalytics = () => {
                                 </div>
                             )}
                             <div>
-                                <label className="block text-sm font-medium mb-1">Pays</label>
+                                <label className="block text-sm font-medium mb-1">Heure</label>
                                 <select
-                                    value={countryFilter}
-                                    onChange={(e) => setCountryFilter(e.target.value)}
+                                    value={hourFilter}
+                                    onChange={(e) => setHourFilter(e.target.value)}
                                     className="border rounded px-3 py-2"
                                 >
-                                    <option value="">Tous les pays</option>
-                                    {countries.map(country => (
-                                        <option key={country} value={country}>{country}</option>
+                                    <option value="">Toutes les heures</option>
+                                    {Array.from({ length: 24 }, (_, i) => (
+                                        <option key={i} value={i}>{i}h - {i + 1}h</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="flex gap-2">
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Pays</label>
+                                    <select
+                                        value={countryFilter}
+                                        onChange={(e) => setCountryFilter(e.target.value)}
+                                        className="border rounded px-3 py-2"
+                                    >
+                                        <option value="">Tous les pays</option>
+                                        {countries.map(country => (
+                                            <option key={country} value={country}>{country}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                {countryFilter && (
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Mode</label>
+                                        <select
+                                            value={countryFilterMode}
+                                            onChange={(e) => setCountryFilterMode(e.target.value as 'include' | 'exclude')}
+                                            className="border rounded px-3 py-2"
+                                        >
+                                            <option value="include">Seulement</option>
+                                            <option value="exclude">Sauf</option>
+                                        </select>
+                                    </div>
+                                )}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Référent</label>
+                                <select
+                                    value={referrerFilter}
+                                    onChange={(e) => setReferrerFilter(e.target.value)}
+                                    className="border rounded px-3 py-2"
+                                >
+                                    <option value="">Tous les référents</option>
+                                    {referrers.map(ref => (
+                                        <option key={ref} value={ref}>{ref}</option>
                                     ))}
                                 </select>
                             </div>
@@ -635,7 +721,8 @@ const UrlAnalytics = () => {
                             <table className="w-full text-sm">
                                 <thead>
                                     <tr className="border-b">
-                                        <th className="text-left p-2">Date/Heure</th>
+                                        <th className="text-left p-2">Date</th>
+                                        <th className="text-left p-2">Heure</th>
                                         <th className="text-left p-2">Localisation</th>
                                         <th className="text-left p-2">Appareil</th>
                                         <th className="text-left p-2">Navigateur</th>
@@ -645,11 +732,16 @@ const UrlAnalytics = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredClicks.slice(0, 50).map((click) => (
-                                        <tr key={click.id} className="border-b hover:bg-gray-50">
-                                            <td className="p-2">
-                                                {new Date(click.clicked_at).toLocaleString('fr-FR')}
-                                            </td>
+                                    {filteredClicks.slice(0, 50).map((click) => {
+                                        const clickDate = new Date(click.clicked_at);
+                                        return (
+                                            <tr key={click.id} className="border-b hover:bg-gray-50">
+                                                <td className="p-2">
+                                                    {clickDate.toLocaleDateString('fr-FR')}
+                                                </td>
+                                                <td className="p-2">
+                                                    {clickDate.toLocaleTimeString('fr-FR')}
+                                                </td>
                                             <td className="p-2">
                                                 {click.location_city && click.location_country
                                                     ? `${click.location_city}, ${click.location_country}`
@@ -680,11 +772,12 @@ const UrlAnalytics = () => {
                                                  })()
                                                 }
                                             </td>
-                                            <td className="p-2 font-mono text-xs">
-                                                {click.ip && click.ip !== 'En cours...' ? click.ip : 'Inconnu'}
-                                            </td>
-                                        </tr>
-                                    ))}
+                                                <td className="p-2 font-mono text-xs">
+                                                    {click.ip && click.ip !== 'En cours...' ? click.ip : 'Inconnu'}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                             {filteredClicks.length > 50 && (

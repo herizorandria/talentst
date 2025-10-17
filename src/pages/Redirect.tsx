@@ -280,8 +280,10 @@ const Redirect: React.FC = () => {
 
     if (!url) return;
 
-    // After bot verification, show content warning
-    setShowContentWarning(true);
+    // After bot verification, redirect
+    recordClick(url.id, { ip: clientIp, country: clientCountry, city: clientCity });
+    updateClickStatsAsync(url.shortCode);
+    window.location.href = url.originalUrl;
   };
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
