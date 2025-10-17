@@ -6,3 +6,7 @@ ADD COLUMN button_url TEXT,
 ADD COLUMN show_location BOOLEAN NOT NULL DEFAULT false,
 ADD COLUMN show_verified_badge BOOLEAN NOT NULL DEFAULT false,
 ADD COLUMN countdown_to TIMESTAMP WITH TIME ZONE;
+ALTER TABLE landing_pages ADD COLUMN button_icon text;
+ALTER TABLE landing_pages ADD COLUMN profile_photo_bucket_path text;
+ALTER TABLE landing_pages ADD COLUMN profile_photo_source text;
+
