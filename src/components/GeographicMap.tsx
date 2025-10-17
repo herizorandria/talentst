@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import React from 'react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { MapPin } from 'lucide-react';
+import { Icon } from 'leaflet';
 
 interface GeographicMapProps {
   clicks: Array<{
@@ -13,123 +13,37 @@ interface GeographicMapProps {
   }>;
 }
 
-const GeographicMap = ({ clicks }: GeographicMapProps) => {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState('');
-  const [isTokenSet, setIsTokenSet] = useState(false);
+// Custom icon for markers to fix default icon issue with webpack
+const customIcon = new Icon({
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    shadowSize: [41, 41],
+});
 
-  // Country coordinates for markers
+const GeographicMap = ({ clicks }: GeographicMapProps) => {
+  // Country coordinates for markers [lat, lng]
   const countryCoordinates: Record<string, [number, number]> = {
-    'France': [2.3522, 48.8566],
-    'Madagascar': [47.5079, -18.8792],
-    'USA': [-95.7129, 37.0902],
-    'UK': [-0.1276, 51.5074],
-    'Germany': [10.4515, 51.1657],
-    'Spain': [-3.7038, 40.4168],
-    'Italy': [12.5674, 41.8719],
-    'Canada': [-106.3468, 56.1304],
-    'Australia': [133.7751, -25.2744],
-    'Japan': [138.2529, 36.2048],
+    'France': [48.8566, 2.3522],
+    'Madagascar': [-18.8792, 47.5079],
+    'USA': [37.0902, -95.7129],
+    'UK': [51.5074, -0.1276],
+    'Germany': [51.1657, 10.4515],
+    'Spain': [40.4168, -3.7038],
+    'Italy': [41.8719, 12.5674],
+    'Canada': [56.1304, -106.3468],
+    'Australia': [-25.2744, 133.7751],
+    'Japan': [36.2048, 138.2529],
   };
 
-  useEffect(() => {
-    if (!mapContainer.current || !isTokenSet || !mapboxToken) return;
-
-    // Initialize map
-    mapboxgl.accessToken = mapboxToken;
-
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/light-v11',
-      zoom: 1.5,
-      center: [20, 20],
-    });
-
-    // Add navigation controls
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-
-    // Count clicks by country
-    const countryClicks: Record<string, number> = {};
-    clicks.forEach(click => {
-      const country = click.location_country || 'Unknown';
-      countryClicks[country] = (countryClicks[country] || 0) + 1;
-    });
-
-    // Add markers for each country with clicks
-    Object.entries(countryClicks).forEach(([country, count]) => {
-      const coords = countryCoordinates[country];
-      if (coords && map.current) {
-        const el = document.createElement('div');
-        el.className = 'marker';
-        el.style.backgroundColor = '#f59e0b';
-        el.style.width = `${Math.min(20 + count * 2, 50)}px`;
-        el.style.height = `${Math.min(20 + count * 2, 50)}px`;
-        el.style.borderRadius = '50%';
-        el.style.opacity = '0.7';
-        el.style.border = '2px solid white';
-
-        new mapboxgl.Marker(el)
-          .setLngLat(coords)
-          .setPopup(
-            new mapboxgl.Popup({ offset: 25 })
-              .setHTML(`<strong>${country}</strong><br/>${count} clics`)
-          )
-          .addTo(map.current);
-      }
-    });
-
-    return () => {
-      map.current?.remove();
-    };
-  }, [clicks, isTokenSet, mapboxToken]);
-
-  if (!isTokenSet) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
-            Carte de Distribution Géographique
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <p className="text-sm text-gray-600">
-              Pour afficher la carte interactive, veuillez entrer votre token Mapbox public.
-            </p>
-            <p className="text-xs text-gray-500">
-              Obtenez votre token sur{' '}
-              <a
-                href="https://account.mapbox.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                mapbox.com
-              </a>
-            </p>
-            <div className="flex gap-2">
-              <Input
-                type="text"
-                placeholder="pk.eyJ1Ijoi..."
-                value={mapboxToken}
-                onChange={(e) => setMapboxToken(e.target.value)}
-                className="flex-1"
-              />
-              <button
-                onClick={() => setIsTokenSet(true)}
-                disabled={!mapboxToken}
-                className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 disabled:opacity-50"
-              >
-                Activer
-              </button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  // Count clicks by country
+  const countryClicks: Record<string, number> = {};
+  clicks.forEach(click => {
+    const country = click.location_country || 'Unknown';
+    countryClicks[country] = (countryClicks[country] || 0) + 1;
+  });
 
   return (
     <Card>
@@ -140,7 +54,27 @@ const GeographicMap = ({ clicks }: GeographicMapProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div ref={mapContainer} className="h-[400px] rounded-lg shadow-lg" />
+        <MapContainer center={[20, 20]} zoom={2} style={{ height: '400px', width: '100%' }} className="rounded-lg shadow-lg z-0">
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          />
+          {Object.entries(countryClicks).map(([country, count]) => {
+            const coords = countryCoordinates[country];
+            if (coords) {
+              return (
+                <Marker key={country} position={coords} icon={customIcon}>
+                  <Popup>
+                    <strong>{country}</strong>
+                    <br />
+                    {count} clics
+                  </Popup>
+                </Marker>
+              );
+            }
+            return null;
+          })}
+        </MapContainer>
       </CardContent>
     </Card>
   );
