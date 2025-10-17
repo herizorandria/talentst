@@ -18,7 +18,8 @@ import {
     Eye,
     Filter,
     Download,
-    Sun
+    Sun,
+    RotateCcw
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -317,6 +318,18 @@ const UrlAnalytics = () => {
         navigate('/?tab=linksmanager');
     };
 
+    const resetFilters = () => {
+        setDateFilter('7');
+        setCountryFilter('');
+        setCountryFilterMode('include');
+        setReferrerFilter('');
+        setDeviceFilter('');
+        setHourFilter('');
+        setCustomStartDate(null);
+        setCustomEndDate(null);
+        setUseCustomRange(false);
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-amber-100 flex items-center justify-center">
@@ -470,6 +483,10 @@ const UrlAnalytics = () => {
                                     ))}
                                 </select>
                             </div>
+                            <Button onClick={resetFilters} variant="outline">
+                                <RotateCcw className="h-4 w-4 mr-2" />
+                                Réinitialiser
+                            </Button>
                             <Button onClick={exportData} variant="outline">
                                 <Download className="h-4 w-4 mr-2" />
                                 Exporter CSV
