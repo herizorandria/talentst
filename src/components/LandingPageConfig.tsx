@@ -96,6 +96,13 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
 
   return (
     <div className="space-y-6">
+      <div className="text-sm text-gray-600 bg-gray-100 p-4 rounded">
+                <p className="font-medium mb-1">URL de votre landing page:</p>
+                <div className="flex items-center gap-2">
+                    <a href={`${window.location.origin}/${shortCode}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all">{window.location.origin}/{shortCode}</a>
+                    <Button size="sm" variant="ghost" onClick={copyToClipboard}>{copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}</Button>
+                </div>
+              </div>
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2"><Settings className="h-5 w-5" />Configuration Landing Page</CardTitle></CardHeader>
         <CardContent className="space-y-6">
@@ -161,13 +168,7 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
 
               <div className="pt-6"><Button onClick={handleSave} disabled={loading} className="w-full">{loading ? 'Sauvegarde...' : 'Sauvegarder'}</Button></div>
 
-              <div className="text-sm text-gray-600 bg-gray-100 p-4 rounded">
-                <p className="font-medium mb-1">URL de votre landing page:</p>
-                <div className="flex items-center gap-2">
-                    <a href={`${window.location.origin}/${shortCode}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all">{window.location.origin}/{shortCode}</a>
-                    <Button size="sm" variant="ghost" onClick={copyToClipboard}>{copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}</Button>
-                </div>
-              </div>
+              
             </>
           )}
         </CardContent>
