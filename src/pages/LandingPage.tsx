@@ -7,34 +7,34 @@ import { differenceInSeconds, parseISO } from 'date-fns';
 
 interface LandingPageData {
   background_type: string;
-  background_color: string;
-  background_gradient_start: string;
-  background_gradient_end: string;
-  background_image_url: string;
+  background_color: string | null;
+  background_gradient_start: string | null;
+  background_gradient_end: string | null;
+  background_image_url: string | null;
   layout_type: string;
   title: string;
-  subtitle: string;
-  description: string;
-  button_text: string;
-  button_color: string;
-  button_url: string;
-  button_icon: string;
-  show_countdown: boolean;
-  redirect_delay: number;
-  profile_photo_source: string;
-  profile_photo_url: string;
-  profile_photo_bucket_path: string;
-  user_name: string;
-  user_bio: string;
+  subtitle: string | null;
+  description: string | null;
+  button_text: string | null;
+  button_color: string | null;
+  button_url: string | null;
+  button_icon: string | null;
+  show_countdown: boolean | null;
+  redirect_delay: number | null;
+  profile_photo_source: string | null;
+  profile_photo_url: string | null;
+  profile_photo_bucket_path: string | null;
+  user_name: string | null;
+  user_bio: string | null;
   show_location: boolean;
   show_verified_badge: boolean;
-  countdown_to: string;
+  countdown_to: string | null;
 }
 
 const DynamicIcon = ({ name, ...props }: { name: string, [key: string]: any }) => {
-    const LucideIcon = icons[name as keyof typeof icons];
-    if (!LucideIcon) return <icons.ArrowRight {...props} />;
-    return <LucideIcon {...props} />;
+    const IconComponent = icons[name as keyof typeof icons] as React.ComponentType<any>;
+    if (!IconComponent) return <icons.ArrowRight {...props} />;
+    return <IconComponent {...props} />;
 };
 
 const LandingPage = () => {
@@ -56,12 +56,13 @@ const LandingPage = () => {
 
         const { data: landingData } = await supabase.from('landing_pages').select('*').eq('short_url_id', urlData.id).eq('enabled', true).maybeSingle();
         if (landingData) {
-          setConfig(landingData as LandingPageData);
-          if (landingData.countdown_to) {
-            const seconds = differenceInSeconds(parseISO(landingData.countdown_to), new Date());
+          const configData: any = landingData;
+          setConfig(configData);
+          if (configData.countdown_to) {
+            const seconds = differenceInSeconds(parseISO(configData.countdown_to), new Date());
             setCountdown(seconds > 0 ? seconds : 0);
-          } else if (landingData.show_countdown) {
-            setCountdown(landingData.redirect_delay);
+          } else if (configData.show_countdown) {
+            setCountdown(configData.redirect_delay || 3);
           }
         } else {
           window.location.href = urlData.original_url;

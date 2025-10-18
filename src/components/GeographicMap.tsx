@@ -1,9 +1,6 @@
 import React from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin } from 'lucide-react';
-import { Icon } from 'leaflet';
 
 interface GeographicMapProps {
   clicks: Array<{
@@ -13,37 +10,18 @@ interface GeographicMapProps {
   }>;
 }
 
-// Custom icon for markers to fix default icon issue with webpack
-const customIcon = new Icon({
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-    shadowSize: [41, 41],
-});
-
 const GeographicMap = ({ clicks }: GeographicMapProps) => {
-  // Country coordinates for markers [lat, lng]
-  const countryCoordinates: Record<string, [number, number]> = {
-    'France': [48.8566, 2.3522],
-    'Madagascar': [-18.8792, 47.5079],
-    'USA': [37.0902, -95.7129],
-    'UK': [51.5074, -0.1276],
-    'Germany': [51.1657, 10.4515],
-    'Spain': [40.4168, -3.7038],
-    'Italy': [41.8719, 12.5674],
-    'Canada': [56.1304, -106.3468],
-    'Australia': [-25.2744, 133.7751],
-    'Japan': [36.2048, 138.2529],
-  };
-
   // Count clicks by country
   const countryClicks: Record<string, number> = {};
   clicks.forEach(click => {
     const country = click.location_country || 'Unknown';
     countryClicks[country] = (countryClicks[country] || 0) + 1;
   });
+
+  // Sort countries by click count
+  const sortedCountries = Object.entries(countryClicks)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 10);
 
   return (
     <Card>
@@ -54,27 +32,26 @@ const GeographicMap = ({ clicks }: GeographicMapProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <MapContainer center={[20, 20]} zoom={2} style={{ height: '400px', width: '100%' }} className="rounded-lg shadow-lg z-0">
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          />
-          {Object.entries(countryClicks).map(([country, count]) => {
-            const coords = countryCoordinates[country];
-            if (coords) {
-              return (
-                <Marker key={country} position={coords} icon={customIcon}>
-                  <Popup>
-                    <strong>{country}</strong>
-                    <br />
-                    {count} clics
-                  </Popup>
-                </Marker>
-              );
-            }
-            return null;
-          })}
-        </MapContainer>
+        <div className="space-y-4">
+          {sortedCountries.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">Aucune donnée géographique disponible</p>
+          ) : (
+            sortedCountries.map(([country, count]) => (
+              <div key={country} className="flex items-center justify-between">
+                <span className="text-sm font-medium">{country}</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-primary rounded-full transition-all"
+                      style={{ width: `${(count / sortedCountries[0][1]) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-sm text-muted-foreground w-12 text-right">{count}</span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </CardContent>
     </Card>
   );

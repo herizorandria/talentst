@@ -118,8 +118,8 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
                 <div className="space-y-2">
                     <Label>Source de la photo</Label>
                     <div className="flex gap-2 rounded-md p-1">
-                        <Button variant={config.profile_photo_source === 'url' ? 'primary' : 'ghost'} size="sm" onClick={() => setConfig({...config, profile_photo_source: 'url'})} className="flex-1"><Link className="h-4 w-4 mr-2"/>URL</Button>
-                        <Button variant={config.profile_photo_source === 'bucket' ? 'primary' : 'ghost'} size="sm" onClick={() => setConfig({...config, profile_photo_source: 'bucket'})} className="flex-1"><Image className="h-4 w-4 mr-2"/>Fichier</Button>
+                        <Button variant={config.profile_photo_source === 'url' ? 'default' : 'ghost'} size="sm" onClick={() => setConfig({...config, profile_photo_source: 'url'})} className="flex-1"><Link className="h-4 w-4 mr-2"/>URL</Button>
+                        <Button variant={config.profile_photo_source === 'bucket' ? 'default' : 'ghost'} size="sm" onClick={() => setConfig({...config, profile_photo_source: 'bucket'})} className="flex-1"><Image className="h-4 w-4 mr-2"/>Fichier</Button>
                     </div>
                 </div>
                 {config.profile_photo_source === 'url' ? (

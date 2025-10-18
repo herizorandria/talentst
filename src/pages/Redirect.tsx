@@ -152,6 +152,20 @@ const Redirect: React.FC = () => {
         let resolvedCountry = 'Inconnu';
         let resolvedCity = 'Inconnu';
 
+        // Check if landing page is configured and enabled BEFORE geolocation
+        const { data: landingData } = await supabase
+          .from('landing_pages')
+          .select('enabled')
+          .eq('short_url_id', foundUrl.id)
+          .eq('enabled', true)
+          .maybeSingle();
+
+        if (landingData?.enabled) {
+          // Redirect to landing page immediately without geolocation check
+          window.location.href = `/landing/${shortCode}`;
+          return;
+        }
+
         try {
           // Resolve client IP and location with a more reliable fallback
           const resolveIpAndLocation = async (): Promise<{ ip: string; country: string; city: string }> => {
@@ -231,26 +245,6 @@ const Redirect: React.FC = () => {
           }
         } catch (err) {
           console.warn('Erreur vérification géolocalisation:', err);
-        }
-
-        // Check if landing page is configured and enabled
-        const { data: landingData } = await supabase
-          .from('landing_pages')
-          .select('enabled')
-          .eq('short_url_id', foundUrl.id)
-          .eq('enabled', true)
-          .maybeSingle();
-
-        if (landingData?.enabled) {
-          try {
-            recordClick(foundUrl.id, { ip: resolvedIp, country: resolvedCountry, city: resolvedCity });
-            updateClickStatsAsync(foundUrl.shortCode);
-          } catch (err) {
-            console.warn('Failed to record click before landing page redirect:', err);
-          }
-          // Redirect to landing page
-          window.location.href = `/landing/${shortCode}`;
-          return;
         }
 
         // Ignore password requirement for direct redirects: always continue to redirect.
