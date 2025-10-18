@@ -161,10 +161,19 @@ const Redirect: React.FC = () => {
           .maybeSingle();
 
         if (landingData?.enabled) {
-          // Record click before redirecting to landing page
+          // Record click with full geolocation before redirecting to landing page
           try {
-            const basicIp = await getClientIP();
-            recordClick(foundUrl.id, { ip: basicIp || 'Inconnu', country: 'Inconnu', city: 'Inconnu' });
+            const ip = await getClientIP();
+            let country = 'Inconnu';
+            let city = 'Inconnu';
+            
+            if (ip && ip !== 'Inconnu') {
+              const loc = await getLocationFromIP(ip);
+              country = loc.country || 'Inconnu';
+              city = loc.city || 'Inconnu';
+            }
+            
+            recordClick(foundUrl.id, { ip: ip || 'Inconnu', country, city });
             updateClickStatsAsync(foundUrl.shortCode);
           } catch (err) {
             console.warn('Failed to record click for landing page:', err);
