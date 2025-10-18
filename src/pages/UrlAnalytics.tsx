@@ -365,114 +365,35 @@ const UrlAnalytics = () => {
                     </div>
                 </div>
 
-                {/* Filtres and Actions */}
-                <div className="flex justify-between items-center mb-6">
-                    <Sheet>
-                        <SheetTrigger asChild>
-                            <Button variant="outline">
-                                <Filter className="h-4 w-4 mr-2" />
-                                Filtrer
+                {/* Layout with filters on right side */}
+                <div className="flex gap-6">
+                    {/* Main content - Left side */}
+                    <div className="flex-1 space-y-6">
+                        {/* Export button */}
+                        <div className="flex justify-end">
+                            <Button onClick={exportData} variant="outline">
+                                <Download className="h-4 w-4 mr-2" />
+                                Exporter CSV
                             </Button>
-                        </SheetTrigger>
-                        <SheetContent className="w-full sm:max-w-md">
-                            <SheetHeader>
-                                <SheetTitle>Filtres</SheetTitle>
-                            </SheetHeader>
-                            <div className="py-4 space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Période</label>
-                                    <select value={dateFilter} onChange={(e) => {
-                                        const value = e.target.value;
-                                        setDateFilter(value);
-                                        if (value !== 'custom') {
-                                            setUseCustomRange(false);
-                                            setCustomStartDate(null);
-                                            setCustomEndDate(null);
-                                        }
-                                    }} className="border rounded px-3 py-2 w-full">
-                                        <option value="1">Dernières 24h</option>
-                                        <option value="7">7 derniers jours</option>
-                                        <option value="30">30 derniers jours</option>
-                                        <option value="90">90 derniers jours</option>
-                                        <option value="custom">Période personnalisée</option>
-                                    </select>
-                                </div>
-                                {dateFilter === 'custom' && (
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1">Dates personnalisées</label>
-                                        <DateRangePicker startDate={customStartDate} endDate={customEndDate} onDateRangeChange={handleCustomDateRangeChange} />
-                                    </div>
-                                )}
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Heure</label>
-                                    <select value={hourFilter} onChange={(e) => setHourFilter(e.target.value)} className="border rounded px-3 py-2 w-full">
-                                        <option value="">Toutes les heures</option>
-                                        {Array.from({ length: 24 }, (_, i) => (<option key={i} value={i}>{i}h - {i + 1}h</option>))}
-                                    </select>
-                                </div>
-                                <div className="flex gap-2">
-                                    <div className="flex-1">
-                                        <label className="block text-sm font-medium mb-1">Pays</label>
-                                        <select value={countryFilter} onChange={(e) => setCountryFilter(e.target.value)} className="border rounded px-3 py-2 w-full">
-                                            <option value="">Tous les pays</option>
-                                            {countries.map(country => (<option key={country} value={country}>{country}</option>))}
-                                        </select>
-                                    </div>
-                                    {countryFilter && (
-                                        <div className="flex-1">
-                                            <label className="block text-sm font-medium mb-1">Mode</label>
-                                            <select value={countryFilterMode} onChange={(e) => setCountryFilterMode(e.target.value as 'include' | 'exclude')} className="border rounded px-3 py-2 w-full">
-                                                <option value="include">Seulement</option>
-                                                <option value="exclude">Sauf</option>
-                                            </select>
-                                        </div>
-                                    )}
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Référent</label>
-                                    <select value={referrerFilter} onChange={(e) => setReferrerFilter(e.target.value)} className="border rounded px-3 py-2 w-full">
-                                        <option value="">Tous les référents</option>
-                                        {referrers.map(ref => (<option key={ref} value={ref}>{ref}</option>))}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Appareil</label>
-                                    <select value={deviceFilter} onChange={(e) => setDeviceFilter(e.target.value)} className="border rounded px-3 py-2 w-full">
-                                        <option value="">Tous les appareils</option>
-                                        {devices.map(device => (<option key={device} value={device}>{device}</option>))}
-                                    </select>
-                                </div>
-                                <Button onClick={resetFilters} variant="outline" className="w-full">
-                                    <RotateCcw className="h-4 w-4 mr-2" />
-                                    Réinitialiser les filtres
-                                </Button>
+                        </div>
+
+                        {/* Main Content Grid */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            {/* Left Column */}
+                            <div className="lg:col-span-1 space-y-8">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Landing Page</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <LandingPageConfig shortUrlId={urlInfo.id} shortCode={shortCode || ''} />
+                                    </CardContent>
+                                </Card>
                             </div>
-                        </SheetContent>
-                    </Sheet>
 
-                    <Button onClick={exportData} variant="outline">
-                        <Download className="h-4 w-4 mr-2" />
-                        Exporter CSV
-                    </Button>
-                </div>
-
-                {/* Main Content */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Left Column */}
-                    <div className="lg:col-span-1 space-y-8">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Landing Page</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <LandingPageConfig shortUrlId={urlInfo.id} shortCode={shortCode || ''} />
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    {/* Right Column */}
-                    <div className="lg:col-span-2 space-y-8">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Right Column */}
+                            <div className="lg:col-span-2 space-y-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <Card>
                                 <CardContent className="pt-6">
                                     <div className="flex items-center justify-between">
@@ -614,6 +535,127 @@ const UrlAnalytics = () => {
                         </Tabs>
                     </div>
                 </div>
+            </div>
+
+            {/* Filters sidebar - Always visible on right */}
+            <aside className="w-80 shrink-0 space-y-4 sticky top-8 self-start">
+                <Card className="bg-white shadow-lg">
+                    <CardHeader className="pb-3">
+                        <CardTitle className="text-lg flex items-center justify-between">
+                            <span className="flex items-center gap-2">
+                                <Filter className="h-5 w-5" />
+                                Filtres
+                            </span>
+                            <Button size="sm" variant="ghost" onClick={resetFilters}>
+                                <RotateCcw className="h-4 w-4" />
+                            </Button>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Période</label>
+                            <select 
+                                value={dateFilter} 
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setDateFilter(value);
+                                    if (value !== 'custom') {
+                                        setUseCustomRange(false);
+                                        setCustomStartDate(null);
+                                        setCustomEndDate(null);
+                                    }
+                                }} 
+                                className="border rounded px-3 py-2 w-full bg-white"
+                            >
+                                <option value="1">Dernières 24h</option>
+                                <option value="7">7 derniers jours</option>
+                                <option value="30">30 derniers jours</option>
+                                <option value="90">90 derniers jours</option>
+                                <option value="custom">Période personnalisée</option>
+                            </select>
+                        </div>
+                        
+                        {dateFilter === 'custom' && (
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Dates personnalisées</label>
+                                <DateRangePicker 
+                                    startDate={customStartDate} 
+                                    endDate={customEndDate} 
+                                    onDateRangeChange={handleCustomDateRangeChange} 
+                                />
+                            </div>
+                        )}
+                        
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Heure</label>
+                            <select 
+                                value={hourFilter} 
+                                onChange={(e) => setHourFilter(e.target.value)} 
+                                className="border rounded px-3 py-2 w-full bg-white"
+                            >
+                                <option value="">Toutes les heures</option>
+                                {Array.from({ length: 24 }, (_, i) => (
+                                    <option key={i} value={i}>{i}h - {i + 1}h</option>
+                                ))}
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Pays</label>
+                            <select 
+                                value={countryFilter} 
+                                onChange={(e) => setCountryFilter(e.target.value)} 
+                                className="border rounded px-3 py-2 w-full bg-white mb-2"
+                            >
+                                <option value="">Tous les pays</option>
+                                {countries.map(country => (
+                                    <option key={country} value={country}>{country}</option>
+                                ))}
+                            </select>
+                            
+                            {countryFilter && (
+                                <select 
+                                    value={countryFilterMode} 
+                                    onChange={(e) => setCountryFilterMode(e.target.value as 'include' | 'exclude')} 
+                                    className="border rounded px-3 py-2 w-full bg-white"
+                                >
+                                    <option value="include">Seulement</option>
+                                    <option value="exclude">Sauf</option>
+                                </select>
+                            )}
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Référent</label>
+                            <select 
+                                value={referrerFilter} 
+                                onChange={(e) => setReferrerFilter(e.target.value)} 
+                                className="border rounded px-3 py-2 w-full bg-white"
+                            >
+                                <option value="">Tous les référents</option>
+                                {referrers.map(ref => (
+                                    <option key={ref} value={ref}>{ref}</option>
+                                ))}
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Appareil</label>
+                            <select 
+                                value={deviceFilter} 
+                                onChange={(e) => setDeviceFilter(e.target.value)} 
+                                className="border rounded px-3 py-2 w-full bg-white"
+                            >
+                                <option value="">Tous les appareils</option>
+                                {devices.map(device => (
+                                    <option key={device} value={device}>{device}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </CardContent>
+                </Card>
+            </aside>
+        </div>
             </div>
         </div>
     );
