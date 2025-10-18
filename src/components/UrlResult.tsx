@@ -50,7 +50,7 @@ const UrlResult = ({ shortenedUrl, shortUrl }: UrlResultProps) => {
               )}
             </div>
             
-            <div className="flex items-center gap-2 p-3 bg-white rounded-lg border border-green-200">
+            <div className="flex items-center gap-2 p-3 bg-black rounded-lg border border-green-200">
               <Input
                 value={shortUrl}
                 readOnly

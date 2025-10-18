@@ -32,7 +32,7 @@ export const tutorials = [
         icon: <Link className="h-4 w-4" />,
         content: (
           <div className="space-y-4">
-            <div className="bg-white border rounded-lg p-4">
+            <div className="bg-black border rounded-lg p-4">
               <h4 className="font-semibold mb-2">Interface principale</h4>
               <p className="text-sm text-gray-600 mb-3">
                 L'application est organisée en 4 onglets principaux :
@@ -70,7 +70,7 @@ export const tutorials = [
         icon: <Link className="h-4 w-4" />,
         content: (
           <div className="space-y-4">
-            <div className="bg-white border rounded-lg p-4">
+            <div className="bg-black border rounded-lg p-4">
               <h4 className="font-semibold mb-3">Étapes pour créer un lien :</h4>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
@@ -110,7 +110,7 @@ export const tutorials = [
         icon: <Copy className="h-4 w-4" />,
         content: (
           <div className="space-y-4">
-            <div className="bg-white border rounded-lg p-4">
+            <div className="bg-black border rounded-lg p-4">
               <h4 className="font-semibold mb-3">Actions disponibles :</h4>
               <div className="space-y-3">
                 <div className="flex items-center gap-3 p-2 border rounded">
@@ -141,7 +141,7 @@ export const tutorials = [
         icon: <BarChart3 className="h-4 w-4" />,
         content: (
           <div className="space-y-4">
-            <div className="bg-white border rounded-lg p-4">
+            <div className="bg-black border rounded-lg p-4">
               <h4 className="font-semibold mb-3">Métriques disponibles :</h4>
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-3 bg-orange-50 rounded">
@@ -187,7 +187,7 @@ export const tutorials = [
         icon: <Settings className="h-4 w-4" />,
         content: (
           <div className="space-y-4">
-            <div className="bg-white border rounded-lg p-4">
+            <div className="bg-black border rounded-lg p-4">
               <h4 className="font-semibold mb-3">Accéder aux options avancées :</h4>
               <p className="text-sm text-gray-600 mb-3">
                 Cliquez sur le bouton "Options avancées" sous le formulaire principal pour révéler :
@@ -225,7 +225,7 @@ export const tutorials = [
         icon: <Shield className="h-4 w-4" />,
         content: (
           <div className="space-y-4">
-            <div className="bg-white border rounded-lg p-4">
+            <div className="bg-black border rounded-lg p-4">
               <h4 className="font-semibold mb-3">Protéger un lien :</h4>
               <div className="space-y-3">
                 <div className="p-3 bg-orange-50 border border-orange-200 rounded">
@@ -260,7 +260,7 @@ export const tutorials = [
         icon: <Zap className="h-4 w-4" />,
         content: (
           <div className="space-y-4">
-            <div className="bg-white border rounded-lg p-4">
+            <div className="bg-black border rounded-lg p-4">
               <h4 className="font-semibold mb-3">Lien direct vs Normal :</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-3 bg-orange-50 border border-orange-200 rounded">
@@ -297,7 +297,7 @@ export const tutorials = [
         icon: <Calendar className="h-4 w-4" />,
         content: (
           <div className="space-y-4">
-            <div className="bg-white border rounded-lg p-4">
+            <div className="bg-black border rounded-lg p-4">
               <h4 className="font-semibold mb-3">Cas d'usage pour l'expiration :</h4>
               <div className="space-y-3">
                 <div className="p-3 bg-yellow-50 border border-yellow-200 rounded">
@@ -335,7 +335,7 @@ export const tutorials = [
         icon: <Tag className="h-4 w-4" />,
         content: (
           <div className="space-y-4">
-            <div className="bg-white border rounded-lg p-4">
+            <div className="bg-black border rounded-lg p-4">
               <h4 className="font-semibold mb-3">Exemples de tags :</h4>
               <div className="space-y-3">
                 <div className="flex flex-wrap gap-2">
@@ -381,7 +381,7 @@ export const tutorials = [
         icon: <Settings className="h-4 w-4" />,
         content: (
           <div className="space-y-4">
-            <div className="bg-white border rounded-lg p-4">
+            <div className="bg-black border rounded-lg p-4">
               <h4 className="font-semibold mb-3">Fonctionnalités de gestion :</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -417,7 +417,7 @@ export const tutorials = [
         icon: <BarChart3 className="h-4 w-4" />,
         content: (
           <div className="space-y-4">
-            <div className="bg-white border rounded-lg p-4">
+            <div className="bg-black border rounded-lg p-4">
               <h4 className="font-semibold mb-3">Métriques principales :</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-3 bg-orange-50 rounded">
@@ -457,14 +457,14 @@ export const tutorials = [
         icon: <Eye className="h-4 w-4" />,
         content: (
           <div className="space-y-4">
-            <div className="bg-white border rounded-lg p-4">
+            <div className="bg-black border rounded-lg p-4">
               <h4 className="font-semibold mb-3">Top 3 des liens populaires :</h4>
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <div className="flex items-center gap-3">
                     <div className="w-6 h-6 bg-yellow-400 text-yellow-900 rounded-full text-sm font-bold flex items-center justify-center">1</div>
                     <div>
-                      <code className="text-sm font-mono bg-white px-2 py-1 rounded">promo-noel</code>
+                      <code className="text-sm font-mono bg-black px-2 py-1 rounded">promo-noel</code>
                       <p className="text-xs text-gray-600 mt-1">https://boutique.example.com/promo-noel-2024</p>
                     </div>
                   </div>
@@ -477,7 +477,7 @@ export const tutorials = [
                   <div className="flex items-center gap-3">
                     <div className="w-6 h-6 bg-gray-400 text-white rounded-full text-sm font-bold flex items-center justify-center">2</div>
                     <div>
-                      <code className="text-sm font-mono bg-white px-2 py-1 rounded">blog-seo</code>
+                      <code className="text-sm font-mono bg-black px-2 py-1 rounded">blog-seo</code>
                       <p className="text-xs text-gray-600 mt-1">https://blog.example.com/guide-seo-2024</p>
                     </div>
                   </div>
@@ -490,7 +490,7 @@ export const tutorials = [
                   <div className="flex items-center gap-3">
                     <div className="w-6 h-6 bg-orange-400 text-white rounded-full text-sm font-bold flex items-center justify-center">3</div>
                     <div>
-                      <code className="text-sm font-mono bg-white px-2 py-1 rounded">demo-app</code>
+                      <code className="text-sm font-mono bg-black px-2 py-1 rounded">demo-app</code>
                       <p className="text-xs text-gray-600 mt-1">https://demo.example.com/nouvelle-app</p>
                     </div>
                   </div>
@@ -516,7 +516,7 @@ export const tutorials = [
         icon: <Globe className="h-4 w-4" />,
         content: (
           <div className="space-y-4">
-            <div className="bg-white border rounded-lg p-4">
+            <div className="bg-black border rounded-lg p-4">
               <h4 className="font-semibold mb-3">Meilleures pratiques :</h4>
               <div className="space-y-4">
                 <div className="p-3 bg-green-50 border border-green-200 rounded">

@@ -81,7 +81,7 @@ const TestLinkSpace = ({ shortUrl, originalUrl, shortCode, directLink }: TestLin
           </div>
           
           <div className="space-y-2">
-            <div className="flex items-center gap-2 p-2 bg-white rounded border">
+            <div className="flex items-center gap-2 p-2 bg-black rounded border">
               <Globe className="h-4 w-4 text-gray-500" />
               <Input
                 value={testUrl}

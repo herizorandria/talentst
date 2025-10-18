@@ -51,7 +51,7 @@ const PhilosophicalQuotes = () => {
       <div className="max-w-2xl w-full space-y-6">
 
         {/* Header Card */}
-        {/*<Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+        {/*<Card className="shadow-2xl border-0 bg-black/80 backdrop-blur-sm">
           <CardHeader className="text-center pb-4">
             <CardTitle className="flex items-center justify-center gap-3 text-2xl text-indigo-800">
               <Globe className="h-8 w-8" />
@@ -64,7 +64,7 @@ const PhilosophicalQuotes = () => {
         </Card>*/}
 
         {/* Quote Card */}
-        <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
+        <Card className="shadow-2xl border-0 bg-black/90 backdrop-blur-sm">
           <CardContent className="p-8">
             <div className={`text-center transition-all duration-300 ${isAnimating ? 'opacity-0 transform scale-95' : 'opacity-100 transform scale-100'}`}>
               <Quote className="h-12 w-12 text-indigo-400 mx-auto mb-6" />

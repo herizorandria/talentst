@@ -75,7 +75,7 @@ const UrlAnalytics = () => {
     const [urlInfo, setUrlInfo] = useState<UrlInfo | null>(null);
     const [clicks, setClicks] = useState<Click[]>([]);
     const [loading, setLoading] = useState(true);
-    const [dateFilter, setDateFilter] = useState('7');
+    const [dateFilter, setDateFilter] = useState('0');
     const [countryFilter, setCountryFilter] = useState('');
     const [countryFilterMode, setCountryFilterMode] = useState<'include' | 'exclude'>('include');
     const [referrerFilter, setReferrerFilter] = useState('');
@@ -294,7 +294,7 @@ const UrlAnalytics = () => {
     const handleBackToManager = () => navigate('/?tab=linksmanager');
 
     const resetFilters = () => {
-        setDateFilter('7');
+        setDateFilter('0');
         setCountryFilter('');
         setCountryFilterMode('include');
         setReferrerFilter('');
@@ -309,7 +309,7 @@ const UrlAnalytics = () => {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <div className="w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                     <p className="text-lg text-gray-600">Chargement des analytics...</p>
                 </div>
             </div>
@@ -398,10 +398,10 @@ const UrlAnalytics = () => {
                                 <CardContent className="pt-6">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-2xl font-bold text-blue-600">{filteredClicks.length}</p>
+                                            <p className="text-2xl font-bold text-yellow-400">{filteredClicks.length}</p>
                                             <p className="text-sm text-gray-600">Clics (période)</p>
                                         </div>
-                                        <Eye className="h-8 w-8 text-blue-600" />
+                                        <Eye className="h-8 w-8 text-yellow-400" />
                                     </div>
                                 </CardContent>
                             </Card>
@@ -418,9 +418,9 @@ const UrlAnalytics = () => {
                             </Card>
                         </div>
 
-                        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+                        <Card className="border-yellow-400">
                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-blue-700">
+                                <CardTitle className="flex items-center gap-2 text-white">
                                     <Sun className="h-5 w-5" />
                                     Statistiques d'aujourd'hui
                                 </CardTitle>
@@ -428,21 +428,21 @@ const UrlAnalytics = () => {
                             <CardContent>
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                     <div className="text-center">
-                                        <p className="text-2xl font-bold text-blue-600">{todayClicks.length}</p>
-                                        <p className="text-sm text-blue-700">Clics aujourd'hui</p>
+                                        <p className="text-2xl font-bold text-yellow-400">{todayClicks.length}</p>
+                                        <p className="text-sm text-white">Clics aujourd'hui</p>
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-2xl font-bold text-blue-600">{new Set(todayClicks.map(c => c.location_country).filter(Boolean)).size}</p>
-                                        <p className="text-sm text-blue-700">Pays uniques</p>
+                                        <p className="text-2xl font-bold text-yellow-400">{new Set(todayClicks.map(c => c.location_country).filter(Boolean)).size}</p>
+                                        <p className="text-sm text-white">Pays uniques</p>
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-2xl font-bold text-blue-600">{todayClicks.length > 0 ? Math.round(todayClicks.length / 24 * 10) / 10 : 0}</p>
-                                        <p className="text-sm text-blue-700">Clics/heure moy.</p>
+                                        <p className="text-2xl font-bold text-yellow-400">{todayClicks.length > 0 ? Math.round(todayClicks.length / 24 * 10) / 10 : 0}</p>
+                                        <p className="text-sm text-white">Clics/heure moy.</p>
                                     </div>
                                 </div>
                                 {todayClicks.length > 0 && (
-                                    <div className="mt-4 pt-4 border-t border-blue-200">
-                                        <p className="text-sm text-blue-700 mb-2">Top pays aujourd'hui:</p>
+                                    <div className="mt-4 pt-4 border-t border-yellow-200">
+                                        <p className="text-sm text-yellow-400 mb-2">Top pays aujourd'hui:</p>
                                         <div className="flex flex-wrap gap-2">
                                             {getTopCounts(todayClicks, 'location_country', 3).map(([country, count]) => (
                                                 <Badge key={country} variant="secondary" className="bg-blue-100 text-blue-800">{country} ({count})</Badge>
@@ -470,7 +470,7 @@ const UrlAnalytics = () => {
                                                     <div key={country} className="flex items-center justify-between">
                                                         <div className="flex items-center gap-2"><span>{country}</span></div>
                                                         <div className="flex items-center gap-2">
-                                                            <div className="w-20 bg-gray-200 rounded-full h-2"><div className="bg-blue-600 h-2 rounded-full" style={{ width: `${(count / filteredClicks.length) * 100}%` }} /></div>
+                                                            <div className="w-20 bg-gray-200 rounded-full h-2"><div className="bg-yellow-400 h-2 rounded-full" style={{ width: `${(count / filteredClicks.length) * 100}%` }} /></div>
                                                             <span className="text-sm font-medium">{count}</span>
                                                         </div>
                                                     </div>
@@ -539,7 +539,7 @@ const UrlAnalytics = () => {
 
             {/* Filters sidebar - Always visible on right */}
             <aside className="w-80 shrink-0 space-y-4 sticky top-8 self-start">
-                <Card className="bg-white shadow-lg">
+                <Card className="bg-black shadow-lg">
                     <CardHeader className="pb-3">
                         <CardTitle className="text-lg flex items-center justify-between">
                             <span className="flex items-center gap-2">
@@ -565,9 +565,10 @@ const UrlAnalytics = () => {
                                         setCustomEndDate(null);
                                     }
                                 }} 
-                                className="border rounded px-3 py-2 w-full bg-white"
+                                className="border rounded px-3 py-2 w-full bg-black"
                             >
                                 <option value="1">Dernières 24h</option>
+                                <option value="0">Aujourd'hui</option>
                                 <option value="7">7 derniers jours</option>
                                 <option value="30">30 derniers jours</option>
                                 <option value="90">90 derniers jours</option>
@@ -591,7 +592,7 @@ const UrlAnalytics = () => {
                             <select 
                                 value={hourFilter} 
                                 onChange={(e) => setHourFilter(e.target.value)} 
-                                className="border rounded px-3 py-2 w-full bg-white"
+                                className="border rounded px-3 py-2 w-full bg-black"
                             >
                                 <option value="">Toutes les heures</option>
                                 {Array.from({ length: 24 }, (_, i) => (
@@ -605,7 +606,7 @@ const UrlAnalytics = () => {
                             <select 
                                 value={countryFilter} 
                                 onChange={(e) => setCountryFilter(e.target.value)} 
-                                className="border rounded px-3 py-2 w-full bg-white mb-2"
+                                className="border rounded px-3 py-2 w-full bg-black mb-2"
                             >
                                 <option value="">Tous les pays</option>
                                 {countries.map(country => (
@@ -617,7 +618,7 @@ const UrlAnalytics = () => {
                                 <select 
                                     value={countryFilterMode} 
                                     onChange={(e) => setCountryFilterMode(e.target.value as 'include' | 'exclude')} 
-                                    className="border rounded px-3 py-2 w-full bg-white"
+                                    className="border rounded px-3 py-2 w-full bg-black"
                                 >
                                     <option value="include">Seulement</option>
                                     <option value="exclude">Sauf</option>
@@ -630,7 +631,7 @@ const UrlAnalytics = () => {
                             <select 
                                 value={referrerFilter} 
                                 onChange={(e) => setReferrerFilter(e.target.value)} 
-                                className="border rounded px-3 py-2 w-full bg-white"
+                                className="border rounded px-3 py-2 w-full bg-black"
                             >
                                 <option value="">Tous les référents</option>
                                 {referrers.map(ref => (
@@ -644,7 +645,7 @@ const UrlAnalytics = () => {
                             <select 
                                 value={deviceFilter} 
                                 onChange={(e) => setDeviceFilter(e.target.value)} 
-                                className="border rounded px-3 py-2 w-full bg-white"
+                                className="border rounded px-3 py-2 w-full bg-black"
                             >
                                 <option value="">Tous les appareils</option>
                                 {devices.map(device => (

@@ -144,7 +144,7 @@ const LandingPage = () => {
         }
         {config.user_bio && <p className="text-white/80 max-w-md mx-auto">{config.user_bio}</p>}
         {visitorLocation && config.show_location && 
-            <div className="flex items-center justify-center gap-2 text-sm bg-white/10 backdrop-blur-sm rounded-full px-3 py-1 max-w-xs mx-auto">
+            <div className="flex items-center justify-center gap-2 text-sm bg-black/10 backdrop-blur-sm rounded-full px-3 py-1 max-w-xs mx-auto">
                 <icons.MapPin className="h-4 w-4" />
                 <span>{visitorLocation}</span>
             </div>

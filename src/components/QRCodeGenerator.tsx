@@ -52,7 +52,7 @@ const QRCodeGenerator = ({ url, shortCode }: QRCodeGeneratorProps) => {
   };
 
   return (
-    <Card className="bg-white border-amber-200">
+    <Card className="bg-black border-amber-200">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-yellow-400">
           <QrCode className="h-5 w-5" />

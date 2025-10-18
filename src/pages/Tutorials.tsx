@@ -226,9 +226,9 @@ const Tutorials = () => {
             <div className="space-y-2">
               <h4 className="font-semibold text-amber-800">🚀 Raccourcis clavier</h4>
               <ul className="text-sm text-amber-700 space-y-1">
-                <li>• <kbd className="bg-white px-1 rounded">Ctrl+V</kbd> pour coller une URL</li>
-                <li>• <kbd className="bg-white px-1 rounded">Enter</kbd> pour raccourcir</li>
-                <li>• <kbd className="bg-white px-1 rounded">Ctrl+C</kbd> pour copier le résultat</li>
+                <li>• <kbd className="bg-black px-1 rounded">Ctrl+V</kbd> pour coller une URL</li>
+                <li>• <kbd className="bg-black px-1 rounded">Enter</kbd> pour raccourcir</li>
+                <li>• <kbd className="bg-black px-1 rounded">Ctrl+C</kbd> pour copier le résultat</li>
               </ul>
             </div>
           </div>
