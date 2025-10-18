@@ -140,7 +140,22 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
 
               <div className="space-y-4 border-t pt-4">
                 <h3 className="font-semibold flex items-center gap-2"><Palette className="h-4 w-4" />Design</h3>
-                {/* ... Design fields ... */}
+                <div className="space-y-2">
+                                  <Label>Type de fond</Label>
+                                  <select value={config.background_type} onChange={(e) => setConfig({ ...config, background_type: e.target.value })} className="w-full border rounded px-3 py-2">
+                                    <option value="gradient">Dégradé</option>
+                                    <option value="solid">Couleur unie</option>
+                                    <option value="image">Image</option>
+                                  </select>
+                                </div>
+                                {config.background_type === 'gradient' && (
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div><Label>Couleur début</Label><Input type="color" value={config.background_gradient_start} onChange={(e) => setConfig({ ...config, background_gradient_start: e.target.value })} /></div>
+                                    <div><Label>Couleur fin</Label><Input type="color" value={config.background_gradient_end} onChange={(e) => setConfig({ ...config, background_gradient_end: e.target.value })} /></div>
+                                  </div>
+                                )}
+                                {config.background_type === 'solid' && (<div><Label>Couleur de fond</Label><Input type="color" value={config.background_color} onChange={(e) => setConfig({ ...config, background_color: e.target.value })} /></div>)}
+                                {config.background_type === 'image' && (<div><Label>URL de l'image</Label><Input type="url" placeholder="https://..." value={config.background_image_url} onChange={(e) => setConfig({ ...config, background_image_url: e.target.value })} /></div>)}
               </div>
 
               <div className="space-y-4 border-t pt-4">
