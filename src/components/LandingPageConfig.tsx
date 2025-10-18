@@ -96,7 +96,7 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
 
   return (
     <div className="space-y-6">
-      <div className="text-sm text-gray-600 bg-gray-100 p-4 rounded">
+      <div className="text-sm text-white p-4 rounded">
                 <p className="font-medium mb-1">URL de votre landing page:</p>
                 <div className="flex items-center gap-2">
                     <a href={`${window.location.origin}/${shortCode}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all">{window.location.origin}/{shortCode}</a>

@@ -61,12 +61,12 @@ const UrlHistory = ({ urls, onUrlClick }: UrlHistoryProps) => {
 
   if (urls.length === 0) {
     return (
-      <Card className="bg-gray-50">
+      <Card className="bg-black-50">
         <CardContent className="pt-6">
           <div className="text-center py-8">
-            <History className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-            <p className="text-gray-500">Aucun lien raccourci pour le moment</p>
-            <p className="text-sm text-gray-400 mt-2">
+            <History className="h-12 w-12 mx-auto text-white mb-4" />
+            <p className="text-gray-400">Aucun lien raccourci pour le moment</p>
+            <p className="text-sm text-white mt-2">
               Créez votre premier lien raccourci ci-dessus
             </p>
           </div>

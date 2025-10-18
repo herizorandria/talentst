@@ -330,7 +330,7 @@ const UrlAnalytics = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-black">
             <div className="container mx-auto px-4 py-8 max-w-7xl">
                 {/* Header */}
                 <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
@@ -345,7 +345,7 @@ const UrlAnalytics = () => {
                             Retour à la gestion
                         </Button>
                         <div className="flex items-center gap-2">
-                            <h1 className="text-3xl font-bold text-gray-800">
+                            <h1 className="text-3xl font-bold text-yellow-400">
                                 Analytics - /{shortCode}
                             </h1>
                             <Button
@@ -358,9 +358,9 @@ const UrlAnalytics = () => {
                         </div>
                     </div>
                     <div className="flex-1 min-w-[300px]">
-                        <p className="text-gray-600 break-all text-right">{urlInfo.original_url}</p>
+                        <p className="text-yellow-400 break-all text-right">{urlInfo.original_url}</p>
                         {urlInfo.description && (
-                            <p className="text-sm text-gray-500 mt-1 text-right">{urlInfo.description}</p>
+                            <p className="text-sm text-white mt-1 text-right">{urlInfo.description}</p>
                         )}
                     </div>
                 </div>
