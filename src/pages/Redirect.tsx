@@ -161,7 +161,14 @@ const Redirect: React.FC = () => {
           .maybeSingle();
 
         if (landingData?.enabled) {
-          // Redirect to landing page immediately without geolocation check
+          // Record click before redirecting to landing page
+          try {
+            const basicIp = await getClientIP();
+            recordClick(foundUrl.id, { ip: basicIp || 'Inconnu', country: 'Inconnu', city: 'Inconnu' });
+            updateClickStatsAsync(foundUrl.shortCode);
+          } catch (err) {
+            console.warn('Failed to record click for landing page:', err);
+          }
           window.location.href = `/landing/${shortCode}`;
           return;
         }

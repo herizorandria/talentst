@@ -153,7 +153,7 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
               <div className="space-y-4 border-t pt-4">
                 <h3 className="font-semibold flex items-center gap-2"><Clock className="h-4 w-4" />Fonctionnalités</h3>
                 <div><Label>Texte du bouton</Label><Input type="text" value={config.button_text} onChange={(e) => setConfig({ ...config, button_text: e.target.value })} /></div>
-                <div><Label>URL du bouton</Label><Input type="url" placeholder="https://..." value={config.button_url || ''} onChange={(e) => setConfig({ ...config, button_url: e.target.value })} /></div>
+                <div><Label>URL du bouton (optionnel)</Label><Input type="url" placeholder="https://..." value={config.button_url || ''} onChange={(e) => setConfig({ ...config, button_url: e.target.value })} /></div>
                 <div>
                     <Label>Icône du bouton (Lucide)</Label>
                     <div className="flex items-center gap-2">
@@ -162,8 +162,23 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
                     </div>
                 </div>
                 <div><Label>Couleur du bouton</Label><Input type="color" value={config.button_color} onChange={(e) => setConfig({ ...config, button_color: e.target.value })} /></div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="countdown">Afficher compte à rebours</Label>
+                  <Switch id="countdown" checked={config.show_countdown} onCheckedChange={(c) => setConfig({ ...config, show_countdown: c })} />
+                </div>
+                {config.show_countdown && (
+                  <div>
+                    <Label>Date cible du compte à rebours (optionnel)</Label>
+                    <Input 
+                      type="datetime-local" 
+                      value={config.countdown_to ? config.countdown_to.substring(0, 16) : ''} 
+                      onChange={(e) => setConfig({ ...config, countdown_to: e.target.value })} 
+                      placeholder="Laisser vide pour décompte simple"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Si vide, décompte de 3 secondes avant redirection</p>
+                  </div>
+                )}
                 <div className="flex items-center justify-between"><Label htmlFor="loc">Localisation visiteur</Label><Switch id="loc" checked={config.show_location} onCheckedChange={(c) => setConfig({ ...config, show_location: c })} /></div>
-                <div><Label>Compte à rebours (laisser vide pour désactiver)</Label><Input type="datetime-local" value={config.countdown_to ? config.countdown_to.substring(0, 16) : ''} onChange={(e) => setConfig({ ...config, countdown_to: e.target.value })} /></div>
               </div>
 
               <div className="pt-6"><Button onClick={handleSave} disabled={loading} className="w-full">{loading ? 'Sauvegarde...' : 'Sauvegarder'}</Button></div>
