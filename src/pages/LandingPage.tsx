@@ -107,7 +107,7 @@ const LandingPage = () => {
           const { data } = supabase.storage.from('profil').getPublicUrl(config.profile_photo_bucket_path);
           return data.publicUrl;
       }
-      return config.profile_photo_url;
+      return config.profile_photo_url || '';
   }, [config]);
 
   if (loading) {
