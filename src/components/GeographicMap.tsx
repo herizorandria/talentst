@@ -151,7 +151,7 @@ const customIcon = new Icon({
       <MapContainer
         center={[20, 20]}
         zoom={2}
-        style={{ height: '400px', width: '200%' }}
+        style={{ height: '400px', width: '100%' }}
         className="rounded-lg shadow-lg z-0"
       >
         <TileLayer
