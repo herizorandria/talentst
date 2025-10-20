@@ -49,14 +49,34 @@ const LandingPage = () => {
   const [countdown, setCountdown] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!code) return;
+    if (!code) {
+      navigate('/', { replace: true });
+      return;
+    }
+    
     const fetchData = async () => {
       try {
-        const { data: urlData } = await supabase.from('shortened_urls').select('id, original_url').or(`short_code.eq.${code},custom_code.eq.${code}`).single();
-        if (!urlData) { navigate('/404'); return; }
+        const { data: urlData, error: urlError } = await supabase
+          .from('shortened_urls')
+          .select('id, original_url')
+          .or(`short_code.eq.${code},custom_code.eq.${code}`)
+          .maybeSingle();
+        
+        if (urlError || !urlData) {
+          console.error('URL not found:', urlError);
+          navigate('*', { replace: true });
+          return;
+        }
+        
         setTargetUrl(urlData.original_url);
 
-        const { data: landingData } = await supabase.from('landing_pages').select('*').eq('short_url_id', urlData.id).eq('enabled', true).maybeSingle();
+        const { data: landingData } = await supabase
+          .from('landing_pages')
+          .select('*')
+          .eq('short_url_id', urlData.id)
+          .eq('enabled', true)
+          .maybeSingle();
+        
         if (landingData) {
           const configData: any = landingData;
           setConfig(configData);
@@ -67,11 +87,12 @@ const LandingPage = () => {
             setCountdown(configData.redirect_delay || 3);
           }
         } else {
+          // No landing page configured, redirect directly to target URL
           window.location.href = urlData.original_url;
         }
       } catch (error) {
-        console.error('Error fetching page:', error);
-        navigate('/404');
+        console.error('Error fetching landing page:', error);
+        navigate('*', { replace: true });
       } finally {
         setLoading(false);
       }

@@ -1,9 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin, Globe } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import { Icon } from 'leaflet';
 
 interface GeographicMapProps {
   clicks: Array<{
@@ -42,30 +39,6 @@ const GeographicMap = ({ clicks }: GeographicMapProps) => {
 
   const maxCountryClicks = sortedCountries.length > 0 ? sortedCountries[0][1] : 1;
   const maxCityClicks = sortedCities.length > 0 ? sortedCities[0][1].count : 1;
-
-  // ✅ Définir les coordonnées des pays
-  const countryCoordinates: Record<string, [number, number]> = {
-    France: [48.8566, 2.3522],
-    Madagascar: [-18.8792, 47.5079],
-    USA: [37.0902, -95.7129],
-    UK: [51.5074, -0.1276],
-    Germany: [51.1657, 10.4515],
-    Spain: [40.4168, -3.7038],
-    Italy: [41.8719, 12.5674],
-    Canada: [56.1304, -106.3468],
-    Australia: [-25.2744, 133.7751],
-    Japan: [36.2048, 138.2529],
-  };
-
- // Custom icon for markers to fix default icon issue with webpack
-const customIcon = new Icon({
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-    shadowSize: [41, 41],
-});
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
@@ -146,34 +119,6 @@ const customIcon = new Icon({
           </div>
         </CardContent>
       </Card>
-
-      {/* ✅ Carte Leaflet */}
-      <MapContainer
-        center={[20, 20]}
-        zoom={2}
-        style={{ height: '400px', width: '100%' }}
-        className="rounded-lg shadow-lg z-0"
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        />
-        {Object.entries(countryClicks).map(([country, count]) => {
-          const coords = countryCoordinates[country];
-          if (coords) {
-            return (
-              <Marker key={country} position={coords} icon={customIcon}>
-                <Popup>
-                  <strong>{country}</strong>
-                  <br />
-                  {count} clics
-                </Popup>
-              </Marker>
-            );
-          }
-          return null;
-        })}
-      </MapContainer>
     </div>
   );
 };

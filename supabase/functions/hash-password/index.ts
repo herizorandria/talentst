@@ -37,8 +37,8 @@ serve(async (req) => {
     }
 
     // Hash password using bcrypt with salt rounds 12
-    const saltRounds = 12;
-    const hash = await bcrypt.hash(password, saltRounds);
+    const salt = await bcrypt.genSalt(12);
+    const hash = await bcrypt.hash(password, salt);
 
     console.log('Password hashed successfully');
 

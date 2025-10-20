@@ -99,9 +99,16 @@ const Redirect: React.FC = () => {
 
         const { data, error } = await supabase
           .rpc('get_redirect_url', { p_code: shortCode })
-          .single();
+          .maybeSingle();
 
-        if (error || !data) {
+        if (error) {
+          console.error('Error fetching redirect URL:', error);
+          setUrl(null);
+          setLoading(false);
+          return;
+        }
+        
+        if (!data) {
           setUrl(null);
           setLoading(false);
           return;
