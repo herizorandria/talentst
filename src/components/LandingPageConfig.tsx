@@ -206,12 +206,10 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
                 )}
                 <div className="flex items-center justify-between"><Label htmlFor="loc">Localisation visiteur</Label><Switch id="loc" checked={config.show_location} onCheckedChange={(c) => setConfig({ ...config, show_location: c })} /></div>
               </div>
-
-              <div className="pt-6"><Button onClick={handleSave} disabled={loading} className="w-full">{loading ? 'Sauvegarde...' : 'Sauvegarder'}</Button></div>
-
-              
             </>
           )}
+
+          <div className="pt-6"><Button onClick={handleSave} disabled={loading} className="w-full">{loading ? 'Sauvegarde...' : 'Sauvegarder'}</Button></div>
         </CardContent>
       </Card>
     </div>
