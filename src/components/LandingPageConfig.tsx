@@ -34,6 +34,7 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
     button_color: '#f59e0b',
     button_url: '',
     button_icon: '',
+    button_animation: '',
     show_countdown: true,
     profile_photo_source: 'url',
     profile_photo_url: '',
@@ -177,6 +178,16 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
                     </div>
                 </div>
                 <div><Label>Couleur du bouton</Label><Input type="color" value={config.button_color} onChange={(e) => setConfig({ ...config, button_color: e.target.value })} /></div>
+                <div>
+                  <Label>Animation du bouton</Label>
+                  <select value={config.button_animation || ''} onChange={(e) => setConfig({ ...config, button_animation: e.target.value })} className="w-full border rounded px-3 py-2 bg-background">
+                    <option value="">Aucune</option>
+                    <option value="animate-pulse">Pulse</option>
+                    <option value="animate-bounce">Bounce</option>
+                    <option value="animate-spin">Spin</option>
+                    <option value="animate-ping">Ping</option>
+                  </select>
+                </div>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="countdown">Afficher compte à rebours</Label>
                   <Switch id="countdown" checked={config.show_countdown} onCheckedChange={(c) => setConfig({ ...config, show_countdown: c })} />

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import * as icons from 'lucide-react';
 import { differenceInSeconds, parseISO } from 'date-fns';
 
@@ -19,6 +20,7 @@ interface LandingPageData {
   button_color: string | null;
   button_url: string | null;
   button_icon: string | null;
+  button_animation: string | null;
   show_countdown: boolean | null;
   redirect_delay: number | null;
   profile_photo_source: string | null;
@@ -160,7 +162,14 @@ const LandingPage = () => {
             </div>
         )}
 
-        <Button onClick={handleButtonClick} style={{ backgroundColor: config.button_color }} className="text-white hover:opacity-90 transition-opacity px-8 py-6 text-lg shadow-lg">
+        <Button 
+            onClick={handleButtonClick} 
+            style={{ backgroundColor: config.button_color }} 
+            className={cn(
+                "text-white hover:opacity-90 transition-opacity px-8 py-6 text-lg shadow-lg",
+                config.button_animation
+            )}
+        >
             {config.button_text || 'Continuer'}
             <DynamicIcon name={config.button_icon} className="ml-2 h-5 w-5" />
         </Button>
