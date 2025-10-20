@@ -2,15 +2,8 @@
   "version": 2,
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!api).*)",
       "destination": "/index.html"
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/old-path",
-      "destination": "/",
-      "permanent": true
     }
   ]
 }
