@@ -56,24 +56,23 @@ const LandingPage = () => {
     
     const fetchData = async () => {
       try {
-        const { data: urlData, error: urlError } = await supabase
-          .from('shortened_urls')
-          .select('id, original_url')
-          .or(`short_code.eq.${code},custom_code.eq.${code}`)
+        // Use the same RPC as Redirect to ensure consistency and bypass RLS
+        const { data: rpcData, error: rpcError } = await supabase
+          .rpc('get_redirect_url', { p_code: code })
           .maybeSingle();
-        
-        if (urlError || !urlData) {
-          console.error('URL not found:', urlError);
-          navigate('*', { replace: true });
+
+        if (rpcError || !rpcData) {
+          console.error('Landing: code not found or RPC error:', rpcError);
+          navigate('/404', { replace: true });
           return;
         }
-        
-        setTargetUrl(urlData.original_url);
+
+        setTargetUrl(rpcData.original_url);
 
         const { data: landingData } = await supabase
           .from('landing_pages')
           .select('*')
-          .eq('short_url_id', urlData.id)
+          .eq('short_url_id', rpcData.id)
           .eq('enabled', true)
           .maybeSingle();
         
@@ -88,11 +87,11 @@ const LandingPage = () => {
           }
         } else {
           // No landing page configured, redirect directly to target URL
-          window.location.href = urlData.original_url;
+          window.location.href = rpcData.original_url;
         }
       } catch (error) {
         console.error('Error fetching landing page:', error);
-        navigate('*', { replace: true });
+        navigate('/404', { replace: true });
       } finally {
         setLoading(false);
       }
@@ -102,9 +101,12 @@ const LandingPage = () => {
 
   useEffect(() => {
     if (config?.show_location) {
-      fetch('http://ip-api.com/json').then(res => res.json()).then(data => {
-        if (data.city && data.country) setVisitorLocation(`${data.city}, ${data.country}`);
-      }).catch(console.error);
+      fetch('https://ip-api.com/json')
+        .then(res => res.json())
+        .then(data => {
+          if (data.city && data.country) setVisitorLocation(`${data.city}, ${data.country}`);
+        })
+        .catch(console.error);
     }
   }, [config?.show_location]);
 
