@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Palette, Layout, Settings, User, Clock, Copy, Check, Image, Link, Wind } from 'lucide-react';
+import { Palette, Layout, Settings, User, Clock, Copy, Check, Image, Link, Wind, Upload } from 'lucide-react';
 
 interface LandingPageConfigProps {
   shortUrlId: string;
@@ -19,6 +19,7 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [bucketFiles, setBucketFiles] = useState<any[]>([]);
+  const [uploading, setUploading] = useState(false);
   const [config, setConfig] = useState({
     enabled: false,
     background_type: 'gradient',
@@ -86,6 +87,36 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
     }
   };
 
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = fileName;
+
+      const { error: uploadError } = await supabase.storage
+        .from('landing-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('landing-images')
+        .getPublicUrl(filePath);
+
+      setConfig({ ...config, profile_photo_url: publicUrl, profile_photo_source: 'url' });
+      toast({ title: 'Succès', description: 'Image uploadée avec succès' });
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast({ title: 'Erreur', description: "Impossible d'uploader l'image", variant: 'destructive' });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const copyToClipboard = () => {
     const url = `${window.location.origin}/${shortCode}`;
     navigator.clipboard.writeText(url).then(() => {
@@ -120,11 +151,18 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
                     <Label>Source de la photo</Label>
                     <div className="flex gap-2 rounded-md p-1">
                         <Button variant={config.profile_photo_source === 'url' ? 'default' : 'ghost'} size="sm" onClick={() => setConfig({...config, profile_photo_source: 'url'})} className="flex-1"><Link className="h-4 w-4 mr-2"/>URL</Button>
+                        <Button variant={config.profile_photo_source === 'upload' ? 'default' : 'ghost'} size="sm" onClick={() => setConfig({...config, profile_photo_source: 'upload'})} className="flex-1"><Upload className="h-4 w-4 mr-2"/>Upload</Button>
                         <Button variant={config.profile_photo_source === 'bucket' ? 'default' : 'ghost'} size="sm" onClick={() => setConfig({...config, profile_photo_source: 'bucket'})} className="flex-1"><Image className="h-4 w-4 mr-2"/>Fichier</Button>
                     </div>
                 </div>
                 {config.profile_photo_source === 'url' ? (
                     <div><Label>Photo (URL)</Label><Input type="url" placeholder="https://..." value={config.profile_photo_url || ''} onChange={(e) => setConfig({ ...config, profile_photo_url: e.target.value })} /></div>
+                ) : config.profile_photo_source === 'upload' ? (
+                    <div>
+                        <Label>Uploader une image</Label>
+                        <Input type="file" accept="image/*" onChange={handleFileUpload} disabled={uploading} />
+                        {uploading && <p className="text-sm text-muted-foreground mt-1">Upload en cours...</p>}
+                    </div>
                 ) : (
                     <div>
                         <Label>Fichier du bucket "profil"</Label>
