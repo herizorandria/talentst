@@ -114,22 +114,33 @@ export type Database = {
           background_gradient_start: string | null
           background_image_url: string | null
           background_type: string
+          button_animation: string | null
           button_color: string | null
+          button_icon: string | null
           button_text: string | null
+          button_url: string | null
+          countdown_to: string | null
           created_at: string
           description: string | null
           enabled: boolean
           id: string
           layout_type: string
           logo_url: string | null
+          profile_photo_bucket_path: string | null
+          profile_photo_source: string | null
+          profile_photo_url: string | null
           redirect_delay: number | null
           redirect_mode: string
           short_url_id: string
           show_countdown: boolean | null
+          show_location: boolean
           show_url_preview: boolean | null
+          show_verified_badge: boolean
           subtitle: string | null
           title: string
           updated_at: string
+          user_bio: string | null
+          user_name: string | null
         }
         Insert: {
           background_color?: string | null
@@ -137,22 +148,33 @@ export type Database = {
           background_gradient_start?: string | null
           background_image_url?: string | null
           background_type?: string
+          button_animation?: string | null
           button_color?: string | null
+          button_icon?: string | null
           button_text?: string | null
+          button_url?: string | null
+          countdown_to?: string | null
           created_at?: string
           description?: string | null
           enabled?: boolean
           id?: string
           layout_type?: string
           logo_url?: string | null
+          profile_photo_bucket_path?: string | null
+          profile_photo_source?: string | null
+          profile_photo_url?: string | null
           redirect_delay?: number | null
           redirect_mode?: string
           short_url_id: string
           show_countdown?: boolean | null
+          show_location?: boolean
           show_url_preview?: boolean | null
+          show_verified_badge?: boolean
           subtitle?: string | null
           title?: string
           updated_at?: string
+          user_bio?: string | null
+          user_name?: string | null
         }
         Update: {
           background_color?: string | null
@@ -160,22 +182,33 @@ export type Database = {
           background_gradient_start?: string | null
           background_image_url?: string | null
           background_type?: string
+          button_animation?: string | null
           button_color?: string | null
+          button_icon?: string | null
           button_text?: string | null
+          button_url?: string | null
+          countdown_to?: string | null
           created_at?: string
           description?: string | null
           enabled?: boolean
           id?: string
           layout_type?: string
           logo_url?: string | null
+          profile_photo_bucket_path?: string | null
+          profile_photo_source?: string | null
+          profile_photo_url?: string | null
           redirect_delay?: number | null
           redirect_mode?: string
           short_url_id?: string
           show_countdown?: boolean | null
+          show_location?: boolean
           show_url_preview?: boolean | null
+          show_verified_badge?: boolean
           subtitle?: string | null
           title?: string
           updated_at?: string
+          user_bio?: string | null
+          user_name?: string | null
         }
         Relationships: [
           {
