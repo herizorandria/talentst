@@ -62,7 +62,7 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
   };
 
   const fetchBucketFiles = async () => {
-    const { data, error } = await supabase.storage.from('profil').list();
+    const { data, error } = await supabase.storage.from('landing-images').list();
     if (error) console.error('Error fetching bucket files:', error);
     else setBucketFiles(data || []);
   };
@@ -103,11 +103,7 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('landing-images')
-        .getPublicUrl(filePath);
-
-      setConfig({ ...config, profile_photo_url: publicUrl, profile_photo_source: 'url' });
+      setConfig({ ...config, profile_photo_bucket_path: filePath, profile_photo_source: 'bucket' });
       toast({ title: 'Succès', description: 'Image uploadée avec succès' });
     } catch (error) {
       console.error('Error uploading file:', error);
@@ -165,7 +161,7 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
                     </div>
                 ) : (
                     <div>
-                        <Label>Fichier du bucket "profil"</Label>
+                        <Label>Fichier du bucket "landing-images"</Label>
                         <select value={config.profile_photo_bucket_path || ''} onChange={(e) => setConfig({ ...config, profile_photo_bucket_path: e.target.value })} className="w-full border rounded px-3 py-2">
                             <option value="">Sélectionner un fichier</option>
                             {bucketFiles.map(file => <option key={file.id} value={file.name}>{file.name}</option>)}
