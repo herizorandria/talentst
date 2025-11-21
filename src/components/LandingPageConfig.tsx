@@ -27,6 +27,8 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
     background_gradient_start: '#f59e0b',
     background_gradient_end: '#d97706',
     background_image_url: '',
+    background_image_source: 'url',
+    background_image_bucket_path: '',
     layout_type: 'center',
     title: 'Redirection en cours...',
     subtitle: '',
@@ -87,7 +89,7 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
     }
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, type: 'profile' | 'background') => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -103,7 +105,11 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
 
       if (uploadError) throw uploadError;
 
-      setConfig({ ...config, profile_photo_bucket_path: filePath, profile_photo_source: 'bucket' });
+      if (type === 'profile') {
+        setConfig({ ...config, profile_photo_bucket_path: filePath, profile_photo_source: 'bucket' });
+      } else {
+        setConfig({ ...config, background_image_bucket_path: filePath, background_image_source: 'bucket' });
+      }
       toast({ title: 'Succès', description: 'Image uploadée avec succès' });
     } catch (error) {
       console.error('Error uploading file:', error);
@@ -156,7 +162,7 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
                 ) : config.profile_photo_source === 'upload' ? (
                     <div>
                         <Label>Uploader une image</Label>
-                        <Input type="file" accept="image/*" onChange={handleFileUpload} disabled={uploading} />
+                        <Input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, 'profile')} disabled={uploading} />
                         {uploading && <p className="text-sm text-muted-foreground mt-1">Upload en cours...</p>}
                     </div>
                 ) : (
@@ -190,7 +196,35 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
                                   </div>
                                 )}
                                 {config.background_type === 'solid' && (<div><Label>Couleur de fond</Label><Input type="color" value={config.background_color} onChange={(e) => setConfig({ ...config, background_color: e.target.value })} /></div>)}
-                                {config.background_type === 'image' && (<div><Label>URL de l'image</Label><Input type="url" placeholder="https://..." value={config.background_image_url} onChange={(e) => setConfig({ ...config, background_image_url: e.target.value })} /></div>)}
+                                {config.background_type === 'image' && (
+                                  <>
+                                    <div className="space-y-2">
+                                      <Label>Source de l'image de fond</Label>
+                                      <div className="flex gap-2 rounded-md p-1">
+                                        <Button variant={config.background_image_source === 'url' ? 'default' : 'ghost'} size="sm" onClick={() => setConfig({...config, background_image_source: 'url'})} className="flex-1"><Link className="h-4 w-4 mr-2"/>URL</Button>
+                                        <Button variant={config.background_image_source === 'upload' ? 'default' : 'ghost'} size="sm" onClick={() => setConfig({...config, background_image_source: 'upload'})} className="flex-1"><Upload className="h-4 w-4 mr-2"/>Upload</Button>
+                                        <Button variant={config.background_image_source === 'bucket' ? 'default' : 'ghost'} size="sm" onClick={() => setConfig({...config, background_image_source: 'bucket'})} className="flex-1"><Image className="h-4 w-4 mr-2"/>Fichier</Button>
+                                      </div>
+                                    </div>
+                                    {config.background_image_source === 'url' ? (
+                                      <div><Label>Image de fond (URL)</Label><Input type="url" placeholder="https://..." value={config.background_image_url || ''} onChange={(e) => setConfig({ ...config, background_image_url: e.target.value })} /></div>
+                                    ) : config.background_image_source === 'upload' ? (
+                                      <div>
+                                        <Label>Uploader une image de fond</Label>
+                                        <Input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, 'background')} disabled={uploading} />
+                                        {uploading && <p className="text-sm text-muted-foreground mt-1">Upload en cours...</p>}
+                                      </div>
+                                    ) : (
+                                      <div>
+                                        <Label>Fichier du bucket "landing-images"</Label>
+                                        <select value={config.background_image_bucket_path || ''} onChange={(e) => setConfig({ ...config, background_image_bucket_path: e.target.value })} className="w-full border rounded px-3 py-2">
+                                          <option value="">Sélectionner un fichier</option>
+                                          {bucketFiles.map(file => <option key={file.id} value={file.name}>{file.name}</option>)}
+                                        </select>
+                                      </div>
+                                    )}
+                                  </>
+                                )}
               </div>
 
               <div className="space-y-4 border-t pt-4">
