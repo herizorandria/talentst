@@ -12,6 +12,8 @@ interface LandingPageData {
   background_gradient_start: string | null;
   background_gradient_end: string | null;
   background_image_url: string | null;
+  background_image_source: string | null;
+  background_image_bucket_path: string | null;
   layout_type: string;
   title: string;
   subtitle: string | null;
@@ -129,10 +131,19 @@ const LandingPage = () => {
   const profileImageUrl = useMemo(() => {
       if (!config) return '';
       if (config.profile_photo_source === 'bucket' && config.profile_photo_bucket_path) {
-          const { data } = supabase.storage.from('profil').getPublicUrl(config.profile_photo_bucket_path);
+          const { data } = supabase.storage.from('landing-images').getPublicUrl(config.profile_photo_bucket_path);
           return data.publicUrl;
       }
       return config.profile_photo_url || '';
+  }, [config]);
+
+  const backgroundImageUrl = useMemo(() => {
+      if (!config) return '';
+      if (config.background_image_source === 'bucket' && config.background_image_bucket_path) {
+          const { data } = supabase.storage.from('landing-images').getPublicUrl(config.background_image_bucket_path);
+          return data.publicUrl;
+      }
+      return config.background_image_url || '';
   }, [config]);
 
   if (loading) {
@@ -145,7 +156,7 @@ const LandingPage = () => {
     switch (config.background_type) {
       case 'gradient': return { background: `linear-gradient(135deg, ${config.background_gradient_start}, ${config.background_gradient_end})` };
       case 'solid': return { backgroundColor: config.background_color };
-      case 'image': return { backgroundImage: `url(${config.background_image_url})`, backgroundSize: 'cover', backgroundPosition: 'center' };
+      case 'image': return { backgroundImage: `url(${backgroundImageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' };
       default: return {};
     }
   };
