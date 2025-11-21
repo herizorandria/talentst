@@ -112,6 +112,8 @@ export type Database = {
           background_color: string | null
           background_gradient_end: string | null
           background_gradient_start: string | null
+          background_image_bucket_path: string | null
+          background_image_source: string | null
           background_image_url: string | null
           background_type: string
           button_animation: string | null
@@ -146,6 +148,8 @@ export type Database = {
           background_color?: string | null
           background_gradient_end?: string | null
           background_gradient_start?: string | null
+          background_image_bucket_path?: string | null
+          background_image_source?: string | null
           background_image_url?: string | null
           background_type?: string
           button_animation?: string | null
@@ -180,6 +184,8 @@ export type Database = {
           background_color?: string | null
           background_gradient_end?: string | null
           background_gradient_start?: string | null
+          background_image_bucket_path?: string | null
+          background_image_source?: string | null
           background_image_url?: string | null
           background_type?: string
           button_animation?: string | null
