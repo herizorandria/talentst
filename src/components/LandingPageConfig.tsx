@@ -19,6 +19,7 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [bucketFiles, setBucketFiles] = useState<any[]>([]);
+  const [bucketFilesWithUrls, setBucketFilesWithUrls] = useState<Array<{name: string, url: string}>>([]);
   const [uploading, setUploading] = useState(false);
   const [config, setConfig] = useState({
     enabled: false,
@@ -65,8 +66,23 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
 
   const fetchBucketFiles = async () => {
     const { data, error } = await supabase.storage.from('landing-images').list();
-    if (error) console.error('Error fetching bucket files:', error);
-    else setBucketFiles(data || []);
+    if (error) {
+      console.error('Error fetching bucket files:', error);
+      return;
+    }
+    
+    setBucketFiles(data || []);
+    
+    // Générer les URLs publiques pour chaque fichier
+    const filesWithUrls = (data || []).map(file => {
+      const { data: urlData } = supabase.storage.from('landing-images').getPublicUrl(file.name);
+      return {
+        name: file.name,
+        url: urlData.publicUrl
+      };
+    });
+    
+    setBucketFilesWithUrls(filesWithUrls);
   };
 
   const handleSave = async () => {
@@ -167,11 +183,34 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
                     </div>
                 ) : (
                     <div>
-                        <Label>Fichier du bucket "landing-images"</Label>
-                        <select value={config.profile_photo_bucket_path || ''} onChange={(e) => setConfig({ ...config, profile_photo_bucket_path: e.target.value })} className="w-full border rounded px-3 py-2">
-                            <option value="">Sélectionner un fichier</option>
-                            {bucketFiles.map(file => <option key={file.id} value={file.name}>{file.name}</option>)}
-                        </select>
+                        <Label>Galerie d'images du bucket "landing-images"</Label>
+                        {bucketFilesWithUrls.length === 0 ? (
+                          <p className="text-sm text-muted-foreground mt-2">Aucune image disponible. Uploadez d'abord des images.</p>
+                        ) : (
+                          <div className="grid grid-cols-3 gap-3 mt-3">
+                            {bucketFilesWithUrls.map(file => (
+                              <div
+                                key={file.name}
+                                onClick={() => setConfig({ ...config, profile_photo_bucket_path: file.name })}
+                                className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
+                                  config.profile_photo_bucket_path === file.name 
+                                    ? 'border-primary ring-2 ring-primary' 
+                                    : 'border-border hover:border-primary/50'
+                                }`}
+                              >
+                                <img src={file.url} alt={file.name} className="w-full h-24 object-cover" />
+                                {config.profile_photo_bucket_path === file.name && (
+                                  <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                                    <Check className="h-8 w-8 text-primary" />
+                                  </div>
+                                )}
+                                <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-1 truncate">
+                                  {file.name}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                     </div>
                 )}
                 <div><Label>Nom d'utilisateur</Label><Input type="text" value={config.user_name || ''} onChange={(e) => setConfig({ ...config, user_name: e.target.value })} /></div>
@@ -216,11 +255,34 @@ const LandingPageConfig = ({ shortUrlId, shortCode }: LandingPageConfigProps) =>
                                       </div>
                                     ) : (
                                       <div>
-                                        <Label>Fichier du bucket "landing-images"</Label>
-                                        <select value={config.background_image_bucket_path || ''} onChange={(e) => setConfig({ ...config, background_image_bucket_path: e.target.value })} className="w-full border rounded px-3 py-2">
-                                          <option value="">Sélectionner un fichier</option>
-                                          {bucketFiles.map(file => <option key={file.id} value={file.name}>{file.name}</option>)}
-                                        </select>
+                                        <Label>Galerie d'images du bucket "landing-images"</Label>
+                                        {bucketFilesWithUrls.length === 0 ? (
+                                          <p className="text-sm text-muted-foreground mt-2">Aucune image disponible. Uploadez d'abord des images.</p>
+                                        ) : (
+                                          <div className="grid grid-cols-3 gap-3 mt-3">
+                                            {bucketFilesWithUrls.map(file => (
+                                              <div
+                                                key={file.name}
+                                                onClick={() => setConfig({ ...config, background_image_bucket_path: file.name })}
+                                                className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
+                                                  config.background_image_bucket_path === file.name 
+                                                    ? 'border-primary ring-2 ring-primary' 
+                                                    : 'border-border hover:border-primary/50'
+                                                }`}
+                                              >
+                                                <img src={file.url} alt={file.name} className="w-full h-24 object-cover" />
+                                                {config.background_image_bucket_path === file.name && (
+                                                  <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                                                    <Check className="h-8 w-8 text-primary" />
+                                                  </div>
+                                                )}
+                                                <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-1 truncate">
+                                                  {file.name}
+                                                </div>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        )}
                                       </div>
                                     )}
                                   </>
