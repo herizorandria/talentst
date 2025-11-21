@@ -504,26 +504,14 @@ export type Database = {
         }
         Returns: boolean
       }
-      increment_photo_clicks: {
-        Args: { photo_id: string }
-        Returns: undefined
-      }
-      increment_photo_shares: {
-        Args: { photo_id: string }
-        Returns: undefined
-      }
-      increment_photo_views: {
-        Args: { photo_id: string }
-        Returns: undefined
-      }
+      increment_photo_clicks: { Args: { photo_id: string }; Returns: undefined }
+      increment_photo_shares: { Args: { photo_id: string }; Returns: undefined }
+      increment_photo_views: { Args: { photo_id: string }; Returns: undefined }
       increment_url_clicks: {
         Args: { p_short_code: string }
         Returns: undefined
       }
-      is_admin: {
-        Args: { _user_id: string }
-        Returns: boolean
-      }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user"
