@@ -318,10 +318,10 @@ const QRCodeBuilder = ({ shortUrl, originalUrl, shortCode, embedded = false }: Q
 
   // Contenu principal
   const renderContent = () => (
-    <div className={`flex ${embedded ? '' : 'min-h-screen'}`}>
+    <div className={`flex flex-col lg:flex-row ${embedded ? '' : 'min-h-screen'}`}>
       {/* Colonne gauche - Options de personnalisation */}
-      <div className={`${embedded ? 'flex-1' : 'w-2/3'} `}>
-        <ScrollArea className={embedded ? 'h-[600px]' : 'h-[calc(100vh-80px)]'}>
+      <div className={`${embedded ? 'flex-1' : 'w-full lg:w-2/3'} `}>
+        <ScrollArea className={embedded ? 'h-[600px]' : 'h-auto lg:h-[calc(100vh-80px)]'}>
           <div className="p-6 space-y-6">
             
             {/* Section Content - Only when NOT embedded */}
@@ -379,7 +379,7 @@ const QRCodeBuilder = ({ shortUrl, originalUrl, shortCode, embedded = false }: Q
                 
                 {frameStyle !== 'none' && (
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Frame Phrase</Label>
                         <Input
@@ -403,7 +403,7 @@ const QRCodeBuilder = ({ shortUrl, originalUrl, shortCode, embedded = false }: Q
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Frame Width ({frameWidth}px)</Label>
                         <Slider
@@ -494,7 +494,7 @@ const QRCodeBuilder = ({ shortUrl, originalUrl, shortCode, embedded = false }: Q
                 {/* Dots */}
                 <div className="mb-6">
                   <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 block">Dots Style</Label>
-                  <div className="grid grid-cols-6 gap-2 mb-4">
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-4">
                     {DOT_STYLES.map((style) => (
                       <button
                         key={style.type}
@@ -512,7 +512,7 @@ const QRCodeBuilder = ({ shortUrl, originalUrl, shortCode, embedded = false }: Q
                 </div>
                 
                 {/* Couleurs */}
-                <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                   <div>
                     <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Background Color</Label>
                     <div className="flex items-center gap-2 p-1 border border-gray-200 rounded-md bg-white">
@@ -590,7 +590,7 @@ const QRCodeBuilder = ({ shortUrl, originalUrl, shortCode, embedded = false }: Q
                 
                 {/* Gradient Colors */}
                 {useGradient && (
-                  <div className="grid grid-cols-2 gap-4 mb-6 p-4  rounded-lg">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 p-4  rounded-lg">
                     <div>
                       <Label className="text-sm text-gray-600 mb-2 block">Gradient Start</Label>
                       <div className="flex items-center gap-2">
@@ -631,7 +631,7 @@ const QRCodeBuilder = ({ shortUrl, originalUrl, shortCode, embedded = false }: Q
                 {/* Marker Border */}
                 <div className="mb-6">
                   <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 block">Marker Border Style</Label>
-                  <div className="grid grid-cols-6 gap-2 mb-3">
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-3">
                     {CORNER_SQUARE_STYLES.map((style) => (
                       <button
                         key={style.type}
@@ -672,7 +672,7 @@ const QRCodeBuilder = ({ shortUrl, originalUrl, shortCode, embedded = false }: Q
                 {/* Marker Center */}
                 <div>
                   <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 block">Marker Center Style</Label>
-                  <div className="grid grid-cols-6 gap-2 mb-3">
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-3">
                     {CORNER_DOT_STYLES.map((style) => (
                       <button
                         key={style.type}
@@ -749,7 +749,7 @@ const QRCodeBuilder = ({ shortUrl, originalUrl, shortCode, embedded = false }: Q
                 {/* Logo Presets */}
                 <div className="mb-4">
                   <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Or choose a preset</Label>
-                  <div className="grid grid-cols-8 gap-2">
+                  <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
                     {LOGO_PRESETS.map((preset) => {
                       const Icon = preset.icon;
                       return (
@@ -827,7 +827,7 @@ const QRCodeBuilder = ({ shortUrl, originalUrl, shortCode, embedded = false }: Q
       </div>
 
       {/* Colonne droite - Preview */}
-      <div className={`${embedded ? 'w-[380px]' : 'w-1/3'} bg-gray-100 border-l`}>
+      <div className={`${embedded ? 'w-full lg:w-[380px]' : 'w-full lg:w-1/3'} bg-gray-100 border-l lg:h-auto`}>
         <div className="sticky top-0 p-6">
           {/* Tabs Preview */}
           <div className="flex gap-2 mb-4">
@@ -910,7 +910,7 @@ const QRCodeBuilder = ({ shortUrl, originalUrl, shortCode, embedded = false }: Q
             </div>
             
             {/* Steps */}
-            <div className="flex items-center gap-8">
+            <div className="hidden md:flex items-center gap-8">
               <div className="flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity cursor-pointer">
                 <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500 flex items-center justify-center text-sm font-bold">
                   <Check className="h-3 w-3" />

@@ -367,7 +367,7 @@ const UrlAnalytics = () => {
                 </div>
 
                 {/* Layout with filters on right side */}
-                <div className="flex gap-6">
+                <div className="flex flex-col-reverse lg:flex-row gap-6">
                     {/* Main content - Left side */}
                     <div className="flex-1 space-y-6">
                         {/* Export button */}
@@ -455,12 +455,12 @@ const UrlAnalytics = () => {
                         </Card>
 
                         <Tabs defaultValue="charts">
-                            <TabsList className="grid w-full grid-cols-5">
-                                <TabsTrigger value="charts">Graphiques</TabsTrigger>
-                                <TabsTrigger value="map">Carte</TabsTrigger>
-                                <TabsTrigger value="clicks">Clics</TabsTrigger>
-                                <TabsTrigger value="advanced">Avancées</TabsTrigger>
-                                <TabsTrigger value="qrcode">QR Code</TabsTrigger>
+                            <TabsList className="flex w-full overflow-x-auto lg:grid lg:grid-cols-5 mb-4 lg:mb-0">
+                                <TabsTrigger value="charts" className="flex-shrink-0">Graphiques</TabsTrigger>
+                                <TabsTrigger value="map" className="flex-shrink-0">Carte</TabsTrigger>
+                                <TabsTrigger value="clicks" className="flex-shrink-0">Clics</TabsTrigger>
+                                <TabsTrigger value="advanced" className="flex-shrink-0">Avancées</TabsTrigger>
+                                <TabsTrigger value="qrcode" className="flex-shrink-0">QR Code</TabsTrigger>
                             </TabsList>
                             <TabsContent value="charts" className="mt-6">
                                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -548,7 +548,7 @@ const UrlAnalytics = () => {
             </div>
 
             {/* Filters sidebar - Always visible on right */}
-            <aside className="w-80 shrink-0 space-y-4 sticky top-8 self-start">
+            <aside className="w-full lg:w-80 shrink-0 space-y-4 lg:sticky lg:top-8 self-start">
                 <Card className="bg-black shadow-lg">
                     <CardHeader className="pb-3">
                         <CardTitle className="text-lg flex items-center justify-between">
