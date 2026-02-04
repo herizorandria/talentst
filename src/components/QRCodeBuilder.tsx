@@ -902,7 +902,7 @@ const QRCodeBuilder = ({ shortUrl, originalUrl, shortCode, embedded = false }: Q
               {/* QR Code avec cadre */}
               <div 
                 ref={frameRef}
-                className="relative transition-all duration-300"
+                className="relative inline-flex flex-col items-center justify-center transition-all duration-300"
                 style={getFrameStyles()}
               >
                 <div ref={qrRef} className="flex items-center justify-center" />
