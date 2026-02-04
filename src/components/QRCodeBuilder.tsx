@@ -344,6 +344,37 @@ const QRCodeBuilder = ({ shortUrl, originalUrl, shortCode, embedded = false }: Q
       <div className={`${embedded ? 'flex-1' : 'w-full lg:w-2/3'} `}>
         <ScrollArea className={embedded ? 'h-[600px]' : 'h-auto lg:h-[calc(100vh-80px)]'}>
           <div className="p-6 space-y-6">
+
+            {/* Link Type Selection - Visible if originalUrl is present */}
+            {originalUrl && (
+              <Card className="border-0 shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold flex items-center gap-2 text-blue-600">
+                      🔗 Link Type
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="direct-link-mode"
+                        checked={useDirectLink}
+                        onCheckedChange={setUseDirectLink}
+                      />
+                      <Label htmlFor="direct-link-mode" className="font-medium cursor-pointer">
+                        {useDirectLink ? 'Direct Link (No Tracking)' : 'Tracking Link (Analytics)'}
+                      </Label>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    {useDirectLink 
+                      ? `Points directly to: ${originalUrl}` 
+                      : `Points to tracking URL: ${shortUrl || qrData}`
+                    }
+                  </p>
+                </CardContent>
+              </Card>
+            )}
             
             {/* Section Content - Only when NOT embedded */}
             {!embedded && (
