@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Copy, Zap } from 'lucide-react';
 import { ShortenedUrl } from '@/types/url';
 import { useToast } from '@/hooks/use-toast';
-import QRCodeGenerator from './QRCodeGenerator';
+import QRCodeEditor from './QRCodeEditor';
 import TestLinkSpace from './TestLinkSpace';
 
 interface UrlResultProps {
@@ -89,16 +89,21 @@ const UrlResult = ({ shortenedUrl, shortUrl }: UrlResultProps) => {
         </CardContent>
       </Card>
 
-      {/* Grille avec QR Code et Espace de test */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <QRCodeGenerator url={shortUrl} shortCode={shortenedUrl.shortCode} />
-        <TestLinkSpace 
-          shortUrl={shortUrl}
-          originalUrl={shortenedUrl.originalUrl}
-          shortCode={shortenedUrl.shortCode}
-          directLink={shortenedUrl.directLink}
-        />
-      </div>
+      {/* Éditeur QR Code avancé */}
+      <QRCodeEditor 
+        shortUrl={shortUrl}
+        originalUrl={shortenedUrl.originalUrl}
+        shortCode={shortenedUrl.shortCode}
+        directLink={shortenedUrl.directLink}
+      />
+      
+      {/* Espace de test */}
+      <TestLinkSpace 
+        shortUrl={shortUrl}
+        originalUrl={shortenedUrl.originalUrl}
+        shortCode={shortenedUrl.shortCode}
+        directLink={shortenedUrl.directLink}
+      />
     </div>
   );
 };
