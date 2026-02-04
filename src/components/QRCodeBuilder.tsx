@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import QRCodeStyling, { DotType, CornerSquareType, CornerDotType } from 'qr-code-styling';
+import * as htmlToImage from 'html-to-image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -107,6 +108,7 @@ const QRCodeBuilder = ({ shortUrl, originalUrl, shortCode, embedded = false }: Q
   const qrRef = useRef<HTMLDivElement>(null);
   const qrCodeRef = useRef<QRCodeStyling | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
 
   // États du QR Code
   const [qrData, setQrData] = useState(shortUrl || 'https://example.com');
@@ -141,9 +143,9 @@ const QRCodeBuilder = ({ shortUrl, originalUrl, shortCode, embedded = false }: Q
   
   // Taille
   const [size, setSize] = useState(280);
-  const [margin, setMargin] = useState(10);
+  const [margin, setMargin] = useState(0);
   const [frameWidth, setFrameWidth] = useState(20); // Default width for frames
-  const [framePadding, setFramePadding] = useState(20); // Internal padding
+  const [framePadding, setFramePadding] = useState(0); // Internal padding
   const [frameTextPosition, setFrameTextPosition] = useState<'top' | 'bottom'>('bottom');
 
   // URL finale du QR
@@ -245,18 +247,37 @@ const QRCodeBuilder = ({ shortUrl, originalUrl, shortCode, embedded = false }: Q
       cornerSquareColor, cornerDotColor, size, margin, transparentBg, useGradient,
       gradientColor1, gradientColor2, logoImage, removeLogoBg]);
 
-  const downloadQRCode = async (format: 'png' | 'svg') => {
-    if (qrCodeRef.current) {
+  const downloadQRCode = async (format: 'png' | 'svg' | 'jpeg') => {
+    if (frameRef.current) {
       try {
-        await qrCodeRef.current.download({
-          name: `qrcode-${shortCode || 'custom'}`,
-          extension: format,
-        });
-        toast({
-          title: 'Succès',
-          description: `QR Code téléchargé en ${format.toUpperCase()}`,
-        });
+        let dataUrl;
+        const options = { backgroundColor: transparentBg ? undefined : '#ffffff' };
+        
+        switch (format) {
+          case 'png':
+            dataUrl = await htmlToImage.toPng(frameRef.current, options);
+            break;
+          case 'svg':
+            dataUrl = await htmlToImage.toSvg(frameRef.current, options);
+            break;
+          case 'jpeg':
+            dataUrl = await htmlToImage.toJpeg(frameRef.current, options);
+            break;
+        }
+
+        if (dataUrl) {
+          const link = document.createElement('a');
+          link.download = `qrcode-${shortCode || 'custom'}.${format}`;
+          link.href = dataUrl;
+          link.click();
+          
+          toast({
+            title: 'Succès',
+            description: `QR Code téléchargé en ${format.toUpperCase()}`,
+          });
+        }
       } catch (error) {
+        console.error('Download error:', error);
         toast({
           title: 'Erreur',
           description: 'Impossible de télécharger le QR Code',
@@ -849,6 +870,7 @@ const QRCodeBuilder = ({ shortUrl, originalUrl, shortCode, embedded = false }: Q
             <CardContent className="p-6 flex flex-col items-center">
               {/* QR Code avec cadre */}
               <div 
+                ref={frameRef}
                 className="relative transition-all duration-300"
                 style={getFrameStyles()}
               >
@@ -873,6 +895,12 @@ const QRCodeBuilder = ({ shortUrl, originalUrl, shortCode, embedded = false }: Q
                   className="flex-1 bg-amber-500 hover:bg-amber-600 text-black font-bold"
                 >
                   <Download className="h-4 w-4 mr-2" /> PNG
+                </Button>
+                <Button
+                  onClick={() => downloadQRCode('jpeg')}
+                  className="flex-1 bg-white hover:bg-gray-100 text-black border border-gray-200 font-bold"
+                >
+                  <Download className="h-4 w-4 mr-2" /> JPEG
                 </Button>
                 <Button
                   onClick={() => downloadQRCode('svg')}
