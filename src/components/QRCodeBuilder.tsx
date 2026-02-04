@@ -849,7 +849,7 @@ const QRCodeBuilder = ({ shortUrl, originalUrl, shortCode, embedded = false }: Q
             <CardContent className="p-6 flex flex-col items-center">
               {/* QR Code avec cadre */}
               <div 
-                className="relative p-4 transition-all duration-300"
+                className="relative transition-all duration-300"
                 style={getFrameStyles()}
               >
                 <div ref={qrRef} className="flex items-center justify-center" />
