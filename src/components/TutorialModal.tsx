@@ -190,7 +190,7 @@ const TutorialModal = ({ isOpen, onClose, tutorial }: TutorialModalProps) => {
               </p>
 
               {/* Contenu de l'étape */}
-              <div className="bg-gray-50 rounded-lg p-6 mb-6">
+              <div className="rounded-lg p-6 mb-6">
                 {currentStepData.content}
               </div>
 

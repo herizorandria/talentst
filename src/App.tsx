@@ -15,6 +15,7 @@ const Admin = lazy(() => import("./pages/Admin"));
 const UrlAnalytics = lazy(() => import("./pages/UrlAnalytics"));
 const PhilosophicalQuotes = lazy(() => import("./pages/PhilosophicalQuotes"));
 const LandingPage = lazy(() => import("./pages/LandingPage"));
+const QRCodeBuilder = lazy(() => import("./components/QRCodeBuilder"));
 
 // Optimized query client configuration
 const queryClient = new QueryClient({
@@ -53,6 +54,7 @@ const App = () => (
               <Route path="/analytics/:shortCode" element={<UrlAnalytics />} />
               <Route path="/philosophical-quotes" element={<PhilosophicalQuotes />} />
               <Route path="/landing/:code" element={<LandingPage />} />
+              <Route path="/qr-builder" element={<QRCodeBuilder />} />
               <Route path="/:shortCode" element={<Redirect />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

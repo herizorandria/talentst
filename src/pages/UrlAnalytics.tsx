@@ -7,6 +7,7 @@ import DateRangePicker from '@/components/DateRangePicker';
 import AdvancedStats from '@/components/AdvancedStats';
 import GeographicMap from '@/components/GeographicMap';
 import LandingPageConfig from '@/components/LandingPageConfig';
+import QRCodeBuilder from '@/components/QRCodeBuilder';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -454,11 +455,12 @@ const UrlAnalytics = () => {
                         </Card>
 
                         <Tabs defaultValue="charts">
-                            <TabsList className="grid w-full grid-cols-4">
+                            <TabsList className="grid w-full grid-cols-5">
                                 <TabsTrigger value="charts">Graphiques</TabsTrigger>
                                 <TabsTrigger value="map">Carte</TabsTrigger>
                                 <TabsTrigger value="clicks">Clics</TabsTrigger>
                                 <TabsTrigger value="advanced">Avancées</TabsTrigger>
+                                <TabsTrigger value="qrcode">QR Code</TabsTrigger>
                             </TabsList>
                             <TabsContent value="charts" className="mt-6">
                                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -532,6 +534,14 @@ const UrlAnalytics = () => {
                                 </Card>
                             </TabsContent>
                             <TabsContent value="advanced" className="mt-6"><AdvancedStats clicks={filteredClicks} shortCode={shortCode || ''} /></TabsContent>
+                            <TabsContent value="qrcode" className="mt-6">
+                                <QRCodeBuilder 
+                                    shortUrl={`${window.location.origin}/${shortCode}`}
+                                    originalUrl={urlInfo.original_url}
+                                    shortCode={shortCode || ''}
+                                    embedded={true}
+                                />
+                            </TabsContent>
                         </Tabs>
                     </div>
                 </div>

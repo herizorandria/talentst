@@ -62,10 +62,24 @@ const BG_COLORS = [
 ];
 
 const FRAME_STYLES = [
-  { id: 'none', label: 'Aucun' },
-  { id: 'simple', label: 'Simple' },
-  { id: 'rounded', label: 'Arrondi' },
-  { id: 'badge', label: 'Badge' },
+  { id: 'none', label: 'Aucun', preview: '❌' },
+  { id: 'simple', label: 'Simple', preview: '⬜' },
+  { id: 'rounded', label: 'Arrondi', preview: '🔲' },
+  { id: 'badge', label: 'Badge', preview: '🏷️' },
+  { id: 'circle', label: 'Cercle', preview: '⭕' },
+  { id: 'ticket', label: 'Ticket', preview: '🎫' },
+  { id: 'bubble', label: 'Bulle', preview: '💬' },
+];
+
+const FONT_STYLES = [
+  { id: 'sans-serif', label: 'Sans Serif', family: 'Arial, sans-serif' },
+  { id: 'serif', label: 'Serif', family: 'Georgia, serif' },
+  { id: 'monospace', label: 'Mono', family: 'Courier New, monospace' },
+  { id: 'impact', label: 'Impact', family: 'Impact, sans-serif' },
+  { id: 'cursive', label: 'Cursive', family: 'Brush Script MT, cursive' },
+  { id: 'roboto', label: 'Roboto', family: "'Roboto', sans-serif" },
+  { id: 'poppins', label: 'Poppins', family: "'Poppins', sans-serif" },
+  { id: 'montserrat', label: 'Montserrat', family: "'Montserrat', sans-serif" },
 ];
 
 const QRCodeEditor = ({ shortUrl, originalUrl, shortCode, directLink: initialDirectLink = false }: QRCodeEditorProps) => {
@@ -92,12 +106,15 @@ const QRCodeEditor = ({ shortUrl, originalUrl, shortCode, directLink: initialDir
   const [frameText, setFrameText] = useState('SCAN ME');
   const [frameColor, setFrameColor] = useState('#000000');
   const [frameTextColor, setFrameTextColor] = useState('#ffffff');
+  const [frameFont, setFrameFont] = useState(FONT_STYLES[0]);
 
   // URL utilisée pour le QR code
   const qrUrl = useDirectLink ? originalUrl : shortUrl;
 
   // Initialiser le QR code
   useEffect(() => {
+    const currentRef = qrRef.current;
+    
     qrCodeRef.current = new QRCodeStyling({
       width: size,
       height: size,
@@ -124,16 +141,17 @@ const QRCodeEditor = ({ shortUrl, originalUrl, shortCode, directLink: initialDir
       },
     });
 
-    if (qrRef.current) {
-      qrRef.current.innerHTML = '';
-      qrCodeRef.current.append(qrRef.current);
+    if (currentRef) {
+      currentRef.innerHTML = '';
+      qrCodeRef.current.append(currentRef);
     }
 
     return () => {
-      if (qrRef.current) {
-        qrRef.current.innerHTML = '';
+      if (currentRef) {
+        currentRef.innerHTML = '';
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Mettre à jour le QR code
@@ -198,6 +216,12 @@ const QRCodeEditor = ({ shortUrl, originalUrl, shortCode, directLink: initialDir
         return 'border-4 rounded-2xl';
       case 'badge':
         return 'border-4 rounded-xl';
+      case 'circle':
+        return 'border-4 rounded-full';
+      case 'ticket':
+        return 'border-4 rounded-lg border-dashed';
+      case 'bubble':
+        return 'border-4 rounded-3xl';
       default:
         return '';
     }
@@ -267,7 +291,8 @@ const QRCodeEditor = ({ shortUrl, originalUrl, shortCode, directLink: initialDir
                   className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-1 rounded-full text-sm font-bold whitespace-nowrap"
                   style={{ 
                     backgroundColor: frameColor,
-                    color: frameTextColor 
+                    color: frameTextColor,
+                    fontFamily: frameFont.family
                   }}
                 >
                   {frameText}
@@ -383,6 +408,25 @@ const QRCodeEditor = ({ shortUrl, originalUrl, shortCode, directLink: initialDir
                 </div>
 
                 <div className="space-y-3">
+                  <Label className="text-sm font-medium">Couleur bordure marqueurs</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="color"
+                      value={cornerSquareColor}
+                      onChange={(e) => setCornerSquareColor(e.target.value)}
+                      className="w-12 h-10 p-1 cursor-pointer"
+                    />
+                    <Input
+                      type="text"
+                      value={cornerSquareColor}
+                      onChange={(e) => setCornerSquareColor(e.target.value)}
+                      className="flex-1 font-mono uppercase text-sm"
+                      placeholder="#000000"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
                   <Label className="text-sm font-medium">Centre des marqueurs</Label>
                   <div className="grid grid-cols-2 gap-2">
                     {CORNER_DOT_STYLES.map((style) => (
@@ -401,24 +445,18 @@ const QRCodeEditor = ({ shortUrl, originalUrl, shortCode, directLink: initialDir
                 </div>
 
                 <div className="space-y-3">
-                  <Label className="text-sm font-medium">Couleur des marqueurs</Label>
+                  <Label className="text-sm font-medium">Couleur centre marqueurs</Label>
                   <div className="flex items-center gap-2">
                     <Input
                       type="color"
-                      value={cornerSquareColor}
-                      onChange={(e) => {
-                        setCornerSquareColor(e.target.value);
-                        setCornerDotColor(e.target.value);
-                      }}
+                      value={cornerDotColor}
+                      onChange={(e) => setCornerDotColor(e.target.value)}
                       className="w-12 h-10 p-1 cursor-pointer"
                     />
                     <Input
                       type="text"
-                      value={cornerSquareColor}
-                      onChange={(e) => {
-                        setCornerSquareColor(e.target.value);
-                        setCornerDotColor(e.target.value);
-                      }}
+                      value={cornerDotColor}
+                      onChange={(e) => setCornerDotColor(e.target.value)}
                       className="flex-1 font-mono uppercase text-sm"
                       placeholder="#000000"
                     />
@@ -497,15 +535,17 @@ const QRCodeEditor = ({ shortUrl, originalUrl, shortCode, directLink: initialDir
               <TabsContent value="frame" className="space-y-4 mt-2">
                 <div className="space-y-3">
                   <Label className="text-sm font-medium">Style du cadre</Label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-4 gap-2">
                     {FRAME_STYLES.map((frame) => (
                       <Button
                         key={frame.id}
                         variant={frameStyle === frame.id ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setFrameStyle(frame.id)}
+                        className="flex flex-col h-auto py-2 px-2"
                       >
-                        {frame.label}
+                        <span className="text-lg">{frame.preview}</span>
+                        <span className="text-[10px] mt-1">{frame.label}</span>
                       </Button>
                     ))}
                   </div>
@@ -522,6 +562,24 @@ const QRCodeEditor = ({ shortUrl, originalUrl, shortCode, directLink: initialDir
                         placeholder="SCAN ME"
                         maxLength={20}
                       />
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium">Police du texte</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {FONT_STYLES.map((font) => (
+                          <Button
+                            key={font.id}
+                            variant={frameFont.id === font.id ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setFrameFont(font)}
+                            className="text-xs"
+                            style={{ fontFamily: font.family }}
+                          >
+                            {font.label}
+                          </Button>
+                        ))}
+                      </div>
                     </div>
 
                     <div className="space-y-3">
